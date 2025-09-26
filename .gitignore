@@ -1,3 +1,25 @@
+#######################################
+##### Project specific .gitignore #####
+#######################################
+
+### Data ###
+
+# Raw data
+data/raw/
+
+# Processed data
+data/processed/
+
+# QGIS Projects
+data/QGIS/
+
+### KKUI Template ###
+docs/instructions/KKUI_Template/
+
+#############################
+##### Global .gitignore #####
+#############################
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
