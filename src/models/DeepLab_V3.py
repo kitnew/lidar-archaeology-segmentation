@@ -1,0 +1,30 @@
+def create_model(backbone: str = 'resnet101', pretrained: bool = False, eval: bool = False):
+    """
+    Create DeepLabV3 model.
+    
+    Args:
+        backbone (str): ResNet version. Can be 'resnet101' or 'resnet50'.
+        pretrained (bool): If True, uses pre-trained weights.
+        eval (bool): If True, sets the model to evaluation mode.
+    
+    Returns:
+        torch.nn.Module: The created DeepLabV3 model.
+    """
+    
+    if backbone == 'resnet101':
+        from torchvision.models.segmentation import deeplabv3_resnet101, DeepLabV3_ResNet101_Weights
+        weights = DeepLabV3_ResNet101_Weights.DEFAULT if pretrained else None
+        model = deeplabv3_resnet101(weights=weights)
+    elif backbone == 'resnet50':
+        from torchvision.models.segmentation import deeplabv3_resnet50, DeepLabV3_ResNet50_Weights
+        weights = DeepLabV3_ResNet50_Weights.DEFAULT if pretrained else None
+        model = deeplabv3_resnet50(weights=weights)
+    else:
+        raise ValueError(f"Unknown backbone: {backbone}")
+    
+    if eval:
+        model.eval()
+    else:
+        model.train()
+    
+    return model
