@@ -2,7 +2,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 import numpy as np
 from tqdm import tqdm
 
@@ -114,10 +114,10 @@ if __name__ == "__main__":
     parser.add_argument('--pretrained', '-p', type=bool, default=False, help='Use pretrained weights')
     parser.add_argument('--dataset', '-d', type=str, default='dem_dataset', choices=['dem_dataset'], help='Dataset name')
     parser.add_argument('--split-ratio', type=tuple, default=(0.7, 0.15, 0.15), help='Split ratio for train, val, test')
-    parser.add_argument('--tile-size', '-t', type=int, default=1024, help='Tile size')
-    parser.add_argument('--stride', '-s', type=int, default=512, help='Stride')
-    parser.add_argument('--ignore-index', '-i', type=int, default=255, help='Ignore index')
-    parser.add_argument('--batch-size', '-b', type=int, default=2, help='Batch size')
+    parser.add_argument('--tile-size', '-t', type=int, default=64, help='Tile size')
+    parser.add_argument('--stride', '-s', type=int, default=32, help='Stride')
+    parser.add_argument('--ignore-index', '-i', type=int, default=-1, help='Ignore index')
+    parser.add_argument('--batch-size', '-b', type=int, default=4, help='Batch size')
     parser.add_argument('--num-workers', '-w', type=int, default=4, help='Number of workers')
     parser.add_argument('--num-epochs', '-e', type=int, default=10, help='Number of epochs')
     parser.add_argument('--learning-rate', '-l', type=float, default=1e-4, help='Learning rate')
@@ -147,28 +147,38 @@ if __name__ == "__main__":
         case 'dem_dataset':
             match(args.mode):
                 case 'slurm':
-                    dem_path = "/home/nc225mj/lidar-archaeology-segmentation/data/raw/DEM.npz"
+                    dem_path = "/home/nc225mj/lidar-archaeology-segmentation/data/processed/DEM_normalized.npz"
                     mask_path = "/home/nc225mj/lidar-archaeology-segmentation/data/raw/Mounds_raster_mask_opened_closed.npy"
                 case 'local':
-                    dem_path = "/home/nikitachernysh/storage/Projects/lidar-archaeology-segmentation/data/raw/DEM.npz"
+                    dem_path = "/home/nikitachernysh/storage/Projects/lidar-archaeology-segmentation/data/raw/DEM_normalized.npz"
                     mask_path = "/home/nikitachernysh/storage/Projects/lidar-archaeology-segmentation/data/raw/Mounds_raster_mask_opened_closed.npy"
-            train_dataset = DEMTilesDataset(
+            dataset = DEMTilesDataset(
                 dem_path=dem_path,
                 mask_path=mask_path,
                 tile_size=args.tile_size,
                 stride=args.stride,
-                split='train'
-            )
-            val_dataset = DEMTilesDataset(
-                dem_path=dem_path,
-                mask_path=mask_path,
-                tile_size=args.tile_size,
-                stride=args.stride,
-                split='val'
             )
             
-            train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True)
-            val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False)
+            # Get the total number of samples
+            n_samples = len(dataset)
+
+            # Calculate split indices
+            train_end = int(n_samples * 0.7)
+            val_end = train_end + int(n_samples * 0.15)
+
+            # Create index lists (not using coords directly)
+            all_indices = list(range(n_samples))
+
+            # Split indices
+            train_indices = all_indices[:train_end]
+            val_indices = all_indices[train_end:val_end]
+
+            # Create subsets
+            train_subset = Subset(dataset, train_indices)
+            val_subset = Subset(dataset, val_indices)
+            
+            train_dataloader = DataLoader(train_subset, batch_size=args.batch_size, num_workers=args.num_workers)
+            val_dataloader = DataLoader(val_subset, batch_size=args.batch_size, num_workers=args.num_workers)
             
         case _:
             raise ValueError(f"Unknown dataset: {args.dataset}")
@@ -177,14 +187,9 @@ if __name__ == "__main__":
         from datetime import datetime
         now = datetime.now()
         args.save_path = f"{now.strftime('%Y-%m-%d_%H-%M-%S')}_model.pth"
-        
-    # Calculate class weights
-    class_weights = 1.0 / (np.bincount(train_dataset.mask.flatten()) + 1e-6)
-    print("Class weights: ", class_weights)
-    class_weights = torch.FloatTensor(class_weights).to(device)
     
     # Initialize loss function and optimizer
-    criterion = nn.CrossEntropyLoss(weight=class_weights, ignore_index=args.ignore_index)
+    criterion = nn.CrossEntropyLoss(ignore_index=args.ignore_index)
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
     
     # Train with validation

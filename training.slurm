@@ -12,4 +12,4 @@
 source /home/nc225mj/lidar-archaeology-segmentation/.venv/bin/activate
 
 # Run script
-python -m src.training -M slurm -D cuda -bone resnet101 -t 512 -s 256 -b 4 -e 4
+python -m src.training -M slurm -D cuda -bone resnet101 -t 64 -s 32 -b 4 -e 4
