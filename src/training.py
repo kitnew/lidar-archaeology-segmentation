@@ -9,17 +9,30 @@ from tqdm import tqdm
 from src.models.DeepLab_V3 import create_model
 from src.datasets.dem_dataset import DEMTilesDataset
 
+IGNORE_INDEX = -1
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def calculate_accuracy(outputs, targets, ignore_index=255):
+def calculate_accuracy(outputs, targets):
     """Calculate pixel accuracy, ignoring pixels with ignore_index."""
     with torch.no_grad():
         # Get predicted class (ignore ignore_index)
         _, preds = torch.max(outputs, 1)
-        valid_pixels = (targets != ignore_index)
+        
+        # Ensure targets is a tensor
+        if not isinstance(targets, torch.Tensor):
+            targets = torch.tensor(targets, device=outputs.device)
+            
+        # Create mask for valid pixels
+        valid_pixels = (targets != IGNORE_INDEX)
+        
+        # If no valid pixels, return 0
+        if valid_pixels.numel() == 0 or not valid_pixels.any():
+            return 0.0
+            
         correct = (preds[valid_pixels] == targets[valid_pixels]).sum().item()
         total = valid_pixels.sum().item()
-        return correct / total if total > 0 else 0.0
+        return correct / total
 
 def train_epoch(dataloader, model, criterion, optimizer):
     model.train()
@@ -30,15 +43,14 @@ def train_epoch(dataloader, model, criterion, optimizer):
     pbar = tqdm(dataloader, desc='Training')
     
     for batch in pbar:
-        images = batch['image'].to(device)
+        images = batch['dem'].to(device)
         masks = batch['mask'].to(device)
         
         # Forward pass
         outputs = model(images)['out']
         loss = criterion(outputs, masks)
         
-        # Calculate accuracy
-        acc = calculate_accuracy(outputs, masks, ignore_index=255)
+        acc = calculate_accuracy(outputs, masks)
         
         # Backward pass
         optimizer.zero_grad()
@@ -60,12 +72,12 @@ def validate(dataloader, model, criterion):
     with torch.no_grad():
         pbar = tqdm(dataloader, desc='Validation')
         for batch in pbar:
-            images = batch['image'].to(device)
+            images = batch['dem'].to(device)
             masks = batch['mask'].to(device)
             
             outputs = model(images)['out']
             loss = criterion(outputs, masks)
-            acc = calculate_accuracy(outputs, masks, ignore_index=255)
+            acc = calculate_accuracy(outputs, masks)
             
             val_loss += loss.item()
             val_acc += acc
@@ -120,7 +132,7 @@ if __name__ == "__main__":
     parser.add_argument('--batch-size', '-b', type=int, default=4, help='Batch size')
     parser.add_argument('--num-workers', '-w', type=int, default=4, help='Number of workers')
     parser.add_argument('--num-epochs', '-e', type=int, default=10, help='Number of epochs')
-    parser.add_argument('--learning-rate', '-l', type=float, default=1e-4, help='Learning rate')
+    parser.add_argument('--learning-rate', '-l', type=float, default=1e-5, help='Learning rate')
     parser.add_argument('--save-path', type=str, default=False, help="Model save path")
     #parser.add_argument('--resume', '-r', type=bool, default=False, help='Resume training from checkpoint')
     
@@ -159,26 +171,22 @@ if __name__ == "__main__":
                 stride=args.stride,
             )
             
-            # Get the total number of samples
-            n_samples = len(dataset)
+            # Получаем все координаты
+            coords = np.array(dataset.coords)  # shape: (N, 2) -> [y, x]
 
-            # Calculate split indices
-            train_end = int(n_samples * 0.7)
-            val_end = train_end + int(n_samples * 0.15)
+            # Разделим по оси Y (например, верх 70%, низ 30%)
+            y_values = coords[:, 0]
+            y_threshold = np.percentile(y_values, 70)
 
-            # Create index lists (not using coords directly)
-            all_indices = list(range(n_samples))
+            train_indices = [i for i, (y, _) in enumerate(dataset.coords) if y < y_threshold]
+            val_indices   = [i for i, (y, _) in enumerate(dataset.coords) if y >= y_threshold]
 
-            # Split indices
-            train_indices = all_indices[:train_end]
-            val_indices = all_indices[train_end:val_end]
-
-            # Create subsets
+            # Создаём сабсеты
             train_subset = Subset(dataset, train_indices)
             val_subset = Subset(dataset, val_indices)
-            
-            train_dataloader = DataLoader(train_subset, batch_size=args.batch_size, num_workers=args.num_workers)
-            val_dataloader = DataLoader(val_subset, batch_size=args.batch_size, num_workers=args.num_workers)
+
+            train_dataloader = DataLoader(train_subset, batch_size=4, num_workers=4, shuffle=True)
+            val_dataloader = DataLoader(val_subset, batch_size=4, num_workers=4, shuffle=False)
             
         case _:
             raise ValueError(f"Unknown dataset: {args.dataset}")
@@ -189,7 +197,7 @@ if __name__ == "__main__":
         args.save_path = f"{now.strftime('%Y-%m-%d_%H-%M-%S')}_model.pth"
     
     # Initialize loss function and optimizer
-    criterion = nn.CrossEntropyLoss(ignore_index=args.ignore_index)
+    criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate)
     
     # Train with validation
@@ -200,5 +208,5 @@ if __name__ == "__main__":
         criterion,
         optimizer,
         args.num_epochs,
-        args.save_path
+        args.save_path,
     )

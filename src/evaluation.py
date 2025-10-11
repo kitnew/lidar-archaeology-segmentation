@@ -2,19 +2,19 @@ import os
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 from tqdm import tqdm
-from torch.utils.data import DataLoader
-from pathlib import Path
+from torch.utils.data import DataLoader, Subset
 
 from src.models.DeepLab_V3 import create_model
 from src.datasets.dem_dataset import DEMTilesDataset
 
-def calculate_metrics(outputs, targets, ignore_index=255):
+IGNORE_INDEX = -1
+
+def calculate_metrics(outputs, targets):
     """Calculate pixel accuracy, precision, recall, and F1 score."""
     with torch.no_grad():
         _, preds = torch.max(outputs, 1)
-        valid_pixels = (targets != ignore_index)
+        valid_pixels = (targets != IGNORE_INDEX)
         
         # Flatten tensors
         preds_flat = preds[valid_pixels].cpu().numpy()
@@ -78,7 +78,7 @@ def evaluate_model(model, dataloader, device, output_dir, num_samples=10):
     
     with torch.no_grad():
         for i, batch in enumerate(tqdm(dataloader, desc='Evaluating')):
-            images = batch['image'].to(device)
+            images = batch['dem'].to(device)
             masks = batch['mask'].to(device)
             
             # Get model predictions
@@ -109,7 +109,7 @@ def evaluate_model(model, dataloader, device, output_dir, num_samples=10):
     avg_metrics = {key: np.mean(values) for key, values in metrics.items()}
     return avg_metrics
 
-def main():
+if __name__ == '__main__':
     import argparse
     
     parser = argparse.ArgumentParser(description='Evaluate DeepLabV3 model on test set.')
@@ -142,28 +142,36 @@ def main():
     # Create test dataset and dataloader
     print('Loading test dataset...')
     if args.mode == 'slurm':
-        dem_path = "/home/nc225mj/lidar-archaeology-segmentation/data/raw/DEM.npz"
+        dem_path = "/home/nc225mj/lidar-archaeology-segmentation/data/processed/DEM_normalized.npz"
         mask_path = "/home/nc225mj/lidar-archaeology-segmentation/data/raw/Mounds_raster_mask_opened_closed.npy"
     else:  # local
-        dem_path = "/home/nikitachernysh/storage/Projects/lidar-archaeology-segmentation/data/raw/DEM.npz"
+        dem_path = "/home/nikitachernysh/storage/Projects/lidar-archaeology-segmentation/data/processed/DEM_normalized.npz"
         mask_path = "/home/nikitachernysh/storage/Projects/lidar-archaeology-segmentation/data/raw/Mounds_raster_mask_opened_closed.npy"
     
-    test_dataset = DEMTilesDataset(
+    dataset = DEMTilesDataset(
         dem_path=dem_path,
         mask_path=mask_path,
         tile_size=args.tile_size,
         stride=args.stride,
-        split='test'
     )
     
-    test_dataloader = DataLoader(
-        test_dataset,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
-        shuffle=False
-    )
+    # Получаем все координаты
+    coords = np.array(dataset.coords)  # shape: (N, 2) -> [y, x]
+
+    # Разделим по оси Y (например, верх 70%, низ 30%)
+    y_values = coords[:, 0]
+    y_threshold = np.percentile(y_values, 70)
+
+    train_indices = [i for i, (y, _) in enumerate(dataset.coords) if y < y_threshold]
+    val_indices   = [i for i, (y, _) in enumerate(dataset.coords) if y >= y_threshold]
+    test_indices  = [i for i, (y, _) in enumerate(dataset.coords) if y >= y_threshold]
+
+    # Создаём сабсеты
+    test_subset = Subset(dataset, test_indices)
+
+    test_dataloader = DataLoader(test_subset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False)
     
-    print(f'Test set: {len(test_dataset)} samples')
+    print(f'Test set: {len(test_subset)} samples')
     
     # Run evaluation
     print('Starting evaluation...')
@@ -182,6 +190,3 @@ def main():
         print(f'{metric.capitalize()}: {value:.4f}')
     print('-' * 40)
     print(f'Visualizations saved to: {os.path.abspath(args.output_dir)}')
-
-if __name__ == '__main__':
-    main()
