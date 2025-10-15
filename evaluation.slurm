@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=deeplabv3
-#SBATCH --output=output.log
-#SBATCH --error=errors.log
+#SBATCH --job-name=deeplabv3_evaluation
+#SBATCH --output=evaluation.log
+#SBATCH --error=evaluation_errors.log
 #SBATCH --partition=dgx
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=shard:10

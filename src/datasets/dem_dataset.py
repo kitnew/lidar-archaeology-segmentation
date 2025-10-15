@@ -2,6 +2,15 @@ from torch.utils.data import Dataset
 import numpy as np
 import torch
 
+from torchvision.transforms import v2
+
+transforms = v2.Compose([
+    v2.RandomHorizontalFlip(),
+    v2.RandomVerticalFlip(),
+    v2.RandomRotation(90),
+    v2.ToTensor()
+])
+
 class DEMTilesDataset(Dataset):
     def __init__(self, dem_path, mask_path, tile_size=64, stride=32):
         """
@@ -17,9 +26,10 @@ class DEMTilesDataset(Dataset):
         data = np.load(dem_path)
         self.dem = data["dem"].astype(np.float32)
         self.valid = data["valid"].astype(bool)
-        self.mask = np.load(mask_path).astype(np.int64)
+        self.mask = np.load(mask_path).astype(np.float32)
         self.tile_size = tile_size
         self.stride = stride
+        self.transforms = transforms
 
         # Generate all tile coordinates
         H, W = self.dem.shape
@@ -45,9 +55,25 @@ class DEMTilesDataset(Dataset):
         
         dem_tile = np.stack((dem_tile, dem_tile, dem_tile), axis=0)
         
+        # Convert to tensor and prepare for transforms
+        dem_tensor = torch.from_numpy(dem_tile).float()
+        mask_tensor = torch.from_numpy(mask_tile).float().unsqueeze(0)  # Add channel dim
+        valid_tensor = torch.from_numpy(valid_tile).bool().unsqueeze(0)  # Add channel dim
+
+        # Apply the same transform to both image and mask
+        if hasattr(self, 'transforms') and self.transforms is not None:
+            # Stack all tensors to apply the same transform
+            stacked = torch.cat([dem_tensor, mask_tensor, valid_tensor.float()], dim=0)
+            transformed = self.transforms(stacked)
+
+            # Split back
+            dem_tensor = transformed[:3]  # First 3 channels are the image
+            mask_tensor = transformed[3:4]  # Next channel is mask
+            valid_tensor = transformed[4:].bool()  # Last channel is valid mask
+
         return {
-            'dem': torch.from_numpy(dem_tile).float(),
-            'valid': torch.from_numpy(valid_tile).bool(),
-            'mask': torch.from_numpy(mask_tile).long(),
+            'dem': dem_tensor,
+            'valid': valid_tensor.squeeze(0),  # Remove channel dim
+            'mask': mask_tensor.squeeze(0),    # Remove channel dim
             'coords': np.array([y, x])
         }

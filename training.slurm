@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=deeplabv3
-#SBATCH --output=output.log
-#SBATCH --error=errors.log
+#SBATCH --job-name=deeplabv3_training
+#SBATCH --output=training.log
+#SBATCH --error=training_errors.log
 #SBATCH --partition=dgx
 #SBATCH --cpus-per-task=16
 #SBATCH --gres=shard:10
@@ -12,4 +12,4 @@
 source /home/nc225mj/lidar-archaeology-segmentation/.venv/bin/activate
 
 # Run script
-python -m src.training -M slurm -D cuda -bone resnet101 -t 64 -s 16 -b 64 -e 4
+python -m src.training -bone resnet101 -t 64 -s 16 -b 64 -w 8 -e 10
