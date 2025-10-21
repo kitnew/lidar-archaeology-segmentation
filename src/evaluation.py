@@ -13,8 +13,18 @@ from src.datasets.dem_dataset import DEMTilesDataset
 
 IGNORE_INDEX = -1
 
-def calculate_metrics(outputs, targets, valid=None, threshold=0.5):
-    """Calculate metrics for confidence-based segmentation."""
+def calculate_metrics(outputs, targets, valid=None, threshold=0.8):
+    """Calculate metrics for binary semantic segmentation.
+    
+    Args:
+        outputs: Model output logits (before sigmoid) of shape (B, 1, H, W)
+        targets: Ground truth masks of shape (B, 1, H, W)
+        valid: Optional mask indicating valid pixels
+        threshold: Threshold for binary prediction
+        
+    Returns:
+        Dictionary containing various segmentation metrics
+    """
     with torch.no_grad():
         # Apply sigmoid to get probabilities
         probs = torch.sigmoid(outputs)
@@ -27,37 +37,55 @@ def calculate_metrics(outputs, targets, valid=None, threshold=0.5):
             valid = valid.unsqueeze(1)
             preds = preds * valid
             targets = targets * valid
+            valid_mask = valid.bool()
+        else:
+            valid_mask = None
         
-        # Flatten tensors
+        # Flatten tensors and convert to numpy
         preds_flat = preds.view(-1).cpu().numpy()
         targets_flat = targets.view(-1).cpu().numpy()
         
-        # Calculate accuracy
-        accuracy = (preds_flat > threshold) == (targets_flat > 0.8)
-        accuracy = accuracy.mean()
+        # Binarize targets
+        binary_targets = (targets_flat > 0.8).astype(float)  # Using 0.5 threshold for targets
+        binary_preds = (preds_flat > threshold).astype(float)
         
-        # Calculate true/false positives/negatives
-        tp = ((preds_flat > threshold) & (targets_flat > 0.8)).sum()
-        fp = ((preds_flat > threshold) & (targets_flat <= 0.8)).sum()
-        fn = ((preds_flat <= threshold) & (targets_flat > 0.8)).sum()
+        # Calculate confusion matrix elements
+        tp = ((binary_preds > 0) & (binary_targets > 0.8)).sum()
+        tn = ((binary_preds == 0) & (binary_targets <= 0.8)).sum()
+        fp = ((binary_preds > 0) & (binary_targets <= 0.8)).sum()
+        fn = ((binary_preds == 0) & (binary_targets > 0.8)).sum()
         
-        # Calculate precision, recall, and F1 score
-        precision = tp / (tp + fp + 1e-10)
-        recall = tp / (tp + fn + 1e-10)
-        f1 = 2 * (precision * recall) / (precision + recall + 1e-10)
+        # Pixel-level metrics
+        eps = 1e-10
+        accuracy = (tp + tn) / (tp + tn + fp + fn + eps)
+        
+        # Class-wise metrics
+        precision = tp / (tp + fp + eps)
+        recall = tp / (tp + fn + eps)
+        f1 = 2 * (precision * recall) / (precision + recall + eps)
+        
+        # IoU (Jaccard Index) for each class
+        iou_positive = tp / (tp + fp + fn + eps)
         
         # Calculate MSE for confidence values
         mse = nn.MSELoss()(probs, targets).item()
         
         return {
-            'accuracy': accuracy,
+            # Overall metrics
+            'accuracy': accuracy,   
+            'mse': mse,
+            
+            # Class-specific metrics
             'precision': precision,
             'recall': recall,
             'f1': f1,
-            'mse': mse
+            'iou': iou_positive,
+            
+            # Additional metrics
+            'specificity': tn / (tn + fp + eps),  # True Negative Rate
         }
 
-def visualize_sample(dem_tile, true_mask, pred_mask, output_dir, index, cmap='viridis'):
+def visualize_sample(dem_tile, true_mask, pred_mask, output_dir, index, cmap='viridis', threshold = 0.8):
     """Visualize DEM and results with color coding:
     - Black: False Positive
     - White: True Positive
@@ -72,7 +100,7 @@ def visualize_sample(dem_tile, true_mask, pred_mask, output_dir, index, cmap='vi
     axes[0].axis('off')
     
     # Create result visualization
-    binary_pred = (pred_mask > 0.8).astype(float)
+    binary_pred = (pred_mask > threshold).astype(float)
     result = np.zeros((*true_mask.shape, 3))  # RGB image
     
     # True Negative (black): 0 in both true and pred
@@ -113,7 +141,7 @@ def visualize_sample(dem_tile, true_mask, pred_mask, output_dir, index, cmap='vi
     axes[1].axis('off')
     
     # Plot predicted mask (binary)
-    axes[2].imshow((pred_mask > 0.8).astype(float), cmap=cmap, vmin=0, vmax=1)
+    axes[2].imshow((pred_mask > threshold).astype(float), cmap=cmap, vmin=0, vmax=1)
     axes[2].set_title('Prediction (Binary)')
     axes[2].axis('off')
     
@@ -127,15 +155,17 @@ def visualize_sample(dem_tile, true_mask, pred_mask, output_dir, index, cmap='vi
     plt.savefig(os.path.join(output_dir, f'sample_old_{index:04d}.png'), dpi=150, bbox_inches='tight')
     plt.close()
 
-def evaluate_model(model, dataloader, device, output_dir, num_samples=10):
+def evaluate_model(model, dataloader, device, output_dir, num_samples=10, threshold=0.8):
     """Evaluate model on test set and generate visualizations."""
     model.eval()
-    metrics = {
-        'accuracy': [],
+    metrics ={
+        'accuracy': [],   
+        'mse': [],
         'precision': [],
         'recall': [],
         'f1': [],
-        'mse': []
+        'iou': [],
+        'specificity': []
     }
     
     # Create output directory if it doesn't exist
@@ -151,25 +181,29 @@ def evaluate_model(model, dataloader, device, output_dir, num_samples=10):
             outputs = model(images)['out']
             
             # Calculate metrics
-            batch_metrics = calculate_metrics(outputs, masks, valid)
+            batch_metrics = calculate_metrics(outputs, masks, valid, threshold)
             for key in metrics:
                 if key in batch_metrics:
                     metrics[key].append(batch_metrics[key])
             
             # Save visualizations for first few samples
-            if i < num_samples:
+            while num_samples > 0:
                 for j in range(images.size(0)):
                     # Convert tensors to numpy arrays
                     dem = images[j].cpu().numpy().mean(0)  # Average across channels
                     true_mask = masks[j][0].cpu().numpy()  # Remove channel dim
                     pred_mask = torch.sigmoid(outputs[j][0]).cpu().numpy()  # Apply sigmoid and remove channel dim
                     
-                    # Visualize
-                    visualize_sample(
-                        dem, true_mask, pred_mask,
-                        output_dir=output_dir,
-                        index=i * dataloader.batch_size + j
-                    )
+                    # Check if there are positive pixels
+                    if np.any(true_mask > 0.5):
+                        # Visualize
+                        visualize_sample(
+                            dem, true_mask, pred_mask,
+                            output_dir=output_dir,
+                            index=i * dataloader.batch_size + j,
+                            threshold=threshold
+                        )
+                num_samples -= 1
     
     # Calculate average metrics
     avg_metrics = {key: np.mean(values) for key, values in metrics.items()}
@@ -186,6 +220,7 @@ if __name__ == '__main__':
     parser.add_argument('--tile-size', type=int, default=1024, help='Tile size')
     parser.add_argument('--stride', type=int, default=1024, help='Stride for test set (use non-overlapping tiles)')
     parser.add_argument('--num-samples', type=int, default=10, help='Number of samples to visualize')
+    parser.add_argument('--threshold', type=float, default=0.8, help='Threshold for binary prediction')
     parser.add_argument('--mode', type=str, choices=['slurm', 'local'], default='local', help='Execution mode')
     
     args = parser.parse_args()
@@ -219,6 +254,7 @@ if __name__ == '__main__':
         mask_path=mask_path,
         tile_size=args.tile_size,
         stride=args.stride,
+        transforms=False
     )
     
     coords = np.array(dataset.coords)  # shape: (N, 2) -> [y, x]
@@ -242,7 +278,8 @@ if __name__ == '__main__':
         dataloader=test_dataloader,
         device=device,
         output_dir=args.output_dir,
-        num_samples=args.num_samples
+        num_samples=args.num_samples,
+        threshold=args.threshold
     )
     
     # Print results

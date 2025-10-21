@@ -13,8 +13,17 @@ data/processed/
 # QGIS Projects
 data/QGIS/
 
+### Experiments ###
+
+# Models
+*.pth
+
+# Evaluation results
+evaluation_results/
+
 ### KKUI Template ###
 docs/instructions/KKUI_Template/
+
 
 #############################
 ##### Global .gitignore #####

@@ -1,18 +1,18 @@
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, Subset
 import numpy as np
 import torch
 
 from torchvision.transforms import v2
 
-transforms = v2.Compose([
+augmentations = v2.Compose([
     v2.RandomHorizontalFlip(),
     v2.RandomVerticalFlip(),
     v2.RandomRotation(90),
-    v2.ToTensor()
+    v2.ToDtype(torch.float32, scale=True)
 ])
 
 class DEMTilesDataset(Dataset):
-    def __init__(self, dem_path, mask_path, tile_size=64, stride=32):
+    def __init__(self, dem_path, mask_path, tile_size=64, stride=32, transforms: bool = False):
         """
         Simplified dataset for DEM and mask tiling.
         
@@ -29,7 +29,7 @@ class DEMTilesDataset(Dataset):
         self.mask = np.load(mask_path).astype(np.float32)
         self.tile_size = tile_size
         self.stride = stride
-        self.transforms = transforms
+        self.transforms = augmentations if transforms else None
 
         # Generate all tile coordinates
         H, W = self.dem.shape
@@ -41,8 +41,6 @@ class DEMTilesDataset(Dataset):
                 if self.valid[y:y+tile_size, x:x+tile_size].any():
                     if self.mask[y:y+tile_size, x:x+tile_size].any():
                         self.coords.append((y, x))
-        
-        print(f"Dataset: {len(self.coords)} tiles")
 
     def __len__(self):
         return len(self.coords)
@@ -61,7 +59,7 @@ class DEMTilesDataset(Dataset):
         valid_tensor = torch.from_numpy(valid_tile).bool().unsqueeze(0)  # Add channel dim
 
         # Apply the same transform to both image and mask
-        if hasattr(self, 'transforms') and self.transforms is not None:
+        if self.transforms is not None:
             # Stack all tensors to apply the same transform
             stacked = torch.cat([dem_tensor, mask_tensor, valid_tensor.float()], dim=0)
             transformed = self.transforms(stacked)
