@@ -12,7 +12,7 @@ augmentations = v2.Compose([
 ])
 
 class DEMTilesDataset(Dataset):
-    def __init__(self, dem_path, mask_path, tile_size=64, stride=32, transforms: bool = False):
+    def __init__(self, dem_path, mask_path, tile_size=64, stride=32, pos_only:bool = False, transforms: bool = False, no_gt: bool = False):
         """
         Simplified dataset for DEM and mask tiling.
         
@@ -26,9 +26,10 @@ class DEMTilesDataset(Dataset):
         data = np.load(dem_path)
         self.dem = data["dem"].astype(np.float32)
         self.valid = data["valid"].astype(bool)
-        self.mask = np.load(mask_path).astype(np.float32)
+        self.mask = np.load(mask_path).astype(np.uint8) if not no_gt else np.zeros((self.dem.shape[0], self.dem.shape[1]), dtype=np.uint8)
         self.tile_size = tile_size
         self.stride = stride
+        self.pos_only = pos_only
         self.transforms = augmentations if transforms else None
 
         # Generate all tile coordinates
@@ -37,10 +38,17 @@ class DEMTilesDataset(Dataset):
         
         for y in range(0, H - tile_size + 1, stride):
             for x in range(0, W - tile_size + 1, stride):
+                if y + tile_size > H or x + tile_size > W:
+                    continue
                 # Check if tile has any valid DEM data
                 if self.valid[y:y+tile_size, x:x+tile_size].any():
-                    if self.mask[y:y+tile_size, x:x+tile_size].any():
+                    if self.pos_only:
+                        if self.mask[y:y+tile_size, x:x+tile_size].any():
+                            self.coords.append((y, x))
+                    else:
                         self.coords.append((y, x))
+                #else:
+                #    print(f"Skipping tile at ({y}, {x}) - no valid DEM data")
 
     def __len__(self):
         return len(self.coords)
@@ -73,5 +81,5 @@ class DEMTilesDataset(Dataset):
             'dem': dem_tensor,
             'valid': valid_tensor.squeeze(0),  # Remove channel dim
             'mask': mask_tensor.squeeze(0),    # Remove channel dim
-            'coords': np.array([y, x])
+            'coords': torch.tensor([y, x], dtype=torch.int32)
         }

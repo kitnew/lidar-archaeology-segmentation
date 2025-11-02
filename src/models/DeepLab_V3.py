@@ -13,12 +13,14 @@ def create_model(backbone: str = 'resnet101', pretrained: bool = False, eval: bo
     
     if backbone == 'resnet101':
         from torchvision.models.segmentation import deeplabv3_resnet101, DeepLabV3_ResNet101_Weights
-        weights = DeepLabV3_ResNet101_Weights.DEFAULT if pretrained else None
-        model = deeplabv3_resnet101(weights=weights, num_classes=1)
+        from torchvision.models import ResNet101_Weights
+        weights = ResNet101_Weights.IMAGENET1K_V2 if pretrained else None
+        model = deeplabv3_resnet101(weights_backbone=weights, num_classes=1)
     elif backbone == 'resnet50':
         from torchvision.models.segmentation import deeplabv3_resnet50, DeepLabV3_ResNet50_Weights
-        weights = DeepLabV3_ResNet50_Weights.DEFAULT if pretrained else None
-        model = deeplabv3_resnet50(weights=weights, num_classes=1)
+        from torchvision.models import ResNet50_Weights
+        weights = ResNet50_Weights.IMAGENET1K_V2 if pretrained else None
+        model = deeplabv3_resnet50(weights_backbone=weights, num_classes=1)
     else:
         raise ValueError(f"Unknown backbone: {backbone}")
     

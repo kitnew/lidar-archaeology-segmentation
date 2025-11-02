@@ -243,7 +243,6 @@ if __name__ == "__main__":
     parser.add_argument('--backbone', '-bone', type=str, default='resnet101', choices=['resnet50', 'resnet101'], help='Backbone name')
     parser.add_argument('--pretrained', '-p', type=bool, default=False, help='Use pretrained weights')
     parser.add_argument('--dataset', '-d', type=str, default='dem_dataset', choices=['dem_dataset'], help='Dataset name')
-    parser.add_argument('--split-ratio', type=tuple, default=(0.7, 0.15, 0.15), help='Split ratio for train, val, test')
     parser.add_argument('--tile-size', '-t', type=int, default=64, help='Tile size')
     parser.add_argument('--stride', '-s', type=int, default=32, help='Stride')
     parser.add_argument('--batch-size', '-b', type=int, default=4, help='Batch size')
@@ -269,41 +268,33 @@ if __name__ == "__main__":
     
     match(args.dataset):
         case 'dem_dataset':
-            dem_path = "/home/nc225mj/lidar-archaeology-segmentation/data/processed/DEM_normalized.npz"
-            mask_path = "/home/nc225mj/lidar-archaeology-segmentation/data/processed/mounds_mask_shadowed.npy"
+            data_path = "/home/nc225mj/lidar-archaeology-segmentation/data/processed/"
+            dem_train_path = data_path + "DEM_normalized_train.npz"
+            dem_val_path = data_path + "DEM_normalized_val.npz"
+            mask_train_path = data_path + "mounds_mask_shadowed_train.npy"
+            mask_val_path = data_path + "mounds_mask_shadowed_val.npy"
+            
             
             train_dataset = DEMTilesDataset(
-                dem_path=dem_path,
-                mask_path=mask_path,
+                dem_path=dem_train_path,
+                mask_path=mask_train_path,
                 tile_size=args.tile_size,
                 stride=args.stride,
+                pos_only=True,
                 transforms=True
             )
             
             val_dataset = DEMTilesDataset(
-                dem_path=dem_path,
-                mask_path=mask_path,
+                dem_path=dem_val_path,
+                mask_path=mask_val_path,
                 tile_size=args.tile_size,
                 stride=args.stride,
+                pos_only=True,
                 transforms=False
             )
-            
-            # Получаем все координаты
-            coords = np.array(train_dataset.coords)  # shape: (N, 2) -> [y, x]
 
-            # Разделим по оси Y (например, верх 70%, низ 30%)
-            y_values = coords[:, 0]
-            y_threshold = np.percentile(y_values, args.split_ratio[0]*100)
-
-            train_indices = [i for i, (y, _) in enumerate(train_dataset.coords) if y < y_threshold]
-            val_indices   = [i for i, (y, _) in enumerate(train_dataset.coords) if y >= y_threshold]
-
-            # Создаём сабсеты
-            val_subset = Subset(train_dataset, val_indices)
-            train_subset = Subset(train_dataset, train_indices)
-
-            train_dataloader = DataLoader(train_subset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True, pin_memory=True)
-            val_dataloader = DataLoader(val_subset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False, pin_memory=True)
+            train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True, pin_memory=True)
+            val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False, pin_memory=True)
             
         case _:
             raise ValueError(f"Unknown dataset: {args.dataset}")
@@ -323,7 +314,6 @@ if __name__ == "__main__":
     print("Using model: ", args.model)
     print("Using backbone: ", args.backbone, "(pretrained: ", args.pretrained, ")")
     print("Using dataset: ", args.dataset)
-    print("Using split ratio: ", args.split_ratio)
     print("Using tile size: ", args.tile_size)
     print("Dataset tiles: ", len(train_dataloader.dataset))
     print("Using stride: ", args.stride)

@@ -13,6 +13,16 @@ data/processed/
 # QGIS Projects
 data/QGIS/
 
+# .tif
+*.tif
+*.tif.aux.xml
+
+# CSV
+*.csv
+
+# PNGs
+*.png
+
 ### Experiments ###
 
 # Models
@@ -20,6 +30,9 @@ data/QGIS/
 
 # Evaluation results
 evaluation_results/
+
+# Prediction tiles
+predictions/
 
 ### KKUI Template ###
 docs/instructions/KKUI_Template/
