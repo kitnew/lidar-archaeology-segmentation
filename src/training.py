@@ -269,10 +269,10 @@ if __name__ == "__main__":
     match(args.dataset):
         case 'dem_dataset':
             data_path = "/home/nc225mj/lidar-archaeology-segmentation/data/processed/"
-            dem_train_path = data_path + "DEM_normalized_train.npz"
-            dem_val_path = data_path + "DEM_normalized_val.npz"
-            mask_train_path = data_path + "mounds_mask_shadowed_train.npy"
-            mask_val_path = data_path + "mounds_mask_shadowed_val.npy"
+            dem_train_path = data_path + "DEM0.80(5)_normalized_train.npz"
+            dem_val_path = data_path + "DEM0.80(5)_normalized_val.npz"
+            mask_train_path = data_path + "mounds_mask0.80(5)_shadowed_train.npy"
+            mask_val_path = data_path + "mounds_mask0.80(5)_shadowed_val.npy"
             
             
             train_dataset = DEMTilesDataset(
