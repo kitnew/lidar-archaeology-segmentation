@@ -28,7 +28,7 @@ origPath = '/home/nikitachernysh/storage/Projects/lidar-archaeology-segmentation
 #data = cv2.imread('../data/output/looting_mask.tif')
 
 #pngPath = 'c:/Users/marek/Downloads/Guatemala/Nové dáta/GeoTiff//Remake s Mirom/prediction_mounds_10_59_05_05_2022.png'
-pngPath = '/home/nikitachernysh/storage/Projects/lidar-archaeology-segmentation/notebooks/DEM21_opt_map.png'
+pngPath = '/home/nikitachernysh/storage/Projects/lidar-archaeology-segmentation/notebooks/0.80(5)(Pretrained)_DEM21_opt_map.png'
 
 trgtPath = pngPath[:-4] + '.tif'
 #trgtPath = 'ph2' + '.tif'

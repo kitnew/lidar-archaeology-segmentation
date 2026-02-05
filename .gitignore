@@ -34,6 +34,9 @@ evaluation_results/
 # Prediction tiles
 predictions/
 
+# other
+data/other/
+
 ### KKUI Template ###
 docs/instructions/KKUI_Template/
 

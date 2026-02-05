@@ -11,6 +11,7 @@ import sys
 
 from src.models.DeepLab_V3 import create_model
 from src.datasets.dem_dataset import DEMTilesDataset
+from src.datasets.rgb_dataset import RGBTilesDataset
 
 IGNORE_INDEX = -1
 
@@ -84,7 +85,7 @@ def calculate_metrics(probs, targets, valid=None, threshold=0.8):
         'specificity': tn / (tn + fp + eps),  # True Negative Rate
     }
 
-def evaluate_model(model, dataloader, device, output_dir, num_samples=10, threshold=0.8, pred_map_size=None):
+def evaluate_model(model, dataloader, device, output_dir, dataset, num_samples=10, threshold=0.8, pred_map_size=None, no_gt=False):
     """Evaluate model on test set and generate visualizations."""
     model.eval()
     metrics ={
@@ -120,12 +121,15 @@ def evaluate_model(model, dataloader, device, output_dir, num_samples=10, thresh
     final_map = map / torch.clamp(map_count, min=1)
     final_map = final_map.squeeze().cpu().numpy()
 
-    pred_dir = os.path.join(output_dir, "full_prediction_map.npy")
+    pred_dir = os.path.join(output_dir, f"{dataset}_full_prediction_map.npy")
     os.makedirs(os.path.dirname(pred_dir), exist_ok=True)
     np.save(pred_dir, final_map)
     print(f"Full prediction map saved to: {pred_dir}")
     
-    metrics = calculate_metrics(final_map, global_mask, global_valid, threshold)
+    if not no_gt:
+        metrics = calculate_metrics(final_map, global_mask, global_valid, threshold)
+    else:
+        metrics = {'accuracy': 0, 'precision': 0, 'recall': 0, 'f1': 0, 'iou': 0, 'specificity': 0}
     return metrics
 
 if __name__ == '__main__':
@@ -135,13 +139,15 @@ if __name__ == '__main__':
     parser.add_argument('--model-path', type=str, required=True, help='Path to trained model checkpoint')
     parser.add_argument('--output-dir', type=str, default='evaluation_results', help='Directory to save results')
     parser.add_argument('--batch-size', type=int, default=4, help='Batch size for evaluation')
+    parser.add_argument('--tile-norm', action='store_true', help='Normalize tiles')
+    parser.add_argument('--norm-constant', type=float, default=50.0, help='Normalization constant for tile normalization')
     parser.add_argument('--num-workers', type=int, default=4, help='Number of workers for data loading')
     parser.add_argument('--tile-size', type=int, default=1024, help='Tile size')
     parser.add_argument('--stride', type=int, default=1024, help='Stride for test set (use non-overlapping tiles)')
     parser.add_argument('--num-samples', type=int, default=10, help='Number of samples to visualize')
     parser.add_argument('--threshold', type=float, default=0.8, help='Threshold for binary prediction')
     parser.add_argument('--mode', type=str, choices=['slurm', 'local'], default='local', help='Execution mode')
-    parser.add_argument('--dataset', type=str, choices=['DEM', 'DEM21_opt'], default='DEM', help='Dataset to evaluate on')
+    parser.add_argument('--dataset', type=str, choices=['DEM', 'DEM_hillshade', 'DEM_slope', 'DEM_hillshade_slope', 'DEM21_opt', 'DEM21_opt_hillshade', 'DEM21_opt_slope', 'DEM21_opt_hillshade_slope', 'MC', 'JZ'], default='DEM', help='Dataset to evaluate on')
     parser.add_argument('--split', type=str, choices=['train', 'val', 'test', 'full'], default='test', help='Split to evaluate on')
     parser.add_argument('--no-gt', action='store_true', help='Do not use ground truth for evaluation')
 
@@ -165,14 +171,22 @@ if __name__ == '__main__':
     # Create test dataset and dataloader
     print('Loading test dataset...')
 
-    dem_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/{args.dataset}_normalized{f"_{args.split}" if args.split != 'full' else ""}.npz"
+    dem_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/{args.dataset.split('_')[0]}_normalized{f"_{args.split}" if args.split != 'full' else ""}.npz"
+    #dem_path = "/home/nc225mj/lidar-archaeology-segmentation/data/processed/DEM.npz"
     mask_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/mounds_mask_shadowed{f"_{args.split}" if args.split != 'full' else ""}.npy"
-    
+    dem_hillshade_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/{args.dataset.split('_')[0]}_hillshade_norm{f"_{args.split}" if args.split != 'full' else ""}.npy"
+    dem_slope_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/{args.dataset.split('_')[0]}_slope_norm{f"_{args.split}" if args.split != 'full' else ""}.npy"
+    rgb_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/{args.dataset.split('_')[0]}_rgb{f"_{args.split}" if args.split != 'full' else ""}.npz"
+
     dataset = DEMTilesDataset(
         dem_path=dem_path,
         mask_path=mask_path,
+        hillshade_path=dem_hillshade_path if args.dataset == 'DEM_hillshade' or args.dataset == 'DEM21_opt_hillshade' or args.dataset == 'DEM_hillshade_slope' or args.dataset == 'DEM21_opt_hillshade_slope' else None,
+        slope_path=dem_slope_path if args.dataset == 'DEM_slope' or args.dataset == 'DEM21_opt_slope' or args.dataset == 'DEM_hillshade_slope' or args.dataset == 'DEM21_opt_hillshade_slope' else None,
         tile_size=args.tile_size,
         stride=args.stride,
+        tile_norm=args.tile_norm,
+        norm_constant=args.norm_constant,
         transforms=False,
         no_gt=args.no_gt
     )
@@ -198,9 +212,11 @@ if __name__ == '__main__':
         dataloader=test_dataloader,
         device=device,
         output_dir=args.output_dir,
+        dataset=args.dataset.split('_')[0],
         num_samples=args.num_samples,
         threshold=args.threshold,
-        pred_map_size = (total_height, total_width)
+        pred_map_size = (total_height, total_width),
+        no_gt=args.no_gt
     )
     
     # Print results
@@ -209,4 +225,13 @@ if __name__ == '__main__':
     for metric, value in metrics.items():
         print(f'{metric.capitalize()}: {value:.4f}')
     print('-' * 40)
-    print(f'Visualizations saved to: {os.path.abspath(args.output_dir)}')
+    metrics_path = os.path.join(args.output_dir, f"{args.dataset.split('_')[0]}_metrics.json")
+    
+    # Save metrics to JSON file
+    import json
+    with open(metrics_path, 'w') as f:
+        json.dump(metrics, f, indent=2)
+    
+    print(f'Metrics saved to: {os.path.abspath(metrics_path)}')
+    print(f'Predictions saved to: {os.path.abspath(args.output_dir)}')
+

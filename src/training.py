@@ -10,6 +10,7 @@ import sys
 
 from src.models.DeepLab_V3 import create_model
 from src.datasets.dem_dataset import DEMTilesDataset
+from src.datasets.rgb_dataset import RGBTilesDataset
 
 IGNORE_INDEX = -1
 
@@ -98,7 +99,7 @@ def calculate_metrics(outputs, targets, valid=None, threshold=0.8):
         
         return {
             # Overall metrics
-            'accuracy': accuracy,   
+            'accuracy': accuracy,
             'mse': mse,
             
             # Class-specific metrics
@@ -122,7 +123,7 @@ def train_epoch(train_loader, model, criterion, optimizer):
     
     for index, batch in enumerate(pbar):
         try:
-            images = batch["dem"].to(device)
+            images = batch["data"].to(device)
             masks = batch["mask"].to(device)
             valid = batch["valid"].to(device).unsqueeze(1).float()
 
@@ -177,7 +178,7 @@ def validate(val_loader, model, criterion):
     
     with torch.no_grad():
         for batch in pbar:
-            images = batch["dem"].to(device)
+            images = batch["data"].to(device)
             masks = batch["mask"].to(device)
             valid = batch["valid"].to(device).unsqueeze(1).float()
             
@@ -229,6 +230,7 @@ def train_loop(train_dataloader, val_dataloader, model, criterion, optimizer, nu
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             torch.save(model.state_dict(), save_path)
+            torch.save(optimizer.state_dict(), save_path[:-4] + "_optimizer.pth")
             print(f"Saved model to {save_path}")
         print("")
     
@@ -242,7 +244,9 @@ if __name__ == "__main__":
     parser.add_argument('--model', '-m', type=str, choices=['DeepLabV3'], default='DeepLabV3', help='Model name')
     parser.add_argument('--backbone', '-bone', type=str, default='resnet101', choices=['resnet50', 'resnet101'], help='Backbone name')
     parser.add_argument('--pretrained', '-p', type=bool, default=False, help='Use pretrained weights')
-    parser.add_argument('--dataset', '-d', type=str, default='dem_dataset', choices=['dem_dataset'], help='Dataset name')
+    parser.add_argument('--dataset', '-d', type=str, default='dem', choices=['dem', 'dem_hillshade', 'dem_slope', 'dem_hillshade_slope', 'rgb'], help='Dataset name')
+    parser.add_argument('--tile-norm', action='store_true', help='Normalize tiles')
+    parser.add_argument('--norm-constant', type=float, default=50.0, help='Normalization constant for tile normalization')
     parser.add_argument('--tile-size', '-t', type=int, default=64, help='Tile size')
     parser.add_argument('--stride', '-s', type=int, default=32, help='Stride')
     parser.add_argument('--batch-size', '-b', type=int, default=4, help='Batch size')
@@ -254,33 +258,44 @@ if __name__ == "__main__":
     parser.add_argument('--dice-weight', '-dw', type=float, default=0.5, help='DiceLoss weight')
     parser.add_argument('--pos-weight', '-pw', type=float, default=20.62, help='Positive weight for BCEWithLogitsLoss')
     parser.add_argument('--reduction', type=str, default='none', choices=['none', 'mean', 'sum'], help='Reduction for BCEWithLogitsLoss')
+    parser.add_argument('--load', type=str, default=False, help="Model weights path")
     parser.add_argument('--save-path', type=str, default=False, help="Model save path")
-        
+    
     args = parser.parse_args()
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')    
     
     match(args.model):
         case 'DeepLabV3':
-            model = create_model(backbone=args.backbone, pretrained=args.pretrained, eval=False).to(device)
+            weights = torch.load(args.load) if args.load else False
+            model = create_model(backbone=args.backbone, p_weights=weights, pretrained=args.pretrained, eval=False).to(device)
         case _:
             raise ValueError(f"Unknown model: {args.model}")
     
+    data_path = "/home/nc225mj/lidar-archaeology-segmentation/data/processed/"
+    dem_train_path = data_path + "DEM0.80(4)_normalized_train.npz" if not args.tile_norm else data_path + "DEM0.80(4)_train.npz"
+    dem_val_path = data_path + "DEM0.80(4)_normalized_val.npz" if not args.tile_norm else data_path + "DEM0.80(4)_val.npz"
+    mask_train_path = data_path + "mounds_mask0.80(4)_shadowed_train.npy"
+    mask_val_path = data_path + "mounds_mask0.80(4)_shadowed_val.npy"
+    hillshade_train_path = data_path + "DEM0.80(4)_hillshade_normalized_train.npy"
+    hillshade_val_path = data_path + "DEM0.80(4)_hillshade_normalized_val.npy"
+    slope_train_path = data_path + "DEM0.80(4)_slope_normalized_train.npy"
+    slope_val_path = data_path + "DEM0.80(4)_slope_normalized_val.npy"
+
+    rgb_train_path = data_path + "RGB0.80(4)_normalized_train.npz"
+    rgb_val_path = data_path + "RGB0.80(4)_normalized_val.npz"
+    
+
     match(args.dataset):
-        case 'dem_dataset':
-            data_path = "/home/nc225mj/lidar-archaeology-segmentation/data/processed/"
-            dem_train_path = data_path + "DEM0.80(5)_normalized_train.npz"
-            dem_val_path = data_path + "DEM0.80(5)_normalized_val.npz"
-            mask_train_path = data_path + "mounds_mask0.80(5)_shadowed_train.npy"
-            mask_val_path = data_path + "mounds_mask0.80(5)_shadowed_val.npy"
-            
-            
+        case 'dem':
             train_dataset = DEMTilesDataset(
                 dem_path=dem_train_path,
                 mask_path=mask_train_path,
                 tile_size=args.tile_size,
                 stride=args.stride,
                 pos_only=True,
+                tile_norm=args.tile_norm,
+                norm_constant=args.norm_constant,
                 transforms=True
             )
             
@@ -290,14 +305,111 @@ if __name__ == "__main__":
                 tile_size=args.tile_size,
                 stride=args.stride,
                 pos_only=True,
+                tile_norm=args.tile_norm,
+                norm_constant=args.norm_constant,
+                transforms=False
+            )
+            
+        case 'dem_hillshade':
+            train_dataset = DEMTilesDataset(
+                dem_path=dem_train_path,
+                mask_path=mask_train_path,
+                hillshade_path=hillshade_train_path,
+                tile_size=args.tile_size,
+                stride=args.stride,
+                pos_only=True,
+                tile_norm=args.tile_norm,
+                norm_constant=args.norm_constant,
+                transforms=True
+            )
+            
+            val_dataset = DEMTilesDataset(
+                dem_path=dem_val_path,
+                mask_path=mask_val_path,
+                hillshade_path=hillshade_val_path,
+                tile_size=args.tile_size,
+                stride=args.stride,
+                pos_only=True,
+                tile_norm=args.tile_norm,
+                norm_constant=args.norm_constant,
                 transforms=False
             )
 
-            train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True, pin_memory=True)
-            val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False, pin_memory=True)
+        case 'dem_slope':
+            train_dataset = DEMTilesDataset(
+                dem_path=dem_train_path,
+                mask_path=mask_train_path,
+                slope_path=slope_train_path,
+                tile_size=args.tile_size,
+                stride=args.stride,
+                pos_only=True,
+                tile_norm=args.tile_norm,
+                norm_constant=args.norm_constant,
+                transforms=True
+            )
             
+            val_dataset = DEMTilesDataset(
+                dem_path=dem_val_path,
+                mask_path=mask_val_path,
+                slope_path=slope_val_path,
+                tile_size=args.tile_size,
+                stride=args.stride,
+                pos_only=True,
+                tile_norm=args.tile_norm,
+                norm_constant=args.norm_constant,
+                transforms=False
+            )
+
+        case 'dem_hillshade_slope':
+            train_dataset = DEMTilesDataset(
+                dem_path=dem_train_path,
+                mask_path=mask_train_path,
+                hillshade_path=hillshade_train_path,
+                slope_path=slope_train_path,
+                tile_size=args.tile_size,
+                stride=args.stride,
+                pos_only=True,
+                tile_norm=args.tile_norm,
+                norm_constant=args.norm_constant,
+                transforms=True
+            )
+            
+            val_dataset = DEMTilesDataset(
+                dem_path=dem_val_path,
+                mask_path=mask_val_path,
+                hillshade_path=hillshade_val_path,
+                slope_path=slope_val_path,
+                tile_size=args.tile_size,
+                stride=args.stride,
+                pos_only=True,
+                tile_norm=args.tile_norm,
+                norm_constant=args.norm_constant,
+                transforms=False
+            )
+        case 'rgb':
+            train_dataset = RGBTilesDataset(
+                rgb_path=rgb_train_path,
+                mask_path=mask_train_path,
+                tile_size=args.tile_size,
+                stride=args.stride,
+                pos_only=True,
+                transforms=True
+            )
+            
+            val_dataset = RGBTilesDataset(
+                rgb_path=rgb_val_path,
+                mask_path=mask_val_path,
+                tile_size=args.tile_size,
+                stride=args.stride,
+                pos_only=True,
+                transforms=False
+            )
+
         case _:
             raise ValueError(f"Unknown dataset: {args.dataset}")
+
+    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=True, pin_memory=True)
+    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False, pin_memory=True)
         
     if not args.save_path:
         from datetime import datetime
@@ -308,6 +420,9 @@ if __name__ == "__main__":
     criterion = BCEDiceLoss(pos_weight=torch.tensor([args.pos_weight], device=device), reduction=args.reduction, bce_weight=args.bce_weight, dice_weight=args.dice_weight).to(device)
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
     
+    if args.load:
+        optimizer.load_state_dict(torch.load(args.load[:-4] + "_optimizer.pth"))
+    
     print("-" * 50)
     print("*" * 20 + " Parameters " + "*" * 20)
     print("")
@@ -315,6 +430,8 @@ if __name__ == "__main__":
     print("Using backbone: ", args.backbone, "(pretrained: ", args.pretrained, ")")
     print("Using dataset: ", args.dataset)
     print("Using tile size: ", args.tile_size)
+    print(f"Using tile norm: {args.tile_norm}" if args.tile_norm else "Using tile norm: False")
+    print("Using norm constant: ", args.norm_constant)
     print("Dataset tiles: ", len(train_dataloader.dataset))
     print("Using stride: ", args.stride)
     print("Using batch size: ", args.batch_size)
