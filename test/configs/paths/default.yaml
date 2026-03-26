@@ -1,0 +1,4 @@
+# Environment specific paths
+data_dir: ${oc.env:DATA_ROOT, /home/nc225mj/lidar-archaeology-segmentation/data/processed}
+output_dir: ${oc.env:OUTPUT_DIR, ./outputs}
+log_dir: ${oc.env:LOG_DIR, ./logs}

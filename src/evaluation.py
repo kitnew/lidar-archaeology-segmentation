@@ -1,11 +1,8 @@
 import os
 import numpy as np
 import torch
-import matplotlib.pyplot as plt
 from tqdm import tqdm
-from torch.utils.data import DataLoader, Subset
-from torch import nn
-from skimage.morphology import opening, disk
+from torch.utils.data import DataLoader
 
 import sys
 
@@ -108,7 +105,8 @@ def evaluate_model(model, dataloader, device, output_dir, dataset, num_samples=1
     
     with torch.no_grad():
         for i, batch in enumerate(tqdm(dataloader, desc='Evaluating', file=sys.stdout)):
-            images = batch['dem'].to(device)
+            images = batch['data'].to(device)
+            
             coords = batch.get("coords", None)
             
             # Get model predictions
@@ -134,6 +132,8 @@ def evaluate_model(model, dataloader, device, output_dir, dataset, num_samples=1
 
 if __name__ == '__main__':
     import argparse
+    import torch.multiprocessing
+    torch.multiprocessing.set_sharing_strategy('file_system')
     
     parser = argparse.ArgumentParser(description='Evaluate DeepLabV3 model on test set.')
     parser.add_argument('--model-path', type=str, required=True, help='Path to trained model checkpoint')
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     parser.add_argument('--num-samples', type=int, default=10, help='Number of samples to visualize')
     parser.add_argument('--threshold', type=float, default=0.8, help='Threshold for binary prediction')
     parser.add_argument('--mode', type=str, choices=['slurm', 'local'], default='local', help='Execution mode')
-    parser.add_argument('--dataset', type=str, choices=['DEM', 'DEM_hillshade', 'DEM_slope', 'DEM_hillshade_slope', 'DEM21_opt', 'DEM21_opt_hillshade', 'DEM21_opt_slope', 'DEM21_opt_hillshade_slope', 'MC', 'JZ'], default='DEM', help='Dataset to evaluate on')
+    parser.add_argument('--dataset', type=str, choices=['DEM', 'DEM_hillshade', 'DEM_slope', 'DEM_hillshade_slope', 'DEM21_opt', 'DEM21_opt_hillshade', 'DEM21_opt_slope', 'DEM21_opt_hillshade_slope', 'MC', 'JZ', 'RGB', 'RGB21'], default='DEM', help='Dataset to evaluate on')
     parser.add_argument('--split', type=str, choices=['train', 'val', 'test', 'full'], default='test', help='Split to evaluate on')
     parser.add_argument('--no-gt', action='store_true', help='Do not use ground truth for evaluation')
 
@@ -176,30 +176,47 @@ if __name__ == '__main__':
     mask_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/mounds_mask_shadowed{f"_{args.split}" if args.split != 'full' else ""}.npy"
     dem_hillshade_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/{args.dataset.split('_')[0]}_hillshade_norm{f"_{args.split}" if args.split != 'full' else ""}.npy"
     dem_slope_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/{args.dataset.split('_')[0]}_slope_norm{f"_{args.split}" if args.split != 'full' else ""}.npy"
-    rgb_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/{args.dataset.split('_')[0]}_rgb{f"_{args.split}" if args.split != 'full' else ""}.npz"
+    #rgb_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/{args.dataset}{f"_{args.split}" if args.split != 'full' else "21"}.npz"
+    rgb_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/RGB_normalized.npz"
+    rgb21_path = f"/home/nc225mj/lidar-archaeology-segmentation/data/processed/RGB21_normalized.npz"
 
-    dataset = DEMTilesDataset(
-        dem_path=dem_path,
-        mask_path=mask_path,
-        hillshade_path=dem_hillshade_path if args.dataset == 'DEM_hillshade' or args.dataset == 'DEM21_opt_hillshade' or args.dataset == 'DEM_hillshade_slope' or args.dataset == 'DEM21_opt_hillshade_slope' else None,
-        slope_path=dem_slope_path if args.dataset == 'DEM_slope' or args.dataset == 'DEM21_opt_slope' or args.dataset == 'DEM_hillshade_slope' or args.dataset == 'DEM21_opt_hillshade_slope' else None,
-        tile_size=args.tile_size,
-        stride=args.stride,
-        tile_norm=args.tile_norm,
-        norm_constant=args.norm_constant,
-        transforms=False,
-        no_gt=args.no_gt
-    )
+    if args.dataset != 'RGB' and args.dataset != 'RGB21':
+        dataset = DEMTilesDataset(
+            dem_path=dem_path,
+            mask_path=mask_path,
+            hillshade_path=dem_hillshade_path if args.dataset == 'DEM_hillshade' or args.dataset == 'DEM21_opt_hillshade' or args.dataset == 'DEM_hillshade_slope' or args.dataset == 'DEM21_opt_hillshade_slope' else None,
+            slope_path=dem_slope_path if args.dataset == 'DEM_slope' or args.dataset == 'DEM21_opt_slope' or args.dataset == 'DEM_hillshade_slope' or args.dataset == 'DEM21_opt_hillshade_slope' else None,
+            tile_size=args.tile_size,
+            stride=args.stride,
+            tile_norm=args.tile_norm,
+            norm_constant=args.norm_constant,
+            transforms=False,
+            no_gt=args.no_gt
+        )
+    else:
+        dataset = RGBTilesDataset(
+            rgb_path=rgb_path if args.dataset == 'RGB' else rgb21_path,
+            mask_path=mask_path,
+            tile_size=args.tile_size,
+            stride=args.stride,
+            transforms=False,
+            no_gt=args.no_gt
+        )
 
     test_dataloader = DataLoader(dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=False)
     
     print(f'Test set: {len(dataset)} samples')
+    print(f'Test set shape: {dataset[0]["data"].shape}')
 
     tile_size = args.tile_size
     stride = args.stride
     
-    dem_height = dataset.dem.shape[0]
-    dem_width = dataset.dem.shape[1]
+    if args.dataset != 'RGB' and args.dataset != 'RGB21':
+        dem_height = dataset.dem.shape[0]
+        dem_width = dataset.dem.shape[1]
+    else:
+        dem_height = dataset.rgb.shape[1]
+        dem_width = dataset.rgb.shape[2]
     
     total_height = dem_height
     total_width  = dem_width

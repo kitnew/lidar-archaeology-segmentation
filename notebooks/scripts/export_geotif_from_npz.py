@@ -5,22 +5,13 @@ import rasterio
 import copy
 
 origPath = [
-    '/home/nc225mj/lidar-archaeology-segmentation/data/georef/DEM_JZ_1m.tiff',
-    '/home/nc225mj/lidar-archaeology-segmentation/data/georef/DEM_JZ_1m.tiff',
-    '/home/nc225mj/lidar-archaeology-segmentation/data/georef/DEM_MC_1m.tiff',
-    '/home/nc225mj/lidar-archaeology-segmentation/data/georef/DEM_MC_1m.tiff'
+    '/home/nc225mj/lidar-archaeology-segmentation/data/georef/ldr21_d_STU_General.tif',
 ]
 preds = [
-    "/home/nc225mj/lidar-archaeology-segmentation/experiments/JZ_Pretrained/JZ_full_prediction_map.npy",
-    "/home/nc225mj/lidar-archaeology-segmentation/experiments/JZ/JZ_full_prediction_map.npy",
-    "/home/nc225mj/lidar-archaeology-segmentation/experiments/MC_Pretrained/MC_full_prediction_map.npy",
-    "/home/nc225mj/lidar-archaeology-segmentation/experiments/MC/MC_full_prediction_map.npy",
+    "/home/nc225mj/lidar-archaeology-segmentation/outputs/full_prediction_map.npy",
 ]
 b_threshold = [
-    0.72,
-    0.72,
-    0.72,
-    0.72
+    0.78,
 ]
 
 for path, b_th, orig_path in zip(preds, b_threshold, origPath):
@@ -46,9 +37,6 @@ for path, b_th, orig_path in zip(preds, b_threshold, origPath):
 
     data = (data>0).astype(np.uint8)
 
-    print(data.dtype)
-    print(data.shape)
-
     selection = [0, 0, data.shape[1], data.shape[0]]
 
     orig = rasterio.open(orig_path)
@@ -61,10 +49,8 @@ for path, b_th, orig_path in zip(preds, b_threshold, origPath):
     [left,top] = orig.transform * (selection[0],selection[1])
     [right,bottom] = orig.transform * (selection[2],selection[3])
 
-    print(origTransform)
     newTransform = rasterio.transform.Affine.translation(left, top)\
         * rasterio.transform.Affine.scale(origTransform.a, origTransform.e)
-    print(newTransform)
 
     trgt = rasterio.open(
             trgtPath,

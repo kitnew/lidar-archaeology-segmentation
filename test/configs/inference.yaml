@@ -1,0 +1,17 @@
+defaults:
+  - _self_
+  - dataset: rgb21
+  - model: deeplabv3/resnet101_pretrained
+  - paths: default
+
+# Inference settings
+checkpoint_path: null
+output_path: "${paths.output_dir}/full_prediction_map.npy"
+threshold: 0.78
+batch_size: 16
+num_workers: 32
+
+# Hydra overrides
+hydra:
+  run:
+    dir: ${paths.output_dir}/inference/${now:%Y-%m-%d}/${now:%H-%M-%S}

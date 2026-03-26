@@ -1,0 +1,5 @@
+_target_: engine.losses.BCEDiceLoss
+pos_weight: [10.62]
+bce_weight: 0.3
+dice_weight: 0.7
+reduction: "none"

@@ -237,6 +237,7 @@ def train_loop(train_dataloader, val_dataloader, model, criterion, optimizer, nu
     print("-" * 50)
     print("*" * 15 + " Training finished " + "*" * 15)
     print("-" * 50)
+    
 if __name__ == "__main__":
     import argparse
     
@@ -432,7 +433,7 @@ if __name__ == "__main__":
     print("Using tile size: ", args.tile_size)
     print(f"Using tile norm: {args.tile_norm}" if args.tile_norm else "Using tile norm: False")
     print("Using norm constant: ", args.norm_constant)
-    print("Dataset tiles: ", len(train_dataloader.dataset))
+    print("Dataset tiles: ", len(train_dataset))
     print("Using stride: ", args.stride)
     print("Using batch size: ", args.batch_size)
     print("Using num workers: ", args.num_workers)
