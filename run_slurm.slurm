@@ -23,9 +23,6 @@ export LOG_DIR="./logs"
 echo "Using DATA_ROOT: $DATA_ROOT"
 
 # Run normal training with default configs
-#python test/src/train.py dataset=dem model.backbone=resnet50 ++training.epochs=20
-python test/src/inference.py +checkpoint_path=./best_model.pth
-
-# Example: Run inference with the best model
-# Ensure out of memory on GPU isn't an issue by keeping batch size reasonable for 35k maps.
-# python test/src/inference.py +checkpoint_path=$OUTPUT_DIR/2026-02-28/12-00-00/best_model.pth dataset=dem dataset.no_gt=True
+python src/train.py dataset=dem model.backbone=resnet50 ++training.epochs=20
+#python src/evaluation.py +checkpoint_path=./best_model.pth
+#python src/inference.py +checkpoint_path=./best_model.pth

@@ -29,9 +29,15 @@ class RGBTilesDataset(Dataset):
             self.valid = data["valid"].astype(bool)
         except Exception as e:
             self.rgb = data["dataset"].astype(np.float32)
-            self.valid = np.ones(self.rgb.shape[:2], dtype=bool)
+            # Assuming rgb is (C, H, W) based on rasterio.read() and your use in EVALUATION
+            self.valid = np.ones((self.rgb.shape[1], self.rgb.shape[2]), dtype=bool)
             
-        self.mask = np.load(mask_path).astype(np.uint8) if not no_gt else np.zeros((self.rgb.shape[0], self.rgb.shape[1]), dtype=np.uint8)
+        if no_gt:
+            self.mask = np.zeros((self.rgb.shape[1], self.rgb.shape[2]), dtype=np.uint8)
+        else:
+            self.mask = np.load(mask_path).astype(np.uint8)
+
+        print(f"Dataset Initialized: RGB shape={self.rgb.shape}, Mask shape={self.mask.shape}, Valid shape={self.valid.shape}")
         self.tile_size = tile_size
         self.stride = stride
         self.pos_only = pos_only

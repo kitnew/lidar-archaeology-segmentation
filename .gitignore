@@ -13,6 +13,9 @@ data/processed/
 # QGIS Projects
 data/QGIS/
 
+# Georef
+data/georef/
+
 # .tif
 *.tif
 *.tif.aux.xml
@@ -22,6 +25,9 @@ data/QGIS/
 
 # PNGs
 *.png
+
+# Zips
+*.zip
 
 ### Experiments ###
 
@@ -40,6 +46,8 @@ data/other/
 ### KKUI Template ###
 docs/instructions/KKUI_Template/
 
+# Configs
+.vscode/
 
 #############################
 ##### Global .gitignore #####
