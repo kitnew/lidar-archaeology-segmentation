@@ -1,13 +1,24 @@
 from torch.utils.data import Dataset, Subset
 import numpy as np
 import torch
+import random
 
 from torchvision.transforms import v2
+
+class RandomRotation(torch.nn.Module):
+    def __init__(self, degrees: list[int] = [0, 90, 180, 270]):
+        super().__init__()
+        self.degrees = degrees
+
+    def forward(self, inpt):
+        k = random.choice(self.degrees) // 90
+        return torch.rot90(inpt, k=k, dims=(-2, -1))
 
 augmentations = v2.Compose([
     v2.RandomHorizontalFlip(),
     v2.RandomVerticalFlip(),
-    v2.RandomRotation(90.0),  # type: ignore
+    RandomRotation([0, 90, 180, 270]),
+    v2.GaussianNoise(sigma=5e-4),
     v2.ToDtype(torch.float32, scale=True)
 ])
 
@@ -111,8 +122,11 @@ class DEMTilesDataset(Dataset):
 
             # Split back
             dem_tensor = transformed[:3]  # First 3 channels are the image
-            mask_tensor = transformed[3:4]  # Next channel is mask
-            valid_tensor = transformed[4:].bool()  # Last channel is valid mask
+            # Fix: GaussianNoise (and possible bilinear interpolation from RandomAffine) corrupts 
+            # the exact binary values (0.0/1.0). For valid_tensor in particular, any noise > 0 
+            # evaluates to True when cast to bool(), rendering invalid areas valid. Threshold at 0.5 to fix.
+            mask_tensor = (transformed[3:4] >= 0.5).float()
+            valid_tensor = transformed[4:] >= 0.5
 
         return {
             'data': dem_tensor.clone(),

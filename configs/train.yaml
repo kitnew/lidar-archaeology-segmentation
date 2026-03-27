@@ -1,8 +1,9 @@
 defaults:
   - _self_
-  - dataset: rgb
-  - model: deeplabv3/resnet101_pretrained
+  - dataset: dem
+  - model: deeplabv3/resnet101
   - loss: bcedice
+  - utils/classweights@utils.class_weights
   - paths: default
   - logger: default
 
@@ -12,7 +13,6 @@ batch_size: 16
 num_workers: 32
 learning_rate: 1e-4
 weight_decay: 0.0
-
 threshold: 0.81
 
 # Experiment level settings

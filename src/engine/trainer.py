@@ -72,7 +72,11 @@ class Trainer:
                 masks = masks.unsqueeze(1)
             masks = masks.float()
 
-            loss = self.criterion(pred, masks)
+            import inspect
+            if hasattr(self.criterion, "forward") and "valid" in inspect.signature(self.criterion.forward).parameters:
+                loss = self.criterion(pred, masks, valid=valid)
+            else:
+                loss = self.criterion(pred, masks)
 
             # Apply valid mask to loss if reduction is none
             if loss.dim() > 0:
@@ -123,13 +127,13 @@ class Trainer:
                 if masks.dim() == 3:
                     masks = masks.unsqueeze(1).float()
 
-                if self.logger and batch_idx == 0: # логируем только первый батч для экономии места
-                    import wandb
-                    self.logger.log({
-                        "predictions": [wandb.Image(images[0].cpu(), caption="Input"), 
-                                        wandb.Image(torch.sigmoid(pred)[0].cpu(), caption="Prediction"),
-                                        wandb.Image(masks[0].cpu(), caption="Ground Truth")]
-                    })
+                #if self.logger and batch_idx == 0: # логируем только первый батч для экономии места
+                #    import wandb
+                #    self.logger.log({
+                #        "predictions": [wandb.Image(images[0].cpu(), caption="Input"), 
+                #                        wandb.Image(torch.sigmoid(pred)[0].cpu(), caption="Prediction"),
+                #                        wandb.Image(masks[0].cpu(), caption="Ground Truth")]
+                #    })
                 
                 # Binarize for metrics
                 pred_bin = (torch.sigmoid(pred) > self.threshold).cpu().numpy().astype(bool)
@@ -141,7 +145,11 @@ class Trainer:
                         metrics_history[k].append(batch_metrics[k])
                 
                 # Loss
-                loss = self.criterion(pred, masks)
+                import inspect
+                if hasattr(self.criterion, "forward") and "valid" in inspect.signature(self.criterion.forward).parameters:
+                    loss = self.criterion(pred, masks, valid=valid)
+                else:
+                    loss = self.criterion(pred, masks)
                 if loss.dim() > 0:
                     loss = (loss * valid).sum() / torch.clamp(valid.sum(), min=1.0)
                 

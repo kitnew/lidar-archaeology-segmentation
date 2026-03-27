@@ -23,6 +23,6 @@ export LOG_DIR="./logs"
 echo "Using DATA_ROOT: $DATA_ROOT"
 
 # Run normal training with default configs
-python src/train.py dataset=dem model.backbone=resnet50 ++training.epochs=20
+python src/train.py
 #python src/evaluation.py +checkpoint_path=./best_model.pth
 #python src/inference.py +checkpoint_path=./best_model.pth
