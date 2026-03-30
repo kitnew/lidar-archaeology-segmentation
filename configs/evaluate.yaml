@@ -1,13 +1,13 @@
 defaults:
   - _self_
-  - dataset: rgb
-  - model: deeplabv3/resnet101_pretrained
+  - dataset: test
+  - model: deeplabv3/resnet101
   - paths: default
 
 # Inference settings
 checkpoint_path: null
 batch_size: 16
-num_workers: 32
+num_workers: 8
 
 # Hydra overrides
 hydra:

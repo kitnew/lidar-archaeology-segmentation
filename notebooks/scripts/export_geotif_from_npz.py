@@ -5,13 +5,13 @@ import rasterio
 import copy
 
 origPath = [
-    '/home/nc225mj/lidar-archaeology-segmentation/data/georef/ldr21_d_STU_General.tif',
+    '/home/nc225mj/lidar-archaeology-segmentation/data/georef/DEM.tif',
 ]
 preds = [
     "/home/nc225mj/lidar-archaeology-segmentation/outputs/full_prediction_map.npy",
 ]
 b_threshold = [
-    0.78,
+    0.5,
 ]
 
 for path, b_th, orig_path in zip(preds, b_threshold, origPath):

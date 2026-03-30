@@ -29,6 +29,9 @@ data/georef/
 # Zips
 *.zip
 
+# Manifests
+*.parquet
+
 ### Experiments ###
 
 # Models

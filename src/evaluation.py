@@ -71,9 +71,11 @@ def optimal_threshold(probs, targets, valid=None, metric='iou'):
 def evaluate_model(cfg, model, dataloader, device):
     metrics = Metrics(0,0,0,0,0,0,0)
 
-    h,w = dataloader.dataset.rgb.shape[1:]
-    tile_size = cfg.dataset.tile_size
-    stride = cfg.dataset.stride
+    h, w = dataloader.dataset.data.shape[1:]
+    tile_size = cfg.dataset.full.tile_size if hasattr(cfg.dataset.full, 'tile_size') else 256 # Fallback if not in config
+    # If the dataset is tiled via a manifest, we don't need a stride here, 
+    # but we need the output map size.
+
 
     map = torch.zeros((1, h, w), dtype=torch.float32, device=device)
     map_count = torch.zeros_like(map)
@@ -86,9 +88,11 @@ def evaluate_model(cfg, model, dataloader, device):
             outputs = model(images)["out"]
             preds = torch.sigmoid(outputs).cpu().numpy()
 
-            for out, (y, x) in zip(outputs.squeeze(1), coords):
-                map[:, y:y+tile_size, x:x+tile_size] += torch.sigmoid(out)
-                map_count[:, y:y+tile_size, x:x+tile_size] += 1
+            for out, (y, x) in zip(outputs, coords):
+                # out is (1, TH, TW), y and x are scalars
+                tile_size_h, tile_size_w = out.shape[-2:]
+                map[:, y:y+tile_size_h, x:x+tile_size_w] += torch.sigmoid(out)
+                map_count[:, y:y+tile_size_h, x:x+tile_size_w] += 1
 
     final_map = map / torch.clamp(map_count, min=1)
     final_map = final_map.squeeze().cpu().numpy()

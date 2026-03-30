@@ -10,9 +10,9 @@ from tqdm import tqdm
 
 def test_model(cfg, model, dataloader, device):
 
-    h,w = dataloader.dataset.rgb.shape[1:]
-    tile_size = cfg.dataset.tile_size
-    stride = cfg.dataset.stride
+    h,w = dataloader.dataset.data.shape[1:]
+    tile_size = 128
+    stride = 32
 
     map = torch.zeros((1, h, w), dtype=torch.float32, device=device)
     map_count = torch.zeros_like(map)

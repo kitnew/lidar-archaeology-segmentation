@@ -18,7 +18,7 @@ augmentations = v2.Compose([
     v2.RandomHorizontalFlip(),
     v2.RandomVerticalFlip(),
     RandomRotation([0, 90, 180, 270]),
-    v2.GaussianNoise(sigma=5e-4),
+    #v2.GaussianNoise(sigma=5e-4),
     v2.ToDtype(torch.float32, scale=True)
 ])
 
