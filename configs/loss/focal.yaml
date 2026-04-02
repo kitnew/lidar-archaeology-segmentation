@@ -1,0 +1,2 @@
+_target_: engine.losses.BinaryFocalLoss
+gamma: 2.0

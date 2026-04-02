@@ -1,0 +1,4 @@
+_target_: engine.losses.FocalDiceLoss
+gamma: 2.0
+focal_weight: 0.5
+dice_weight: 0.5

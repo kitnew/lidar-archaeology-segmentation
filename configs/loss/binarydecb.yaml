@@ -1,0 +1,5 @@
+_target_: engine.losses.BinaryDECBLoss
+mode: "focal"
+gamma: 2.0
+smooth: 1e-8
+normalize_weights: False

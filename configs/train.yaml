@@ -1,8 +1,8 @@
 defaults:
   - _self_
-  - dataset: test
+  - dataset: raw_dem_shadowed_2
   - model: deeplabv3/resnet101
-  - loss: binarytanimoto
+  - loss: bcedice
   - utils/classweights@utils.class_weights
   - paths: default
   - logger: default

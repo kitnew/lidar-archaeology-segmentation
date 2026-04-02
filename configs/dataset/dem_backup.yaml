@@ -1,0 +1,42 @@
+# DEM Dataset Configuration
+train:
+    _target_: datasets.dem_dataset.DEMTilesDataset
+    dem_path: "${paths.data_dir}/DEM0.80(4)_normalized_train.npz"
+    mask_path: "${paths.data_dir}/mounds_mask0.80(4)_shadowed_train.npy"
+    hillshade_path: null
+    slope_path: null
+    tile_size: 128
+    stride: 32
+    pos_only: true
+    tile_norm: false
+    norm_constant: 50.0
+    transforms: true
+    no_gt: false
+
+val:
+    _target_: datasets.dem_dataset.DEMTilesDataset
+    dem_path: "${paths.data_dir}/DEM0.80(4)_normalized_val.npz"
+    mask_path: "${paths.data_dir}/mounds_mask0.80(4)_shadowed_val.npy"
+    hillshade_path: null
+    slope_path: null
+    tile_size: 128
+    stride: 32
+    pos_only: false
+    tile_norm: false
+    norm_constant: 50.0
+    transforms: false
+    no_gt: false
+
+full:
+    _target_: datasets.dem_dataset.DEMTilesDataset
+    dem_path: "${paths.data_dir}/DEM21_normalized.npz"
+    mask_path: null
+    hillshade_path: null
+    slope_path: null
+    tile_size: 128
+    stride: 32
+    pos_only: false
+    tile_norm: false
+    norm_constant: 50.0
+    transforms: false
+    no_gt: true
