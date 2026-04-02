@@ -5,25 +5,9 @@ import logging
 import os
 from tqdm import tqdm
 
+from utils.metrics import optimal_threshold, get_stats_counts
+
 log = logging.getLogger(__name__)
-
-
-def get_stats_counts(pred_bin, gt, valid=None):
-    pred_bin = np.asarray(pred_bin, dtype=np.bool_).reshape(-1)
-    gt = np.asarray(gt, dtype=np.bool_).reshape(-1)
-
-    if valid is not None:
-        valid = np.asarray(valid, dtype=np.bool_).reshape(-1)
-        pred_bin = pred_bin[valid]
-        gt = gt[valid]
-
-    tp = np.sum(pred_bin & gt)
-    fp = np.sum(pred_bin & ~gt)
-    fn = np.sum(~pred_bin & gt)
-    tn = np.sum(~pred_bin & ~gt)
-
-    return int(tp), int(fp), int(fn), int(tn)
-
 
 def calculate_metrics_from_counts(tp, fp, fn, tn, eps=1e-10):
     iou_pos = tp / (tp + fp + fn + eps)
@@ -47,7 +31,6 @@ def calculate_metrics_from_counts(tp, fp, fn, tn, eps=1e-10):
         "specificity": specificity,
         "accuracy": accuracy,
     }
-
 
 class Trainer:
     def __init__(self, model, optimizer, criterion, device, threshold=0.5, logger=None, checkpoint_metric="iou_pos"):
@@ -118,7 +101,7 @@ class Trainer:
 
                 probs = torch.sigmoid(pred)
                 pred_bin = (probs > self.threshold).cpu().numpy().astype(bool)
-                gt_bin = masks.cpu().numpy().astype(bool)
+                gt_bin = masks.cpu().numpy().astype(np.float32)
                 valid_bin = valid.cpu().numpy().astype(bool)
 
                 if valid_bin.sum() == 0:
@@ -136,6 +119,10 @@ class Trainer:
 
         avg_loss = epoch_loss / max(processed_batches, 1)
         avg_metrics = calculate_metrics_from_counts(total_tp, total_fp, total_fn, total_tn)
+
+        best_t, _ = optimal_threshold(probs.cpu().numpy(), gt_bin, valid=valid_bin) if epoch <= 5 else (self.threshold, 0.5)
+        self.threshold = best_t
+        log.info(f"Threshold: {self.threshold}")
 
         return avg_loss, avg_metrics, (total_tp, total_fp, total_fn, total_tn)
 

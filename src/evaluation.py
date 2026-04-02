@@ -10,63 +10,12 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from dataclasses import dataclass
 
-@dataclass
-class Metrics:
-    iou: float
-    accuracy: float
-    precision: float
-    recall: float
-    f1_score: float
-    mor10r: float
-    specificity: float
+from utils.metrics import optimal_threshold, Metrics
 
 @dataclass
 class EvaluationConfig:
     pass
 
-def compute_metrics(pred_bin, gt):
-    tp = np.logical_and(pred_bin == 1, gt == 1).sum()
-    fp = np.logical_and(pred_bin == 1, gt == 0).sum()
-    fn = np.logical_and(pred_bin == 0, gt == 1).sum()
-    tn = np.logical_and(pred_bin == 0, gt == 0).sum()
-
-    eps = 1e-10
-
-    iou = tp / (tp + fp + fn + 1e-8)
-
-    acc = (tp + tn) / (tp + tn + fp + fn + 1e-8)
-    precision = tp / (tp + fp + eps)
-    recall = tp / (tp + fn + eps)
-    f1 = 2 * (precision * recall) / (precision + recall + eps)
-
-    mor10r = tp / (tp + fn + 10*fp + 1e-8)
-    specificity = tn / (tn + fp + eps)
-
-    return Metrics(iou, acc, precision, recall, f1, mor10r, specificity)
-
-def optimal_threshold(probs, targets, valid=None, metric='iou'):
-    best_t, best_iou, best_acc, best_precision, best_recall, best_f1, best_mor10r, best_specificity = 0, 0, 0, 0, 0, 0, 0, 0
-    thresholds = np.linspace(0.5, 0.999, 100)
-
-    for t in thresholds:
-        pred_bin = (probs > t).astype(bool)
-        metrics = compute_metrics(pred_bin, targets)
-        if metric == 'iou':
-            if metrics.iou > best_iou:
-                best_t, best_iou, best_acc, best_precision, best_recall, best_f1, best_mor10r, best_specificity = t, metrics.iou, metrics.accuracy, metrics.precision, metrics.recall, metrics.f1_score, metrics.mor10r, metrics.specificity
-        elif metric == 'f1':
-            if metrics.f1_score > best_f1:
-                best_t, best_iou, best_acc, best_precision, best_recall, best_f1, best_mor10r, best_specificity = t, metrics.iou, metrics.accuracy, metrics.precision, metrics.recall, metrics.f1_score, metrics.mor10r, metrics.specificity
-        elif metric == 'mor10r':
-            if metrics.mor10r > best_mor10r:
-                best_t, best_iou, best_acc, best_precision, best_recall, best_f1, best_mor10r, best_specificity = t, metrics.iou, metrics.accuracy, metrics.precision, metrics.recall, metrics.f1_score, metrics.mor10r, metrics.specificity
-        elif metric == 'specificity':
-            if metrics.specificity > best_specificity:
-                best_t, best_iou, best_acc, best_precision, best_recall, best_f1, best_mor10r, best_specificity = t, metrics.iou, metrics.accuracy, metrics.precision, metrics.recall, metrics.f1_score, metrics.mor10r, metrics.specificity
-        else:
-            raise ValueError(f"Unknown metric: {metric}")
-
-    return best_t, Metrics(best_iou, best_acc, best_precision, best_recall, best_f1, best_mor10r, best_specificity)
 
 def evaluate_model(cfg, model, dataloader, device):
     metrics = Metrics(0,0,0,0,0,0,0)

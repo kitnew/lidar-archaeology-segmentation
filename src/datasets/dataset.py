@@ -3,6 +3,25 @@ from torch.utils.data import Dataset
 import numpy as np
 import pandas as pd
 from utils.channel_stats import compute_channel_stats
+from torchvision.transforms import v2
+import random
+
+class RandomRotation(torch.nn.Module):
+    def __init__(self, degrees: list[int] = [0, 90, 180, 270]):
+        super().__init__()
+        self.degrees = degrees
+
+    def forward(self, inpt):
+        k = random.choice(self.degrees) // 90
+        return torch.rot90(inpt, k=k, dims=(-2, -1))
+
+augmentations = v2.Compose([
+    v2.RandomHorizontalFlip(),
+    v2.RandomVerticalFlip(),
+    RandomRotation([0, 90, 180, 270]),
+    #v2.GaussianNoise(sigma=5e-4),
+    v2.ToDtype(torch.float32, scale=True)
+])
 
 class SegmentationDataset(Dataset):
     def __init__(
@@ -34,8 +53,13 @@ class SegmentationDataset(Dataset):
         data_file = np.load(data_path, allow_pickle=True)
 
         self.data = data_file["data"]      # (C, H, W)
-        self.mask = data_file["mask"]      # (H, W)
         self.valid = data_file["valid"]    # (H, W)
+        
+        ## use soft mask for training, hard mask for validation
+        if subset == "train" and data_file["soft_mask"] is not None:
+            self.mask = data_file["soft_mask"].astype(np.float32)      # (H, W)
+        else:
+            self.mask = data_file["mask"].astype(np.uint8)      # (H, W)
 
         # --- проверка формы ---
         assert self.data.ndim == 3, "data must be (C, H, W)"
@@ -77,7 +101,7 @@ class SegmentationDataset(Dataset):
 
         # --- transforms ---
         if self.transforms:
-            data_tile, mask_tile = self.transforms(data_tile, mask_tile)
+            data_tile, mask_tile, valid_tile = self.transforms(data_tile, mask_tile, valid_tile)
 
         return {
             "data": torch.from_numpy(data_tile),   # (C, H, W)
