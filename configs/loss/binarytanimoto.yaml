@@ -1,3 +1,2 @@
-_target_: engine.losses.BinaryWeightedTanimotoWithComplementLoss
-w_pos: ${utils.class_weights.V.w_pos}
-w_neg: ${utils.class_weights.V.w_neg}
+_target_: engine.losses.BinaryTanimotoWithComplementLoss
+smooth: 1e-6

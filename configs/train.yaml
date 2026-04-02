@@ -3,7 +3,6 @@ defaults:
   - dataset: raw_dem_shadowed_2
   - model: deeplabv3/resnet101
   - loss: bcedice
-  - utils/classweights@utils.class_weights
   - paths: default
   - logger: default
 

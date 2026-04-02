@@ -106,31 +106,19 @@ class BCEDiceLoss(nn.Module):
 
         return self.bce_weight * bce + self.dice_weight * dice
 
-
-class BinaryWeightedTanimotoWithComplementLoss(nn.Module):
+class BinaryTanimotoWithComplementLoss(nn.Module):
     """
-    Binary weighted Tanimoto with complement and internal valid masking.
+    Canonical binary Tanimoto loss with complement.
+
+    Based on the binary formulation:
+        score = (T(p, t) + T(1-p, 1-t)) / 2
+        loss  = 1 - score
 
     Interface:
         forward(logits, targets, valid=None) -> scalar
     """
-    def __init__(
-        self,
-        w_pos: float,
-        w_neg: float,
-        smooth: float = 1e-6,
-    ):
+    def __init__(self, smooth: float = 1e-6):
         super().__init__()
-
-        w_pos = float(w_pos)
-        w_neg = float(w_neg)
-
-        s = w_pos + w_neg
-        if s <= 0:
-            raise ValueError("w_pos + w_neg must be > 0")
-
-        self.w_pos = w_pos / s
-        self.w_neg = w_neg / s
         self.smooth = float(smooth)
 
     def forward(
@@ -165,7 +153,7 @@ class BinaryWeightedTanimotoWithComplementLoss(nn.Module):
         t_pos = tanimoto(p, t)
         t_neg = tanimoto(1.0 - p, 1.0 - t)
 
-        score = self.w_pos * t_pos + self.w_neg * t_neg
+        score = 0.5 * (t_pos + t_neg)
         return (1.0 - score).mean()
 
 class BinaryFocalLoss(nn.Module):
