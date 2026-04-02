@@ -56,7 +56,10 @@ class SegmentationDataset(Dataset):
         self.valid = data_file["valid"]    # (H, W)
         
         ## use soft mask for training, hard mask for validation
-        if subset == "train" and data_file["soft_mask"] is not None:
+        if (subset == "train" and "soft_mask" in data_file 
+            and data_file["soft_mask"] is not None 
+            and getattr(data_file["soft_mask"], "ndim", 0) >= 2):
+            
             self.mask = data_file["soft_mask"].astype(np.float32)      # (H, W)
         else:
             self.mask = data_file["mask"].astype(np.uint8)      # (H, W)
