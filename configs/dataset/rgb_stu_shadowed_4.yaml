@@ -1,0 +1,15 @@
+train:
+  _target_: datasets.dataset.SegmentationDataset
+  data_path: "${paths.data_dir}/RGB(STU)_shadowed_4.npz"
+  manifest_path: "${paths.data_dir}/split4_manifest.parquet"
+  subset: "train"
+  pos_only: True
+  min_valid_fraction: 0.5
+
+val:
+  _target_: datasets.dataset.SegmentationDataset
+  data_path: "${paths.data_dir}/RGB(STU)_shadowed_4.npz"
+  manifest_path: "${paths.data_dir}/split4_manifest.parquet"
+  subset: "val"
+  pos_only: False
+  min_valid_fraction: 0.5

@@ -1,9 +1,0 @@
-# RGB Dataset Configuration
-_target_: datasets.rgb_dataset.RGBTilesDataset
-rgb_path: "${paths.data_dir}/RGB21_normalized.npz"
-mask_path: null
-tile_size: 128
-stride: 32
-pos_only: false
-transforms: false
-no_gt: true
