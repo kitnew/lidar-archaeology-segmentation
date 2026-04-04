@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - dataset: rgb_stu_shadowed_2
+  - dataset: sps_10
   - model: deeplabv3/resnet101
   - loss: bcedice
   - paths: default
