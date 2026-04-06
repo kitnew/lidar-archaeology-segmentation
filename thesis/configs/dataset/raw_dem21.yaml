@@ -1,0 +1,5 @@
+_target_: datasets.dataset.SegmentationDataset
+data_path: "${paths.data_dir}/DEM_raw_shadowed.npz"
+manifest_path: "${paths.data_dir}/full_map_manifest.parquet"
+subset: "full"
+min_valid_fraction: 0.0

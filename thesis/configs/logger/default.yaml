@@ -1,0 +1,6 @@
+# Logger Configuration
+use_wandb: true
+project: "lidar-archaeology"
+name: "experiment_${now:%Y-%m-%d_%H-%M-%S}"
+group: "DEM"
+tags: ["deeplabv3", "DEM", "resnet101", "untrained"]

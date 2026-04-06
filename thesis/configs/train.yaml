@@ -1,0 +1,30 @@
+defaults:
+  - _self_
+  - dataset: sps(znorm)_10
+  - model: deeplabv3/resnet101
+  - loss: tanimoto
+  - paths: default
+  - logger: default
+
+# Training parameters
+epochs: 25
+batch_size: 16
+num_workers: 8
+learning_rate: 1e-4
+weight_decay: 0.0
+threshold: 0.5
+checkpoint_metric: iou_pos
+
+# Experiment level settings
+seed: 42
+
+# Optimizer
+optimizer:
+  _target_: torch.optim.Adam
+  lr: ${learning_rate}
+  weight_decay: ${weight_decay}
+
+# Hydra settings
+hydra:
+  run:
+    dir: ${paths.output_dir}/${now:%Y-%m-%d}/${now:%H-%M-%S}

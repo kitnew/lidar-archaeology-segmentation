@@ -1,0 +1,4 @@
+_target_: models.deeplab_v3.create_model
+backbone: "resnet50"
+pretrained: false
+eval: false
