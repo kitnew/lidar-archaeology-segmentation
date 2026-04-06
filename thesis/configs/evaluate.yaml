@@ -6,7 +6,7 @@ defaults:
 
 # Inference settings
 checkpoint_path: null
-batch_size: 16
+batch_size: 64
 num_workers: 8
 
 # Hydra overrides

@@ -1,8 +1,8 @@
 defaults:
   - _self_
-  - dataset: sps_10
+  - dataset: sps(znorm)_10
   - model: deeplabv3/resnet101
-  - loss: bcedice
+  - loss: tanimoto
   - paths: default
   - logger: default
 
