@@ -120,11 +120,7 @@ class Trainer:
         avg_loss = epoch_loss / max(processed_batches, 1)
         avg_metrics = calculate_metrics_from_counts(total_tp, total_fp, total_fn, total_tn)
 
-        best_t, _ = optimal_threshold(probs.cpu().numpy(), gt_bin, valid=valid_bin)
-        self.threshold = best_t
-        log.info(f"Threshold: {self.threshold}")
-
-        return avg_loss, avg_metrics, (total_tp, total_fp, total_fn, total_tn), best_t
+        return avg_loss, avg_metrics, (total_tp, total_fp, total_fn, total_tn)
 
     def fit(self, train_loader, val_loader, epochs, save_dir):
         self.model.train()
@@ -138,7 +134,7 @@ class Trainer:
             log.info(f"--- Epoch {epoch}/{epochs} ---")
 
             train_loss = self.train_epoch(train_loader, epoch)
-            val_loss, val_metrics, val_counts, val_threshold = self.validate(val_loader, epoch)
+            val_loss, val_metrics, val_counts = self.validate(val_loader, epoch)
             total_tp, total_fp, total_fn, total_tn = val_counts
 
             log.info(f"Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f}")
@@ -147,8 +143,7 @@ class Trainer:
             log_dict = {
                 "train/epoch_loss": train_loss,
                 "val/epoch_loss": val_loss,
-                "epoch": epoch,
-                "val/threshold": val_threshold,
+                "epoch": epoch
             }
 
             for k, v in val_metrics.items():
@@ -168,8 +163,7 @@ class Trainer:
                         "model_state_dict": self.model.state_dict(),
                         "optimizer_state_dict": self.optimizer.state_dict(),
                         "val_iou_pos": best_val_iou,
-                        "val_f1": best_val_f1,
-                        "threshold": self.threshold,
+                        "val_f1": best_val_f1
                     },
                     ckpt_path,
                 )
