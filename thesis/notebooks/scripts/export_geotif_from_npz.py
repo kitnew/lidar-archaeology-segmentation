@@ -1,71 +1,65 @@
-from PIL import Image
 import numpy as np
 from scipy.ndimage import uniform_filter
 import rasterio
 import copy
+import os
 
 origPath = [
-    '/home/nc225mj/lidar-archaeology-segmentation/data/georef/DEM.tif',
+    "/home/nc225mj/lidar-archaeology-segmentation/data/georef/Hradisko_Tribec_DEM25cm.tif"
 ]
-preds = [
-    "/home/nc225mj/lidar-archaeology-segmentation/outputs/full_prediction_map.npy",
+preds_paths = [
+    "/home/nc225mj/lidar-archaeology-segmentation/outputs/inference/2026-04-20/12-22-44/full_prediction_map.npy"
 ]
 b_threshold = [
-    0.5,
+    0.208
 ]
 
-for path, b_th, orig_path in zip(preds, b_threshold, origPath):
-    preds = np.load(path)
+for path, b_th, orig_path in zip(preds_paths, b_threshold, origPath):
+    # Load raw predictions (after sigmoid)
+    raw_preds = np.load(path)
+    
+    # Apply smoothing
+    smoothed = uniform_filter(raw_preds, size=5)
 
-    smoothed = uniform_filter(preds, size=5)
+    # 1. Prepare Binary Map
+    binary_data = (smoothed > b_th).astype(np.uint8)
 
-    # binarize
-    preds = (smoothed > b_th).astype(np.uint8)
+    # 2. Prepare Probability Map (smoothed raw values)
+    prob_data = smoothed.astype(np.float32)
 
-    # save to uint8
-    img = (preds * 255).astype(np.uint8)
-
-    #Image.fromarray(img).save("DEM21_opt_map.png")
-
-    #pngPath = '/home/nikitachernysh/storage/Projects/lidar-archaeology-segmentation/notebooks/0.80(5)(Pretrained)_DEM21_opt_map.npz'
-
-    trgtPath = path[:-4] + '.tif'
-
-    from PIL import Image
-    Image.MAX_IMAGE_PIXELS = None
-    data = img
-
-    data = (data>0).astype(np.uint8)
-
-    selection = [0, 0, data.shape[1], data.shape[0]]
-
+    # Georeferencing setup
     orig = rasterio.open(orig_path)
-    bounds = orig.bounds
-    transform = orig.transform
     crs = orig.crs
+    transform = orig.transform
+    
+    # Define target paths
+    base_name = os.path.splitext(path)[0]
+    binary_trgtPath = base_name + '_binary.tif'
+    prob_trgtPath = base_name + '_prob.tif'
 
-    origTransform = copy.deepcopy(transform)
+    # Common metadata for writing
+    meta = {
+        'driver': 'GTiff',
+        'height': binary_data.shape[0],
+        'width': binary_data.shape[1],
+        'count': 1,
+        'crs': crs,
+        'transform': transform,
+        'compress': 'lzw'
+    }
 
-    [left,top] = orig.transform * (selection[0],selection[1])
-    [right,bottom] = orig.transform * (selection[2],selection[3])
+    # Save Binary Map
+    binary_meta = meta.copy()
+    binary_meta.update(dtype='uint8', nodata=255)
+    with rasterio.open(binary_trgtPath, 'w', **binary_meta) as dst:
+        dst.write(binary_data, 1)
+    print(f"Saved binary map to: {binary_trgtPath}")
 
-    newTransform = rasterio.transform.Affine.translation(left, top)\
-        * rasterio.transform.Affine.scale(origTransform.a, origTransform.e)
+    # Save Probability Map
+    prob_meta = meta.copy()
+    prob_meta.update(dtype='float32', nodata=-1.0) # Using -1.0 for float nodata
+    with rasterio.open(prob_trgtPath, 'w', **prob_meta) as dst:
+        dst.write(prob_data, 1)
+    print(f"Saved probability map to: {prob_trgtPath}")
 
-    trgt = rasterio.open(
-            trgtPath,
-            'w',
-            driver='GTiff',
-            height=data.shape[0],
-            width=data.shape[1],
-            count=1,
-            dtype=data.dtype,
-            crs=crs,
-            transform=newTransform,
-            nodata = 255
-            )
-
-    trgt.write(data, 1)
-
-    trgt.close()
     orig.close()
