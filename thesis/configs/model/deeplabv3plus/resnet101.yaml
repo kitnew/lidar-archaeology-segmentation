@@ -1,0 +1,4 @@
+_target_: models.deeplab_v3_plus.create_model
+backbone: "resnet101"
+pretrained: false
+eval: false
