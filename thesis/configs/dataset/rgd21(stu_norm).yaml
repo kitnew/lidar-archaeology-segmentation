@@ -1,0 +1,6 @@
+_target_: datasets.dataset.SegmentationDataset
+data_path: "${paths.data_dir}/RGDem21(STU_norm).npz"
+manifest_path: "${paths.data_dir}/full_map_manifest.parquet"
+subset: "full"
+pos_only: False
+min_valid_fraction: 0.0

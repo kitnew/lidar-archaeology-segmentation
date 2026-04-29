@@ -1,0 +1,28 @@
+train:
+  _target_: datasets.dataset.TerassesSegmentationDataset
+  data_path:
+    ladzany: "${paths.data_dir}/terrases/DEM(ladzany)_znorm_1.npz"
+    sasovske: "${paths.data_dir}/terrases/DEM(sasovske)_znorm_1.npz"
+    sitno: "${paths.data_dir}/terrases/DEM(sitno)_znorm_1.npz"
+    tribec: "${paths.data_dir}/terrases/DEM(tribec)_znorm.npz"
+  manifest_path: "${paths.data_dir}/terrases/master_manifest.parquet"
+  subset: "train"
+  held_out_location: "sitno"
+  pos_only: false
+  min_valid_fraction: 0.0
+  use_soft_mask: false
+  neg_to_pos_ratio: 2.0
+
+val:
+  _target_: datasets.dataset.TerassesSegmentationDataset
+  data_path:
+    ladzany: "${paths.data_dir}/terrases/DEM(ladzany)_znorm_1.npz"
+    sasovske: "${paths.data_dir}/terrases/DEM(sasovske)_znorm_1.npz"
+    sitno: "${paths.data_dir}/terrases/DEM(sitno)_znorm_1.npz"
+    tribec: "${paths.data_dir}/terrases/DEM(tribec)_znorm.npz"
+  manifest_path: "${paths.data_dir}/terrases/master_manifest.parquet"
+  subset: "val"
+  held_out_location: "sitno"
+  pos_only: false
+  min_valid_fraction: 0.0
+  use_soft_mask: false

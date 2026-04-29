@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - dataset: test
+  - dataset: terraces_aniso_ladzany_128_32
   - model: deeplabv3/resnet101
   - paths: default
 

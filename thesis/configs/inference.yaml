@@ -1,13 +1,13 @@
 defaults:
   - _self_
-  - dataset: test21
+  - dataset: rgb21_stu
   - model: deeplabv3/resnet101
   - paths: default
 
 # Inference settings
 checkpoint_path: null
-output_path: "${paths.output_dir}/full_prediction_map.npy"
-threshold: 0.5
+output_path: "${paths.output_dir}/inference/${now:%Y-%m-%d}/${now:%H-%M-%S}/full_prediction_map.npy"
+threshold: 0.4633
 batch_size: 64
 num_workers: 8
 

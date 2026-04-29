@@ -1,0 +1,28 @@
+train:
+  _target_: datasets.dataset.TerassesSegmentationDataset
+  data_path:
+    ladzany: "${paths.data_dir}/terrases/ANISO(ladzany)_2.npz"
+    sasovske: "${paths.data_dir}/terrases/ANISO(sasovske)_2.npz"
+    sitno: "${paths.data_dir}/terrases/ANISO(sitno)_2.npz"
+    tribec: "${paths.data_dir}/terrases/ANISO(tribec).npz"
+  manifest_path: "${paths.data_dir}/terrases/1024_256_manifest.parquet"
+  subset: "train"
+  held_out_location: "ladzany"
+  pos_only: false
+  min_valid_fraction: 0.0
+  use_soft_mask: false
+  neg_to_pos_ratio: 1.0
+
+val:
+  _target_: datasets.dataset.TerassesSegmentationDataset
+  data_path:
+    ladzany: "${paths.data_dir}/terrases/ANISO(ladzany)_2.npz"
+    sasovske: "${paths.data_dir}/terrases/ANISO(sasovske)_2.npz"
+    sitno: "${paths.data_dir}/terrases/ANISO(sitno)_2.npz"
+    tribec: "${paths.data_dir}/terrases/ANISO(tribec).npz"
+  manifest_path: "${paths.data_dir}/terrases/1024_256_manifest.parquet"
+  subset: "val"
+  held_out_location: "ladzany"
+  pos_only: false
+  min_valid_fraction: 0.0
+  use_soft_mask: false

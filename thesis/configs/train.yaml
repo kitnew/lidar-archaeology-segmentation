@@ -1,16 +1,16 @@
 defaults:
   - _self_
-  - dataset: sps(znorm)_10
+  - dataset: terraces_aniso_ladzany
   - model: deeplabv3/resnet101
-  - loss: tanimoto
+  - loss: bcedice
   - paths: default
   - logger: default
 
 # Training parameters
-epochs: 25
+epochs: 100
 batch_size: 16
 num_workers: 8
-learning_rate: 1e-4
+learning_rate: 1e-5
 weight_decay: 0.0
 threshold: 0.5
 checkpoint_metric: iou_pos

@@ -1,0 +1,13 @@
+_target_: datasets.dataset.TerassesSegmentationDataset
+data_path:
+  ladzany: "${paths.data_dir}/terrases/DEM(ladzany)_minmaxnorm_1.npz"
+  sasovske: "${paths.data_dir}/terrases/DEM(sasovske)_minmaxnorm_1.npz"
+  sitno: "${paths.data_dir}/terrases/DEM(sitno)_minmaxnorm_1.npz"
+  tribec: "${paths.data_dir}/terrases/DEM(tribec)_minmaxnorm.npz"
+manifest_path: "${paths.data_dir}/terrases/master_manifest.parquet"
+subset: "full"
+held_out_location: "sitno"
+full_location: "tribec"
+pos_only: false
+min_valid_fraction: 0.0
+use_soft_mask: false
