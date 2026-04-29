@@ -12,4 +12,4 @@
 source /home/nc225mj/lidar-archaeology-segmentation/.venv/bin/activate
 
 # Run script
-python -m notebooks.scripts.from_tiff_to_npz
+python -m notebooks.scripts.export_terrases
