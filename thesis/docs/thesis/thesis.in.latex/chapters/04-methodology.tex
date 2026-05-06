@@ -1,0 +1,185 @@
+% !TEX root = ../thesis.tex
+
+\chapter{Materials and Methodology}\label{ch:methodology}
+\section{Overview of the Proposed Workflow}
+
+\section{Study Areas and Data Sources}
+We have two datasets available, which serve as a solid foundation for various experiments. Furthermore, their similarity in format and differences in morphology will allow us to accurately assess the transferability of the methodology from one region to another. As part of this thesis, similar experiments will be conducted on both datasets using the same training and validation methodology to ensure the validity of the comparison.
+
+\subsection{Maya LiDAR Data}
+The dataset of Mayan archaeological sites is of great importance to this thesis.
+It was created as part of the large-scale Pacunam LiDAR Initiative (PLI), which in 2016 conducted aerial surveying of the Maya Biosphere Reserve in the department of Petén, Guatemala. The region around the ancient city of Uaxactún (the PARU\footnote{Proyecto Arqueológico Regional Uaxactún} research zone) was selected for the study.
+
+The region was scanned using a Teledyne Optech Titan MW airborne laser scanner at an altitude of approximately 650 meters above ground level. Due to dense vegetation, the point density at ground level ranged from approximately 1.1 to 5.3 points per square meter, while the nominal pulse density was 15 pulses per square meter. Later, all reflections except the last one—which represented the ground surface—were removed from the point cloud. This made it possible to construct a Digital Elevation Model (DEM) and reconstruct the bare micro-relief with a resolution of 1 m per pixel.
+
+Mapping the scanned area took several years of painstaking work by a team of experts from the PARU. The archaeologists identified the features themselves by analyzing visualizations of the LiDAR data and drawing on their field experience. Archaeological features were annotated as georeferenced vector polygons in GIS systems. Ultimately, the annotation results were verified and partially confirmed during on-site field verifications. Experts noted that, although the LiDAR scan annotations were sufficiently accurate, albeit conservative, on-site verification revealed 15\% more structures than were visible in the scans.
+
+The annotation resulted in two main groups of archaeological structures:
+\begin{enumerate}
+    \item Structures—areas of any construction activity (e.g., buildings and platforms)
+    \item Mounds—only the remains of former buildings (burial mounds) that stand out quite clearly from the natural terrain.
+\end{enumerate}
+
+Later, the same group published an expanded scan of the area, covering more than 2,000 square kilometers of land.
+%MORE ABOUT THE EXPANDED DATASET HERE%
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\textwidth]{figures/DEM21_Full_Map.jpg}
+	\caption{Overview of the available LiDAR data that will be used for research}
+	\label{fig:maya_map_overview}
+\end{figure}
+
+The full scope of the available data that will be used for research in this thesis is shown in Figure \ref{fig:maya_map_overview}. Now let's take a closer look at the data itself.
+
+Within the designated area, archaeological sites are divided into three groups based on size:
+\begin{itemize}
+    \item \textbf{Small structures} — covering up to 50 square meters
+    \item \textbf{Medium-sized structures} — covering between 50 and 200 square meters
+    \item \textbf{Large structures} — complex structures covering an area of 200 square meters or more, formed by a combination of platforms and structures.
+\end{itemize}
+
+\begin{figure}[ht!]
+	\centering
+	\includegraphics[width=\textwidth]{figures/Maya_Big_Medium_Small_Buildings.jpg}
+	\caption{Visualization of the structures by size: a) Large structures (\textgreater{} 200 m²), b) Medium-sized structures (50-200 m²), c) Small structures (\textless{} 50 m²)}
+	\label{fig:maya_structures_visualization}
+\end{figure}
+
+\begin{table}[ht!]
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+Size   & Count         & total\_area\_m2 & \% of All Objects & \% of Total Map Area \\ \hline
+Small  & 1491          & 47756           & 36.15             & 0.028537             \\ \hline
+Medium & \textbf{2164} & 211519          & 52.47             & 0.126395             \\ \hline
+Large  & 469           & 192608          & 11.37             & 0.115094             \\ \hline
+\end{tabular}
+\caption{Distribution of archaeological structures by size categories and their coverage within the mapped area.}
+\label{tab:maya_structures_size}
+\end{table}
+
+\begin{figure}[ht!]
+	\centering
+	\includegraphics[width=\textwidth]{figures/maya_objects_distribution.png}
+	\caption{Histogram of the distribution of archaeological structures by size categories within the mapped area.}
+	\label{fig:maya_structures_histogram}
+\end{figure}
+
+Figure~\ref{fig:maya_structures_visualization} illustrates the appearance and size of the structures in detail.
+A total of 4,124 structures of various sizes have been identified in the mapped area. Details of the structures by size are shown in Table~\ref{tab:maya_structures_size}. Based on the histogram in Figure~\ref{fig:maya_structures_histogram}, it is easy to see that medium-sized structures are the most numerous, accounting for slightly more than 50\% of all structures.
+
+\subsection{Slovak LiDAR Data}
+
+The Slovak LiDAR data used in this thesis were provided by the Slovak University of Technology in Bratislava, Faculty of Civil Engineering (STU, StF), in cooperation with the Department of Archaeology of the Monuments Board of the Slovak Republic. This dataset represents a second, independent geographical and archaeological context in the thesis, complementing the Maya data from Guatemala. While the Guatemalan data focus mainly on ancient Maya buildings and construction activity, the Slovak data are oriented toward the detection of archaeological terrace systems in Central European terrain.
+
+The terrace scan data from Slovakia provide access to four locations: Ladzany, Sitno, Sasovske Podhradie, and Tribec. All locations except Tribec include reference annotations in the form of vector polylines representing the central lines of the terraces. The raster resolution of 0.25 m per pixel provides a substantially higher level of spatial detail than the Guatemalan DEM, which has a resolution of 1 m per pixel. This higher resolution is particularly important for terrace detection, since terraces are narrow, elongated micro-relief structures whose visual expression may be significantly affected by raster resolution.
+
+\begin{figure}[p]
+    \centering
+
+    \begin{minipage}[c][0.76\textheight][c]{0.39\textwidth}
+        \centering
+        \includegraphics[
+            width=\linewidth,
+            height=0.62\textheight,
+            keepaspectratio
+        ]{figures/Ladzany_Full_Map.jpg}
+    \end{minipage}
+    \hspace{4mm}
+    \begin{minipage}[c][0.76\textheight][c]{0.52\textwidth}
+        \centering
+        \includegraphics[
+            width=\linewidth,
+            height=0.22\textheight,
+            keepaspectratio
+        ]{figures/Sasovske_Full_Map.jpg}
+
+        \vspace{2mm}
+
+        \includegraphics[
+            width=\linewidth,
+            height=0.22\textheight,
+            keepaspectratio
+        ]{figures/Sitno_Full_Map.jpg}
+
+        \vspace{2mm}
+
+        \includegraphics[
+            width=\linewidth,
+            height=0.22\textheight,
+            keepaspectratio
+        ]{figures/Tribec_Full_Map.jpg}
+    \end{minipage}
+
+    \caption{Overview of the available Slovak LiDAR datasets used in the research.}
+    \label{fig:slovak_lidar_data_views}
+\end{figure}
+
+\section{Reference Data and Label Preparation}
+
+The preparation of annotations has a direct impact on the quality of segmentation and the stability of model training. Many authors note the subjectivity of object annotations by experts, which is why archaeological annotations can often be uncertain and conservative, or conversely, contain oversimplifications and biases. In addition, a significant problem is the so-called \textit{Malerization} — the tendency of archaeologists, when annotating by hand, to transform structures partially destroyed by time into idealized rectangles or geometrically regular contours, which creates noise and blurs the connection between the actual remaining boundaries of the archaeological structure and the ideal segmentation mask. As a result, the model begins to learn not only from real archaeological patterns but also from the imperfections of the annotation process.
+
+The LiDAR data for the Guatemala region, on the other hand, underwent years of manual annotation by various experts, field research and verification, as well as some preprocessing steps, such as Opening \& Closing. As a result, the outcome of this painstaking annotation can be considered of sufficiently high quality, so no further changes will be applied to them.
+
+Despite this, Bundzel proposed the concept of \textit{confidence shadows} in his work, which aims to prevent the influence of malerization on the hard boundaries of objects in the segmentation mask. Bundzel himself describes it as a gradual fading of labels from 1 to 0 within clearly defined boundaries around each object. To test this concept, so-called soft masks were prepared for each object segmentation mask in regions of Guatemala and Slovakia.
+
+Due to the high resolution of the terrace data from Slovakia and the extremely thin vector polylines describing the center of the terraces, these labels must be preprocessed for training. The terraces themselves can vary in width and depth, but a thin line of one pixel is extremely sparse at a resolution of 0.25 square meters per pixel, which will make it difficult for the neural network to learn these labels. To facilitate the training process, the labels were buffered and expanded by 2 m (8 px) on each side of the central rasterized polyline as a compromise between the actual possible size of the terraces and the expansion of the labeled area. The endpoints of the rasterized polylines were rounded with 5 mirror segments on each side.
+Soft masks were created based on the buffered terrace lines with a width of 2 meters (8px) on each side, just as in the case of the Maya data.
+
+\section{LiDAR-Derived Input Representations}
+
+Many authors emphasize the need to create derived DEM visualizations because, although the DEM provides data on absolute elevation changes, it can easily obscure local micro-relief variations even at high resolutions due to the scale of the elevations. To prevent this and, conversely, to increase the distinctiveness of object boundaries, derived visualizations are created. They can be divided into two groups: derived elevation data and raster representations.
+Some basic derivatives were described in ANALYSIS. Of course, taken individually, while they provide a new perspective on elevation data, they are not very informative on their own. Some authors argue for the need to combine different derivatives to improve contextual correlations in the data. A striking example of such a combination is the SPS (Slope, Positive Openness, Sky-view Factor) composite representation. It is the least dependent on the angle of the sun\'s incidence, unlike, for example, basic hillshading. 
+Raster representations, on the other hand, although they do not provide absolute elevation context and consist of a set of various raster filters, they best highlight visual elevation changes and object boundaries, making them very convenient for the visual identification of archaeological structures and facilitating the transfer learning process, since most popular backbone models have pre-trained weights on raster images, such as ImageNet and COCO. 
+
+\section{Dataset Construction}
+
+To ensure the reproducibility and consistency of the pipeline, all derived datasets were created using the same methodology, with no changes to the storage or usage architecture. The only thing that changed was the data itself—either raster representations or derived elevation data.
+
+The dataset itself consists of input data, a binary segmentation mask, a soft mask if needed, and a valid pixel mask.
+Input data is always converted to a 3-channel format, which ensures sufficient data volume for elevation data, derived visualizations, and raster representations, and also allows for the controlled combination of different channels to supplement contextual information.
+
+For DEM data and their derived visualizations, normalization was performed using z-scores. Using the valid pixel mask, each input channel was brought to the same scale without including areas of missing data, which could have caused incorrect normalization, suppression of locality, and scale shifts.
+
+Raster representations already have a unified scale, so normalizing them is unnecessary. However, when combining raster representations with derived elevation data, normalization is a mandatory step to eliminate differences in the range of digital data values, so the z-score was used. 
+
+Segmentation binary masks and soft change masks were not modified and were saved as two separate matrices.
+
+After preprocessing the input data, invalid pixels not included in the valid mask were assigned a value of 0.
+
+\section{Model and Training Methodology}
+
+Within the scope of this thesis, DeepLabV3 and DeepLabV3+ were selected as the deep learning segmentation models. The reason for this was the models’ remarkable complexity and adaptability to archaeological tasks due to their architectural design. %% A LITTLE MORE ABOUT THE ARCHITECTURE AND WHY THESE MODELS, RATHER THAN U-Net OR R-CNN.
+
+Due to the enormous size of the input data, it cannot be fully loaded into the input layer of the selected neural networks. That is why the authors use tiling or a sliding window to create samples that can be loaded into the model. Furthermore, manually dividing the study area into patches and sorting them into training and validation sets would be time-consuming. To ensure the reproducibility of the workflow, manifests were created and used.
+Since the valid pixel mask and the segmentation mask do not differ depending on the representation of the input data, this allowed us to develop a segmentation scheme that divides the entire dataset into patches of the required size without directly affecting the dataset. As a result, the manifest stores only spatial coordinate information depending on the dataset, and allows samples to be obtained solely for training and solely for validation. 
+Due to the resolution characteristics of the source data, 128×128-pixel patches were created for the Maya region and 256×256-pixel patches for the Slovak Terraces region.
+
+Due to tiling limitations, predictions at patch boundaries lack contextual information, which can lead to artifacts. To address this issue, patch intersections were introduced at a quarter of the tile size, i.e., 32 pixels for the Maya region and 64 for the Slovak Terraces region. This means that each pixel at the patch boundaries will be processed 4 times, taking into account different contextual information. The aggregation of the intersection of predictions will be explained later.
+
+For the Maya dataset, five such manifests were created, each of which follows the concept of cross-validation. That is, the entire training dataset was divided into five equal parts, with one part used for validation and the other four for training. The zones designated for validation, starting from the south, have a 64-pixel buffer at the boundaries where they intersect with the training data. This step ensures there is no data leak between the training and validation samples, which prevents the validation metrics from being inflated. Only tiles containing at least one positive pixel were used for training. The entire relevant area was used for validation.
+
+For the Slovak Terraces dataset, the same manifest was used, but with a different strategy. Since we have three labeled geographic zones located at a certain distance from one another, the LOOCV strategy was applied. As a result, we obtained three manifests that also resemble cross-validation, in which two separate locations are entirely dedicated to training, while the third serves for validation. Data leakage is impossible in this case due to the absence of overlap between the data sets.
+
+The existing problem of a catastrophic class imbalance is prompting researchers to develop new loss functions or combine existing ones in order to mitigate the impact of the fact that most pixels are occupied by the surface, thereby facilitating the study of the micro-relief characteristics of archaeological sites.
+
+To expand the training dataset and prevent overfitting, simple geometric augmentations were used:
+1. Random horizontal flipping.
+2. Random vertical flipping.
+3. Random rotation by 0, 90, 180, or 270 degrees.
+Simple geometric augmentations help artificially expand the dataset without distorting the micro-relief and avoid potential elevation artifacts.
+
+\section{Inference and Post-processing Methodology}
+
+Final validation is performed using existing annotation manifests. To ensure the most transparent view of the results, metrics are calculated across the entire map rather than as an average across batches. This is made possible by aggregating the initial probability map for each patch and the number of intersections at specific pixels. The result is a complete map of the evaluation area, and the probability at patch intersections is calculated as the arithmetic mean of the number of intersections. This avoids situations where object identification on one patch was unsuccessful due to its location at the edge, but in the next patch the object is located almost in the center, which averages the probability of identifying an archaeological object and eliminates artifacts arising at tile boundaries.
+
+In the binary segmentation task, thresholding is an important step before obtaining binary predictions. In our case, the IoU metric was chosen as the target value for thresholding optimization, which allows us to select the optimal value to maximize segmentation quality, though not always.
+
+The final metrics are calculated based on the optimal threshold value.
+
+To enable an expert assessment of the model’s performance in the study area, inference is performed on the entire available dataset. As with validation, probabilities are accumulated and averaged at grid cells and then combined into a complete map. This yields a dataset ready for post-processing.
+
+The first step is to apply a uniform filter to the probabilities, as this is the simplest and most common method of post-processing—a low-pass filter. Thanks to this, the resulting prediction map contains less noise, and the hard segmentation boundaries become more natural.
+The second step is mandatory thresholding based on the results of validation metric optimization.
+
+Next, the data is exported to .tif format according to the source data’s CRS to preserve georeferencing, and then this data is analyzed manually in a GIS environment.

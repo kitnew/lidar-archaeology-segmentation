@@ -1,0 +1,44 @@
+% !TEX root = ../thesis.tex
+
+\chapter{Experimental Design and Evaluation Protocol}\label{ch:design_protocol}
+\section{Overview of the Experiment Series}
+\section{Experiment Groups and Controlled Variables}
+
+To ensure consistency and comparability across experiments, they were divided into the following groups:
+1. Loss Functions. % EXPLAIN WHY
+2. Input Data Representation. % EXPLAIN WHY
+3. Effect of Soft Labels. % EXPLAIN WHY
+4. Patch Size and Sampling Strategies. % EXPLAIN WHY
+% ADD MORE GROUPS
+
+It is important to note that some experiments may belong to multiple groups simultaneously. The consistency of the entire workflow allows for comparing experiments from different improvement groups to highlight clear contrasts.
+
+To address the problem of catastrophic class imbalance, the authors develop loss functions with dynamic class weight balancing or adapt existing loss functions and explore their combinations. This thesis will examine the following loss functions:
+1. BCE+Dice Loss % MORE ABOUT THIS
+2. Tanimoto with Complement Loss % MORE ABOUT THIS
+3. Focal Loss % MORE ABOUT THIS
+4. Focal+Dice Loss % MORE ABOUT THIS
+5. DECB Loss % MORE ABOUT THIS
+
+Adam optimizer with LR 1e-5.
+\section{Evaluation Metrics and Threshold Optimization}
+
+The following pixel-wise metrics were used during training and validation:
+1. Positive IoU % ADD FORMULA AND SHORT DESCRIPTION
+2. Negative IoU % ADD FORMULA AND SHORT DESCRIPTION
+3. Mean IoU % ADD FORMULA AND SHORT DESCRIPTION
+4. Precision % ADD FORMULA AND SHORT DESCRIPTION
+5. Recall % ADD FORMULA AND SHORT DESCRIPTION
+6. F1-score % ADD FORMULA AND SHORT DESCRIPTION
+
+Accuracy is of no practical use in this task due to class imbalance.
+
+All of the listed metrics are calculated during threshold optimization. In the context of binary semantic segmentation, the IoU metric is suitable for optimization as one of the most informative metrics. The range of values tested during optimization is linspace(0.2, 0.99, 100).
+
+\section{Qualitative Assesment in GIS}
+
+As mentioned earlier, pixel-wise metrics do not always reflect a model’s actual ability to correctly segment archaeological features, even when the scores are high. That is why conducting a visual analysis yourself using a GIS environment allows you to realistically assess the practical significance of the results, since the goal is not to find absolutely every feature, but to ensure that as many as possible are not missed.
+
+\section{Selection of Representative Experiments}
+
+Given the large number of experiments conducted, selecting representative models will allow us to distinguish the configurations that achieved the best results from those that clearly underperformed. This will help us understand which components, when combined, improve the model’s ability to locate objects, and which do not.

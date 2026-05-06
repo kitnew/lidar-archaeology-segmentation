@@ -2,9 +2,19 @@
 
 \chapter{Introduction}\label{ch:introduction}
 
-Úvod práce stručne opisuje stanovený problém, kontext problému a motiváciu pre riešenie problému. Z úvodu by malo byť jasné, že stanovený problém doposiaľ nie je vyriešený a má zmysel ho riešiť.
+Remote sensing has revolutionized archaeology, making it possible to locate ancient sites and archaeological features without ever lifting a shovel. Since the late 19th century, this field has undergone constant evolution, continually adapting to the technological advancements that have made it possible. Although the overall objectives of its application have not changed drastically, new approaches and tools emerge every 20 to 40 years, significantly expanding its capabilities and allowing the field to develop without pause. However, one thing remains an integral part: the presence of an expert. This is precisely what drives researchers to create methods that reduce human involvement or facilitate and accelerate their work. 
 
-V úvode neuvádzajte štruktúru práce, t.j. o čom je ktorá kapitola. Rozsah úvodu je minimálne 2 celé strany (vrátane formulácie úlohy).
+The development of deep learning models has opened up a wide range of potential applications, and the field of Remote Sensing has not been left out. And despite the fact that research into the implementation of methods using neural networks has emerged relatively recently, the results are already yielding satisfactory outcomes. This makes it possible to survey an extremely large area in a relatively short time. Some authors directly state that the application of artificial intelligence in this field will become a fundamental aspect of the future of archaeological research.
+
+Well, despite some relative successes, the field faces certain challenges. One of the biggest issues is the lack of standardization in preprocessing and data preparation protocols, as well as in the choice of architecture and procedures for evaluating results. This makes it difficult to compare studies and to understand which details influence the outcome and which have almost no effect.
+
+This fact gives rise to the following specific problems, which the research community is actively working to address:
+\begin{enumerate}
+    \item \textbf{Visualization of input data.} At present, there is no universally accepted standard for derived representations of LiDAR data that should be used as the primary source of contextual information. Since different methods of obtaining raster representations or derived visualizations of elevation data highlight different micro-relief topologies, the choice of a representation suitable for the context of the data under study has a critical impact on the final accuracy.
+    \item \textbf{Limitations of standard metrics.} Traditional computer vision metrics used in conjunction with deep learning models, such as Intersection over Union (IoU), do not always demonstrate the practical value of a training model for an archaeologist. The use of pixel-based metrics does not reflect the true potential of segmentation; as a result, for example, predictions with even a slight deviation from the actual location of an object negatively affect the final metric, although for an archaeologist, the result of such detection would already be considered successful and useful for field verification.
+    \item \textbf{Extreme imbalance in target classes.} In archaeological tasks, target objects often occupy a tiny fraction of pixels compared to the background, forcing deep learning models to focus on simpler examples, such as the background, or to suppress features of present objects in favor of the ground surface. This renders standard error calculation functions ineffective and unstable in such tasks, leading to a sharp increase in false positives.
+    \item \textbf{The “black box” problem.} Modern neural networks are often criticized for a lack of transparency in decision-making and the difficulty of interpreting the features that influenced the training or inference results. This is due to the complex architecture of deep learning models themselves, which is precisely what allows them to produce stunning results. However, in the field of archaeology, justification is critically important, as unfounded automatic conclusions are rarely accepted without an understanding of the context, and the difficulty of interpreting the model’s operation reduces researchers’ confidence in the results.
+\end{enumerate}
 
 \section{Motivation}
 
@@ -14,4 +24,4 @@ Motivácia nesmie byť, že ste to dostali ako zadanie, alebo že ste sa chceli 
 
 \section{Formulation of the problem}
 
-V rámci úvodu tiež vysvetlite vaše chápanie úlohy, ktorú budete riešiť. Prvú verziu tejto časti by ste mali napísať čo najskôr, aby ste sa uistili, že rozumiete, čo je cieľom vašej práce, a prekonzultovali ju so školiteľom. Neskôr v priebehu práce na projekte ju môžete spresňovať a dopĺňať.
+At present, there is no single elegant solution to the problems described; therefore, a systematic approach to reproducible end-to-end research into the impact of individual process components on the outcome could provide a critical analysis within the context of selected data domains. That is why this thesis does not aim to practically identify archaeological objects in the scanned data, but rather to use them as a domain for analyzing the impact of state-of-the-art components on the process of training, validation, interpretation, and prediction generation in deep learning models.
