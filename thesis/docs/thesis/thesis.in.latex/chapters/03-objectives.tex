@@ -2,6 +2,27 @@
 
 \chapter{Objectives of the Thesis}\label{ch:objectives}
 \section{Main Objective}
+
+As noted in the first chapter, the main objective of this dissertation is the semantic segmentation of archaeological sites in the two study areas. It should be noted that the methodology is based on the same framework and control variables; therefore, the answer to the question posed by this thesis is not “yes, it is possible” or “no, it is not possible,” but rather “what exactly influences the result obtained and how it can be improved.” Given the existing achievements of similar methodologies described in the Analysis section and the very concept of the “black box” when applying machine learning algorithms in this domain, it is important to experimentally demonstrate which key components of the methodology influence the result. Previous studies have already clearly highlighted the current challenges faced by researchers; therefore, a systematic review of modern methodologies and approaches complements our understanding of the essential implementation details that directly influence the result and also serves as a critical indicator of confidence in the use of specific methods, whose impact has been objectively assessed in the context of various data domains. In any case, studying the impact of different approaches increases confidence in inference results, because if it is unknown on what basis conclusions are drawn and what influences them, creating reliable automatic scanning methods will remain a difficult goal to achieve.
+Algorithms will always produce results; it is important to understand what influences them.
+
 \section{Partial Objectives}
+
+Of course, given the complexity of modern models and the multitude of factors influencing the training and evaluation of artificial intelligence models, evaluating only the final result is unfounded and inaccurate, as each component has its own distinct impact. To avoid biased conclusions, the individual components under study will be grouped according to their level of variability, which may consist of either specific changes in parameters within a single component or changes to the component itself.
+Therefore, the groups under study will include:
+1. Initial representations
+2. Mask types
+3. Sampling strategies
+4. Loss functions
+5. Model architectures
+6. Post-processing methods.
+
+
 \section{Research Questions}
+
+1. Is there a correlation between the representation of input data that differs in terms of information content for humans and for the model (for example, if an object is difficult to spot visually during a visual analysis, but the model was able to segment its boundaries fairly well or indicate its possible location)?
+2. What exactly in the sampling process influences training?
+3. Do post-processing methods significantly affect the results?
+4. How do different types of masks affect training?
+
 \section{Scope and Limitations}
