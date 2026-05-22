@@ -57,6 +57,11 @@
 \setmainlanguage{\tukethesis@mainlanguage}
 \setotherlanguage{\tukethesis@otherlanguage}
 
+% Polyglossia changed some auxiliary-file internals between releases.  Keep
+% stale aux files from older/newer TeX installations readable on the next run.
+\providecommand{\xpglanginauxtrue}{}
+\providecommand{\xpglanginauxfalse}{}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%

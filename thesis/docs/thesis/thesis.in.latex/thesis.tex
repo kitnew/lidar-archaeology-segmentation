@@ -3,7 +3,7 @@
 %% This file uses UTF-8 encoding
 %%
 %% For compilation use following command:
-%% $ latexmk -pdf -pvc thesis
+%% $ latexmk -pvc thesis
 %%
 %% -----------------------------------------------------------------
 %%                                     _     _
@@ -25,6 +25,15 @@
 \usepackage{subcaption}
 \usepackage{graphicx}
 \usepackage{svg}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{pdflscape}
+\usepackage{ragged2e}
+
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
 
 \addbibresource{bibliography.bib}   % Location of file with bibliography resources
 \input{acronyms}                    % Load acronyms
@@ -79,6 +88,7 @@
 \include{appendices/system.manual}
 \include{appendices/structure}
 \include{appendices/latex.101}
+\include{appendices/tables}
 
 
 % avoid empty lof, lot and lol
