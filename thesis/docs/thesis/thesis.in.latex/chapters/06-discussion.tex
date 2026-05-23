@@ -218,10 +218,113 @@ Overall, the Slovak terrace results should therefore be interpreted more cautiou
 
 \section{Ablation Study}
 \subsection{Effect of Input Representation}
+
+Of the four input representations tested—namely DEM, RGB, RGDEM, and SPS—which were evaluated using identical hyperparameters and components, SPS demonstrated the best results. The evaluation metrics for each representation are shown in Table #. SPS demonstrates the highest pixel-level metrics and the most stable training performance among all other options. Moreover, it leads the others by more than 5%. In contrast, the RGB and RGDEM representations differ minimally from one another, although RGDEM achieved a slightly higher peak in IoU. Meanwhile, DEM demonstrates the worst results, likely due to insufficient gradient contrast.
+
+\begin{table}[!ht]
+    \centering
+    \caption{SPS/RGDEM/RGB/DEM Input metrics comparison}
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+        Metric / Input & SPS & RGDEM & RGB & DEM \\ \hline
+        IoU (Foreground) & 0.43 & 0.37 & 0.36 & 0.25 \\ \hline
+        IoU (Average) & 0.71 & 0.68 & 0.67 & 0.62 \\ \hline
+        Precision & 0.61 & 0.54 & 0.52 & 0.43 \\ \hline
+        Recall & 0.6 & 0.54 & 0.54 & 0.39 \\ \hline
+        F1 Score & 0.6 & 0.54 & 0.53 & 0.4 \\ \hline
+    \end{tabular}
+    \label{maya_input_metrics}
+\end{table}
+
 \subsection{Effect of Label Representation}
-\subsection{Effect of Sampling Strategy}
+
+Soft masks generally improve the IoU score by a few percentage points, though not always. However, they reduce precision and increase recall.
+
+\begin{table}[!ht]
+    \centering
+    \caption{Soft/Hard labels metrics comparison}
+    \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
+    \hline
+        Metric / Input & SPS & SPS (Shadow) & RGDEM & RGDEM (Shadow) & RGB & RGB (Shadow) & DEM & DEM (Shadow) \\ \hline
+        IoU (Foreground) & 0.35 & 0.36 & 0.33 & 0.32 & 0.32 & 0.33 & 0.25 & 0.25 \\ \hline
+        IoU (Average) & 0.67 & 0.67 & 0.66 & 0.66 & 0.65 & 0.66 & 0.62 & 0.62 \\ \hline
+        Precision & 0.55 & 0.5 & 0.51 & 0.47 & 0.55 & 0.48 & 0.43 & 0.43 \\ \hline
+        Recall & 0.5 & 0.55 & 0.48 & 0.5 & 0.43 & 0.52 & 0.37 & 0.39 \\ \hline
+        F1 Score & 0.52 & 0.53 & 0.5 & 0.49 & 0.48 & 0.5 & 0.4 & 0.4 \\ \hline
+    \end{tabular}
+    \label{maya_label_metrics}
+\end{table}
+
+\subsection{Effect of Tile Size}
+
+\begin{table}[!ht]
+    \centering
+    \caption{Tile Size metrics comparison for Maya dataset}
+    \begin{tabular}{|l|l|l|}
+    \hline
+        Metric / Input & 128х128m (stride 32m) & 256x256m (stride 64m) \\ \hline
+        IoU (Foreground) & 0,3868 & 0,3409 \\ \hline
+        Precision & 0,6264 & 0,5331 \\ \hline
+        Recall & 0,5111 & 0,4992 \\ \hline
+        F1 Score & 0,5488 & 0,4994 \\ \hline
+    \end{tabular}
+    \label{maya_tile_metrics}
+\end{table}
+
+\begin{table}[!ht]
+    \centering
+    \caption{Tile size metrics comparison for Slovakia dataset}
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+        Metric / Input & 128х128 (stride 32) & 256x256 (stride 64) & 512x512 (stride 128) & 1024x1024 (stride 256) \\ \hline
+        IoU (Foreground) & 0.017 & 0.034 & 0.044 & 0.034 \\ \hline
+        IoU (Average) & 0.48 & 0.49 & 0.51 & 0.47 \\ \hline
+        Precision & 0.018 & 0.035 & 0.052 & 0.035 \\ \hline
+        Recall & 0.462 & 0.453 & 0.228 & 0.498 \\ \hline
+        F1 Score & 0.034 & 0.065 & 0.085 & 0.066 \\ \hline
+    \end{tabular}
+    \label{slovakia_tile_metrics}
+\end{table}
+
 \subsection{Effect of Loss Function}
-\subsection{Effect of Tile Size of Inference Strategy}
+
+According to the metrics, BCEDICE performs better than Tanimoto; however, don’t let that mislead you, as the training is less stable and involves more overfitting.
+Tanimoto and FocalDice
+
+\begin{table}[!ht]
+    \centering
+    \caption{Loss functions metrics comparison}
+    \begin{tabular}{|l|l|l|l|l|l|}
+    \hline
+        Metric / Input & BCE + Dice Loss & Tanimoto Loss & Focal Loss & Focal + Dice Loss & DECB Loss \\ \hline
+        IoU (Foreground) & 0.26 & 0.25 & 0.23 & 0.23 & 0.08 \\ \hline
+        IoU (Average) & 0.63 & 0.62 & 0.61 & 0.61 & 0.52 \\ \hline
+        Precision & 0.45 & 0.43 & 0.48 & 0.39 & 0.09 \\ \hline
+        Recall & 0.39 & 0.37 & 0.31 & 0.35 & 0.77 \\ \hline
+        F1 Score & 0.42 & 0.4 & 0.38 & 0.37 & 0.16 \\ \hline
+    \end{tabular}
+    \label{maya_loss_metrics}
+\end{table}
+
+\subsection{Effect of Model Architecture}
+
+Although both architectures perform at roughly the same level, DeepLab V3+ suffers from less overfitting and produces lower error, even though it takes longer to converge.
+
+\begin{table}[!ht]
+    \centering
+    \caption{Model architectures metrics comparison}
+    \begin{tabular}{|l|l|l|}
+    \hline
+        Metric / Input & DeepLab V3 & DeepLab V3+ \\ \hline
+        IoU (Foreground) & 0.36 & 0.37 \\ \hline
+        IoU (Average) & 0.67 & 0.68 \\ \hline
+        Precision & 0.5 & 0.54 \\ \hline
+        Recall & 0.55 & 0.54 \\ \hline
+        F1 Score & 0.53 & 0.54 \\ \hline
+    \end{tabular}
+    \label{maya_architecture_metrics}
+\end{table}
+
 \section{Error Analysis}
 \section{Archaeological Usefulness of the Results}
 \section{Limitations}
