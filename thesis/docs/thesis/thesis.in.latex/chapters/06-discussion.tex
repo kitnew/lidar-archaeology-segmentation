@@ -81,17 +81,22 @@ Table ~\ref{tab:experiments_overview} provides an overview of the main experimen
 \section{Reference and Best-Performing Configurations}
 \subsection{Best-Performing Configuration for Maya Structures}
 
-For the available Maya data, the following configuration yielded the most promising results:
+For the Maya dataset, the best-performing configuration was obtained with the following setup:
 \begin{itemize}
-    \item Model - DeepLab V3+ (IMAGENET Pretrained ResNet-101 backbone)
-    \item Input representation: SPS (radius = 10m, n\_dir = 16, noise\_sup=0, z-score normalization)
-    \item Labels: Soft mask (radius = 2m)
-    \item Loss Function: Tanimoto with complement loss
-    \item Tile Size: 128x128px (stride = 32px)
+    \item Model: DeepLab V3+ with an ImageNet-pretrained ResNet-101 backbone;
+    \item Input representation: SPS visualization with radius = 10 m, n\_dir = 16, noise\_sup = 0, and z-score normalization;
+    \item Label representation: soft mask with radius = 2 m;
+    \item Loss function: Tanimoto with complement loss;
+    \item Tile size: $128 \times 128$ pixels with a stride of 32 pixels.
 \end{itemize}
-Existing research indicates that pretrained weights provide a significant advantage during training, accelerating convergence and typically improving metrics. However, to compare the impact of pretrained weights, we will compare these results with the same configuration but using the older DeepLab V3 model without pretrained weights. The reason for comparing specifically with the older model lies in the minimal difference in performance between the DeepLab V3 and V3+ models without pre-trained weights, as the difference in results according to evaluation metrics is less than 1 percent, and visual validation did not reveal any significant differences.
 
-Due to the lack of objectivity of pixel-based metrics in the context of the current task, an object-based analysis was also conducted to identify the actual results of the inference. However, pixel metrics remain a necessary indicator during training; they are specifically addressed in Table~\ref{tab:maya_v3_v3+_metrics}. Some metrics do not reflect useful information, as described in Section~\#, so only those that truly reflect useful training information were retained for comparison. It is immediately apparent that the DeepLab V3+ model is the clear leader across all pixel-based evaluation metrics. At the same time, the object-based evaluation, showed in Table~\ref{tab:maya_v3_v3+_object_metrics}, also demonstrates the superiority of the more modern model. Overall, both models handle segmentation relatively well, segmenting between 43\% and 61\% of the available 4084 objects regardless of size. Furthermore, the models make mistakes in the same locations, where isolated small objects are situated on blurred terrain, making their detection more difficult, or conversely, where natural terrain mimics a morphology very similar to man-made structures. A detailed overview of each scenario is shown in Figure~\ref{fig:maya_tp_fp_fn_comparison}. The only difference between the newer model and its predecessor is the lower number of false-positive predictions—the model detects even fragments of potential buildings, so fewer potential candidates would be missed during manual analysis.
+This configuration is used as the reference result for the Maya structures because it achieved the strongest overall performance among the evaluated variants. To provide a meaningful comparison, it is contrasted with the older DeepLab V3 model trained without pretrained weights. This comparison should not be interpreted as an isolated evaluation of pretraining alone, since the models also differ architecturally. However, it remains useful as a representative comparison between the strongest final configuration and the earlier baseline, especially because the non-pretrained DeepLab V3 and DeepLab V3+ variants showed only minor differences in the preliminary experiments.
+
+The pixel-wise results are summarized in Table~\ref{tab:maya_v3_v3+_metrics}. Only the metrics that provide useful information for this highly imbalanced segmentation problem are reported. Overall accuracy and background-dominated measures were omitted, since they can overestimate performance when the foreground class occupies only a small part of the raster. The results show that the DeepLab V3+ configuration improves all retained pixel-level indicators. The most important improvements are visible in foreground IoU, F1 score, and Matthews correlation coefficient, which indicates that the model provides a more balanced segmentation of the archaeological structures rather than merely preserving the dominant background class.
+
+Since pixel-wise metrics do not fully describe the practical usefulness of the predictions in archaeological prospection, an object-wise evaluation was also performed. The results are shown in Table~\ref{tab:maya_v3_v3+_object_metrics}. From the object-level perspective, DeepLab V3+ detected 2253 ground-truth objects, compared with 1746 objects detected by DeepLab V3. Given the total number of 4084 reference objects, this corresponds to a substantially higher coverage of the available archaeological structures. At the same time, the average pixel hit rate per detected object is slightly lower for DeepLab V3+, and the number of false-positive predicted objects is higher. Therefore, the improvement of DeepLab V3+ should be interpreted primarily as an increase in detection completeness rather than as a reduction of all error types.
+
+This behaviour is consistent with the practical objective of the task. In the context of archaeological candidate detection, missing a potential structure may be more problematic than producing additional candidates that can later be reviewed by an expert. The qualitative comparison in Figure~\ref{fig:maya_tp_fp_fn_comparison} supports this interpretation. Both models tend to fail in similar situations: small isolated structures with weak terrain expression are often missed, while natural terrain forms with morphology similar to anthropogenic structures may produce false positives. However, the DeepLab V3+ configuration identifies a larger portion of potential structures and therefore provides a more useful basis for subsequent expert-guided interpretation.
 
 \begin{table}[!ht]
     \centering
@@ -143,6 +148,74 @@ Due to the lack of objectivity of pixel-based metrics in the context of the curr
 \end{figure}
 
 \subsection{Best-Performing Configuration for Slovak Terraces}
+
+For the Slovak terrace dataset, the best-performing configuration was obtained with the following setup:
+\begin{itemize}
+    \item Model: DeepLab V3+ with a ResNet-101 backbone;
+    \item Input representation: ANISO visualization;
+    \item Label representation: soft mask with radius = 2 m;
+    \item Loss function: BCE+Dice loss;
+    \item Tile size: $512 \times 512$ pixels with a stride of 128 pixels.
+\end{itemize}
+
+This configuration is used as the reference result for the Slovak terrace dataset because it achieved the strongest overall performance among the evaluated variants. However, in contrast to the Maya structures, the interpretation of the Slovak results is less straightforward. The terrace task involves narrow, elongated, and partially discontinuous features represented by buffered polylines. Therefore, a prediction may correctly indicate the presence of a terrace complex while still obtaining relatively low pixel-wise overlap with the reference mask.
+
+To keep the comparison consistent with the Maya results, the selected DeepLab V3+ configuration is compared with the same architecture using an ImageNet-pretrained backbone. The comparison shows a clear difference between the two variants. Although the pretrained model showed more stable behaviour during training, the final validation metrics favour the model trained from scratch. As shown in Table~\ref{tab:slovakia_v3_v3plus_metrics}, the non-pretrained DeepLab V3+ achieved higher balanced accuracy, true positive rate, F1 score, foreground IoU, average IoU, and Matthews correlation coefficient. The only retained pixel-level metric in which the pretrained model performed better is positive predictive value, indicating a more conservative prediction behaviour.
+
+The object-wise evaluation in Table~\ref{tab:slovakia_v3plus_object_metrics} confirms the same general tendency, but also shows the limitations of the selected model. The non-pretrained DeepLab V3+ detected more ground-truth terrace objects and produced a substantially higher average hit rate per detected object. At the same time, it generated more predicted objects and a larger number of false positives. The ImageNet-pretrained model produced fewer false-positive objects and more true-positive predicted components, but it detected fewer ground-truth objects overall. This suggests that the pretrained model is more selective, whereas the non-pretrained model is more sensitive to terrace-like terrain patterns.
+
+The qualitative inspection in Figure~\ref{fig:terraces_ladzany_sasovske_tp_fp_fn} supports this interpretation. The non-pretrained model often identifies the approximate location of terrace complexes, especially in areas where the terrain morphology is visually pronounced. However, it does not reliably separate individual terrace lines. Instead, it tends to merge parts of the terrace system into larger connected regions or to activate on neighbouring terrain forms with similar morphology. This behaviour increases recall but also produces a large number of false-positive predictions.
+
+The detailed example in Figure~\ref{fig:terraces_ladzany_tp_fp_fn} illustrates the same limitation at a smaller scale. Several terrace segments are partially detected, but many annotated lines remain false negatives, while additional predictions appear in nearby areas without positive reference pixels. This indicates that the model learned a general representation of terrace-like relief, but did not achieve precise segmentation of individual terrace structures.
+
+Overall, the Slovak terrace results should therefore be interpreted more cautiously than the Maya results. The selected configuration is the most useful among the tested variants because it provides the highest coverage of potential terrace areas and the strongest foreground-oriented metrics. Nevertheless, the high number of false positives and the merging of individual terraces show that the model output is not suitable as a final segmentation map. Its practical value is closer to a candidate layer for expert inspection, where the model can highlight possible terrace complexes but still requires manual verification and interpretation.
+
+\begin{table}[!ht]
+    \centering
+    \caption{DeepLab V3+ pixel-wise metrics comparion on terraces dataset}
+    \begin{tabular}{|l|ll|}
+    \hline
+        \textbf{Metric / Model} & \textbf{DeepLab V3+} & \textbf{DeepLab V3+ (ImageNet)} \\ \hline
+        \textbf{Balanced Accuracy} & 0.61344 & 0.53324 \\ 
+        \textbf{True Positive Rate} & 0.23550 & 0.06822 \\ 
+        \textbf{Positive Predictive Value} & 0.08336 & 0.11459 \\ 
+        \textbf{F1 Score} & 0.12313 & 0.08553 \\ 
+        \textbf{IoU (Foreground)} & 0.06560 & 0.04467 \\ 
+        \textbf{IoU (Average)} & 0.52724 & 0.51992 \\ 
+        \textbf{Matthews Correlation Coefficient} & 0.13540 & 0.08609 \\ \hline
+    \end{tabular}
+    \label{tab:slovakia_v3_v3plus_metrics}
+\end{table}
+
+\begin{table}[!ht]
+    \centering
+    \caption{DeepLab V3+ object-wise metrics comparion on terraces dataset}
+    \begin{tabular}{|l|ll|}
+    \hline
+        \textbf{Metric / Model} & \textbf{DeepLab V3+} & \textbf{DeepLab V3+ (ImageNet)} \\ \hline
+        \textbf{Detected GT Object} & 16 & 9 \\ 
+        \textbf{Average pixels hit-rate per object} & 763.93 & 393.44 \\ 
+        \textbf{Predicted Objects} & 121 & 95 \\ 
+        \textbf{TP Predictions} & 9 & 14 \\ 
+        \textbf{FP Predictions} & 112 & 81 \\ \hline
+    \end{tabular}
+    \label{tab:slovakia_v3plus_object_metrics}
+\end{table}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/ladzany_sasovske_tp_fp_fn.pdf}
+    \caption{Comparison of the number of true positives, false positives, and false negatives for DeepLab V3 and DeepLab V3+ models on the terraces dataset.}
+    \label{fig:terraces_ladzany_sasovske_tp_fp_fn}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/ladzany_tp_fp_fn.pdf}
+    \caption{Comparison of the number of true positives, false positives, and false negatives for DeepLab V3 and DeepLab V3+ models on the terraces dataset.}
+    \label{fig:terraces_ladzany_tp_fp_fn}
+\end{figure}
+
 \section{Ablation Study}
 \subsection{Effect of Input Representation}
 \subsection{Effect of Label Representation}
