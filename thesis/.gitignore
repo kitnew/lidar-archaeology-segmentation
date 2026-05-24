@@ -23,9 +23,6 @@ data/georef/
 # CSV
 *.csv
 
-# PNGs
-*.png
-
 # Zips
 *.zip
 

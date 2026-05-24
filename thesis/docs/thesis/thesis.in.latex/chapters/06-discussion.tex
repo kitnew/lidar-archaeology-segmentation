@@ -2,8 +2,6 @@
 
 \chapter{Results and Discussion}\label{ch:results_discussion}
 
-Vyhodnocovacia časť je kľúčovou časťou záverečnej práce. Tato časť obsahuje vyhodnotenie navrhnutého (vytvoreného) riešenia. Uprednostňované je objektívne vyhodnotenie výsledkov práce, ktoré sa opiera o meranie a štatistické metódy, prípadne matematické dôkazy. V prípade nameraných hodnôt musí autor opísať metódu merania, priebeh merania, výsledky a interpretáciu výsledkov v kontexte riešeného problému a stanovených cieľov. Na základe vyhodnotenia riešenia autor opíše prínosy svojej práce. Vyhodnocovacia časť tvorí zvyčajne ¼ jadra práce.
-
 \section{Overview of Conducted Experiments}
 
 This chapter presents the quantitative and qualitative results of the conducted experiments. The experiments were treated not as an independent sequence of model runs, but as a set of controlled experimental groups. Each group was designed to assess the impact of a single methodological component, such as input data representation, label representation, loss function, sampling strategy, or model architecture. This structure allows us to distinguish general trends from the specific results of individual configurations. A detailed description of all configurations will not be provided due to their high variability; they follow directly from the methodology described above and adhere to a defined evaluation protocol.
@@ -26,48 +24,33 @@ Only experiments conducted on the latest consistent version of the workflow will
 \midrule
 
 \multirow{2}{=}{Input Data Representation} &
-Maya &
-DEM, RGB, RGDEM, SPS \\
-
+Maya & DEM, RGB, RGDEM, SPS \\
 &
-Slovakia &
-DEM, ISO, ANISO \\
+Slovakia & DEM, ISO, ANISO \\
 \midrule
 
 \multirow{2}{=}{Label Representation} &
-Maya &
-Hard mask, soft masks with different radius \\
-
+Maya & Hard mask, soft masks with different radius \\
 &
-Slovakia &
-Hard mask and soft mask variants \\
+Slovakia & Hard mask and soft mask variants \\
 \midrule
 
 \multirow{2}{=}{Loss function} &
-Maya &
-BCE + Dice, Tanimoto, Focal-based losses, DECB \\
-
+Maya & BCE + Dice, Tanimoto, Focal-based losses, DECB \\
 &
-Slovakia &
-BCE + Dice and Tanimoto with complement \\
+Slovakia & BCE + Dice and Tanimoto with complement \\
 \midrule
 
 \multirow{2}{=}{Sampling Strategy} &
-Maya &
-128 and 256 pixel tiles with corresponding strides \\
-
+Maya & 128 and 256 pixel tiles with corresponding strides \\
 &
-Slovakia &
-128, 256, 512, and 1024 pixel tiles \\
+Slovakia & 128, 256, 512, and 1024 pixel tiles \\
 \midrule
 
 \multirow{2}{=}{Model Architecture} &
-Maya &
-DeepLab V3, DeepLab V3+, pretrained DeepLab V3+ \\
-
+Maya & DeepLab V3, DeepLab V3+, pretrained DeepLab V3+ \\
 &
-Slovakia &
-DeepLab V3, DeepLab V3+, pretrained DeepLab V3+ \\
+Slovakia & DeepLab V3, DeepLab V3+, pretrained DeepLab V3+ \\
 
 \bottomrule
 \end{tabularx}
@@ -92,13 +75,9 @@ For the Maya dataset, the best-performing configuration was obtained with the fo
 
 This configuration is used as the reference result for the Maya structures because it achieved the strongest overall performance among the evaluated variants. To provide a meaningful comparison, it is contrasted with the older DeepLab V3 model trained without pretrained weights. This comparison should not be interpreted as an isolated evaluation of pretraining alone, since the models also differ architecturally. However, it remains useful as a representative comparison between the strongest final configuration and the earlier baseline, especially because the non-pretrained DeepLab V3 and DeepLab V3+ variants showed only minor differences in the preliminary experiments.
 
-The pixel-wise results are summarized in Table~\ref{tab:maya_v3_v3+_metrics}. Only the metrics that provide useful information for this highly imbalanced segmentation problem are reported. Overall accuracy and background-dominated measures were omitted, since they can overestimate performance when the foreground class occupies only a small part of the raster. The results show that the DeepLab V3+ configuration improves all retained pixel-level indicators. The most important improvements are visible in foreground IoU, F1 score, and Matthews correlation coefficient, which indicates that the model provides a more balanced segmentation of the archaeological structures rather than merely preserving the dominant background class.
+The pixel-wise results are summarized in Table~\ref{tab:maya_v3_v3plus_metrics}. Only the metrics that provide useful information for this highly imbalanced segmentation problem are reported. Overall accuracy and background-dominated measures were omitted, since they can overestimate performance when the foreground class occupies only a small part of the raster. The results show that the DeepLab V3+ configuration improves all retained pixel-level indicators. The most important improvements are visible in foreground IoU, F1 score, and Matthews correlation coefficient, which indicates that the model provides a more balanced segmentation of the archaeological structures rather than merely preserving the dominant background class.
 
-Since pixel-wise metrics do not fully describe the practical usefulness of the predictions in archaeological prospection, an object-wise evaluation was also performed. The results are shown in Table~\ref{tab:maya_v3_v3+_object_metrics}. From the object-level perspective, DeepLab V3+ detected 2253 ground-truth objects, compared with 1746 objects detected by DeepLab V3. Given the total number of 4084 reference objects, this corresponds to a substantially higher coverage of the available archaeological structures. At the same time, the average pixel hit rate per detected object is slightly lower for DeepLab V3+, and the number of false-positive predicted objects is higher. Therefore, the improvement of DeepLab V3+ should be interpreted primarily as an increase in detection completeness rather than as a reduction of all error types.
-
-This behaviour is consistent with the practical objective of the task. In the context of archaeological candidate detection, missing a potential structure may be more problematic than producing additional candidates that can later be reviewed by an expert. The qualitative comparison in Figure~\ref{fig:maya_tp_fp_fn_comparison} supports this interpretation. Both models tend to fail in similar situations: small isolated structures with weak terrain expression are often missed, while natural terrain forms with morphology similar to anthropogenic structures may produce false positives. However, the DeepLab V3+ configuration identifies a larger portion of potential structures and therefore provides a more useful basis for subsequent expert-guided interpretation.
-
-\begin{table}[!ht]
+\begin{table}[H]
     \centering
     \caption{DeepLab V3 \& DeepLab V3+ pixel-wise metrics comparion on Maya dataset}
     \begin{tabular}{|l|ll|}
@@ -112,10 +91,12 @@ This behaviour is consistent with the practical objective of the task. In the co
         \textbf{IoU (Average)} & 0.62196 & 0.68862 \\ 
         \textbf{Matthews Correlation Coefficient} & 0.39634 & 0.56307 \\ \hline
     \end{tabular}
-    \label{tab:maya_v3_v3+_metrics}
+    \label{tab:maya_v3_v3plus_metrics}
 \end{table}
 
-\begin{table}[!ht]
+Since pixel-wise metrics do not fully describe the practical usefulness of the predictions in archaeological prospection, an object-wise evaluation was also performed. The results are shown in Table~\ref{tab:maya_v3_v3plus_object_metrics}. From the object-level perspective, DeepLab V3+ detected 2253 ground-truth objects, compared with 1746 objects detected by DeepLab V3. Given the total number of 4084 reference objects, this corresponds to a substantially higher coverage of the available archaeological structures. At the same time, the average pixel hit rate per detected object is slightly lower for DeepLab V3+, and the number of false-positive predicted objects is higher. Therefore, the improvement of DeepLab V3+ should be interpreted primarily as an increase in detection completeness rather than as a reduction of all error types.
+
+\begin{table}[H]
     \centering
     \caption{DeepLab V3 \& DeepLab V3+ object-wise metrics comparion on Maya dataset}
     \begin{tabular}{|l|ll|}
@@ -127,10 +108,12 @@ This behaviour is consistent with the practical objective of the task. In the co
         \textbf{TP Predictions} & 1642 & 2248 \\ 
         \textbf{FP Predictions} & 150 & 280 \\ \hline
     \end{tabular}
-    \label{tab:maya_v3_v3+_object_metrics}
+    \label{tab:maya_v3_v3plus_object_metrics}
 \end{table}
 
-\begin{figure}[htbp]
+This behaviour is consistent with the practical objective of the task. In the context of archaeological candidate detection, missing a potential structure may be more problematic than producing additional candidates that can later be reviewed by an expert. The qualitative comparison in Figure~\ref{fig:maya_tp_fp_fn_comparison} supports this interpretation. Both models tend to fail in similar situations: small isolated structures with weak terrain expression are often missed, while natural terrain forms with morphology similar to anthropogenic structures may produce false positives. However, the DeepLab V3+ configuration identifies a larger portion of potential structures and therefore provides a more useful basis for subsequent expert-guided interpretation.
+
+\begin{figure}[H]
     \centering
     \begin{subfigure}{0.49\textwidth}
         \includegraphics[width=\textwidth]{figures/maya_tp_fp_fn_sps_v3.pdf}
@@ -162,15 +145,7 @@ This configuration is used as the reference result for the Slovak terrace datase
 
 To keep the comparison consistent with the Maya results, the selected DeepLab V3+ configuration is compared with the same architecture using an ImageNet-pretrained backbone. The comparison shows a clear difference between the two variants. Although the pretrained model showed more stable behaviour during training, the final validation metrics favour the model trained from scratch. As shown in Table~\ref{tab:slovakia_v3_v3plus_metrics}, the non-pretrained DeepLab V3+ achieved higher balanced accuracy, true positive rate, F1 score, foreground IoU, average IoU, and Matthews correlation coefficient. The only retained pixel-level metric in which the pretrained model performed better is positive predictive value, indicating a more conservative prediction behaviour.
 
-The object-wise evaluation in Table~\ref{tab:slovakia_v3plus_object_metrics} confirms the same general tendency, but also shows the limitations of the selected model. The non-pretrained DeepLab V3+ detected more ground-truth terrace objects and produced a substantially higher average hit rate per detected object. At the same time, it generated more predicted objects and a larger number of false positives. The ImageNet-pretrained model produced fewer false-positive objects and more true-positive predicted components, but it detected fewer ground-truth objects overall. This suggests that the pretrained model is more selective, whereas the non-pretrained model is more sensitive to terrace-like terrain patterns.
-
-The qualitative inspection in Figure~\ref{fig:terraces_ladzany_sasovske_tp_fp_fn} supports this interpretation. The non-pretrained model often identifies the approximate location of terrace complexes, especially in areas where the terrain morphology is visually pronounced. However, it does not reliably separate individual terrace lines. Instead, it tends to merge parts of the terrace system into larger connected regions or to activate on neighbouring terrain forms with similar morphology. This behaviour increases recall but also produces a large number of false-positive predictions.
-
-The detailed example in Figure~\ref{fig:terraces_ladzany_tp_fp_fn} illustrates the same limitation at a smaller scale. Several terrace segments are partially detected, but many annotated lines remain false negatives, while additional predictions appear in nearby areas without positive reference pixels. This indicates that the model learned a general representation of terrace-like relief, but did not achieve precise segmentation of individual terrace structures.
-
-Overall, the Slovak terrace results should therefore be interpreted more cautiously than the Maya results. The selected configuration is the most useful among the tested variants because it provides the highest coverage of potential terrace areas and the strongest foreground-oriented metrics. Nevertheless, the high number of false positives and the merging of individual terraces show that the model output is not suitable as a final segmentation map. Its practical value is closer to a candidate layer for expert inspection, where the model can highlight possible terrace complexes but still requires manual verification and interpretation.
-
-\begin{table}[!ht]
+\begin{table}[H]
     \centering
     \caption{DeepLab V3+ pixel-wise metrics comparion on terraces dataset}
     \begin{tabular}{|l|ll|}
@@ -187,7 +162,9 @@ Overall, the Slovak terrace results should therefore be interpreted more cautiou
     \label{tab:slovakia_v3_v3plus_metrics}
 \end{table}
 
-\begin{table}[!ht]
+The object-wise evaluation in Table~\ref{tab:slovakia_v3plus_object_metrics} confirms the same general tendency, but also shows the limitations of the selected model. The non-pretrained DeepLab V3+ detected more ground-truth terrace objects and produced a substantially higher average hit rate per detected object. At the same time, it generated more predicted objects and a larger number of false positives. The ImageNet-pretrained model produced fewer false-positive objects and more true-positive predicted components, but it detected fewer ground-truth objects overall. This suggests that the pretrained model is more selective, whereas the non-pretrained model is more sensitive to terrace-like terrain patterns.
+
+\begin{table}[H]
     \centering
     \caption{DeepLab V3+ object-wise metrics comparion on terraces dataset}
     \begin{tabular}{|l|ll|}
@@ -202,19 +179,25 @@ Overall, the Slovak terrace results should therefore be interpreted more cautiou
     \label{tab:slovakia_v3plus_object_metrics}
 \end{table}
 
-\begin{figure}[htbp]
+The qualitative inspection in Figure~\ref{fig:terraces_ladzany_sasovske_tp_fp_fn} supports this interpretation. The non-pretrained model often identifies the approximate location of terrace complexes, especially in areas where the terrain morphology is visually pronounced. However, it does not reliably separate individual terrace lines. Instead, it tends to merge parts of the terrace system into larger connected regions or to activate on neighbouring terrain forms with similar morphology. This behaviour increases recall but also produces a large number of false-positive predictions.
+
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figures/ladzany_sasovske_tp_fp_fn.pdf}
     \caption{Comparison of the number of true positives, false positives, and false negatives for DeepLab V3 and DeepLab V3+ models on the terraces dataset.}
     \label{fig:terraces_ladzany_sasovske_tp_fp_fn}
 \end{figure}
 
-\begin{figure}[htbp]
+The detailed example in Figure~\ref{fig:terraces_ladzany_tp_fp_fn} illustrates the same limitation at a smaller scale. Several terrace segments are partially detected, but many annotated lines remain false negatives, while additional predictions appear in nearby areas without positive reference pixels. This indicates that the model learned a general representation of terrace-like relief, but did not achieve precise segmentation of individual terrace structures.
+
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/ladzany_tp_fp_fn.pdf}
     \caption{Comparison of the number of true positives, false positives, and false negatives for DeepLab V3 and DeepLab V3+ models on the terraces dataset.}
     \label{fig:terraces_ladzany_tp_fp_fn}
 \end{figure}
+
+Overall, the Slovak terrace results should therefore be interpreted more cautiously than the Maya results. The selected configuration is the most useful among the tested variants because it provides the highest coverage of potential terrace areas and the strongest foreground-oriented metrics. Nevertheless, the high number of false positives and the merging of individual terraces show that the model output is not suitable as a final segmentation map. Its practical value is closer to a candidate layer for expert inspection, where the model can highlight possible terrace complexes but still requires manual verification and interpretation.
 
 \section{Ablation Study}
 
@@ -226,9 +209,7 @@ The first ablation group evaluates the effect of LiDAR-derived input representat
 
 The results are shown in Table~\ref{tab:maya_input_metrics}. Among the tested representations, SPS achieved the strongest performance across all reported metrics. The foreground IoU increased to 0.43, compared with 0.37 for RGDEM, 0.36 for RGB, and 0.25 for DEM. The same trend is visible in precision, recall, and F1 score. This indicates that the combination of slope, positive openness, and sky-view factor provides more informative local terrain contrast than the direct DEM representation or RGB-like visualization alone.
 
-The DEM representation produced the weakest result. This is expected, since absolute elevation values do not necessarily emphasize local micro-relief patterns associated with archaeological structures. In contrast, SPS explicitly encodes local terrain morphology and therefore makes subtle anthropogenic features more separable from the natural background. RGDEM and RGB performed similarly, with RGDEM achieving slightly better foreground IoU and F1 score. However, the improvement remains smaller than the difference between SPS and the other input variants.
-
-\begin{table}[!htbp]
+\begin{table}[H]
     \centering
     \caption{Comparison of input representations on the Maya dataset}
     \label{tab:maya_input_metrics}
@@ -248,15 +229,15 @@ The DEM representation produced the weakest result. This is expected, since abso
     \end{tabular}
 \end{table}
 
+The DEM representation produced the weakest result. This is expected, since absolute elevation values do not necessarily emphasize local micro-relief patterns associated with archaeological structures. In contrast, SPS explicitly encodes local terrain morphology and therefore makes subtle anthropogenic features more separable from the natural background. RGDEM and RGB performed similarly, with RGDEM achieving slightly better foreground IoU and F1 score. However, the improvement remains smaller than the difference between SPS and the other input variants.
+
 \subsection{Effect of Label Representation}
 
 The second ablation group evaluates the effect of label representation. Hard binary masks are compared with soft masks based on the same input representation. In this table, the relevant comparison is therefore not between all columns globally, but between each original representation and its corresponding soft-mask variant. All other components, including model architecture, input representation, loss function, tile size, and validation protocol, are kept unchanged inside each pair.
 
 The results are summarized in Table~\ref{tab:maya_label_metrics}. The effect of soft labels is not uniform. For SPS and RGB, soft masks slightly improved foreground IoU and F1 score. For RGDEM, the soft-mask variant produced a minor decrease in foreground IoU and F1 score. For DEM, the difference is negligible. This indicates that soft boundary supervision does not automatically improve segmentation quality in all cases.
 
-The most consistent effect of soft masks is visible in the precision--recall balance. In most paired comparisons, soft masks reduce precision and increase recall. This suggests that softer supervision encourages the model to produce broader positive activations around annotated structures. Such behaviour may be useful when the objective is to avoid missing archaeological candidates, but it also increases the risk of false-positive predictions. Therefore, soft labels should be interpreted as a trade-off between more inclusive detection and lower prediction selectivity.
-
-\begin{table}[!htbp]
+\begin{table}[H]
     \centering
     \caption{Comparison of hard and soft label representations on the Maya dataset}
     \label{tab:maya_label_metrics}
@@ -278,13 +259,15 @@ The most consistent effect of soft masks is visible in the precision--recall bal
     }
 \end{table}
 
+The most consistent effect of soft masks is visible in the precision--recall balance. In most paired comparisons, soft masks reduce precision and increase recall. This suggests that softer supervision encourages the model to produce broader positive activations around annotated structures. Such behaviour may be useful when the objective is to avoid missing archaeological candidates, but it also increases the risk of false-positive predictions. Therefore, soft labels should be interpreted as a trade-off between more inclusive detection and lower prediction selectivity.
+
 \subsection{Effect of Tile Size}
 
 The third ablation group evaluates the effect of tile size. In this comparison, the model architecture, input representation, label representation, loss function, training procedure, validation split, and threshold optimization strategy are kept fixed. Only the tile size and corresponding stride are changed.
 
 For the Maya dataset, the tile dimensions can be interpreted directly in metres because the raster resolution is 1 m per pixel. The comparison is shown in Table~\ref{tab:maya_tile_metrics}. The smaller $128 \times 128$ m tile with a stride of 32 m outperformed the $256 \times 256$ m tile with a stride of 64 m across all reported metrics. The improvement is especially visible in foreground IoU and precision. This suggests that, for compact Maya structures, the smaller tile size provides sufficient context while preserving a higher relative density of positive pixels inside the training samples.
 
-\begin{table}[!htbp]
+\begin{table}[H]
     \centering
     \caption{Comparison of tile sizes on the Maya dataset}
     \label{tab:maya_tile_metrics}
@@ -305,7 +288,7 @@ For the Maya dataset, the tile dimensions can be interpreted directly in metres 
 
 For the Slovak terrace dataset, the tile sizes in Table~\ref{tab:slovakia_tile_metrics} are reported in pixels, not metres, because the raster resolution is 0.25 m per pixel. The best result was achieved with the $512 \times 512$ tile and a stride of 128 pixels. This configuration reached the highest foreground IoU, precision, average IoU, and F1 score. Smaller tiles produced higher recall but very low precision, indicating excessive activation on background or terrace-like noise. The $1024 \times 1024$ configuration also achieved high recall, but its lower precision and average IoU indicate that the larger context did not improve the spatial selectivity of predictions.
 
-\begin{table}[!htbp]
+\begin{table}[H]
     \centering
     \caption{Comparison of tile sizes on the Slovak terrace dataset}
     \label{tab:slovakia_tile_metrics}
@@ -331,11 +314,7 @@ For the Slovak terrace dataset, the tile sizes in Table~\ref{tab:slovakia_tile_m
 
 The fourth ablation group evaluates the influence of the loss function. All compared variants use the same model architecture, input representation, label representation, tile size, training procedure, validation split, and threshold optimization strategy. Therefore, the differences in Table~\ref{tab:maya_loss_metrics} reflect the effect of the optimization objective.
 
-According to the pixel-level metrics, BCE+Dice achieved the best overall result among the tested losses, with the highest foreground IoU, average IoU, recall, and F1 score. Tanimoto loss produced very similar results, with only a minor decrease in the reported metrics. Focal loss achieved the highest precision among the standard losses, but its lower recall indicates that it produced more selective predictions and missed more positive pixels. Focal+Dice showed a more balanced but weaker result. DECB loss produced very high recall, but extremely low precision and foreground IoU, indicating that it overemphasized the positive class and generated too many false-positive predictions.
-
-Although BCE+Dice achieved the strongest metric values in this comparison, the training behaviour must also be considered. The observed training curves showed that BCE+Dice was more prone to unstable validation behaviour and overfitting, whereas Tanimoto loss produced smoother and more stable convergence. Therefore, BCE+Dice can be treated as the best metric-oriented loss in this group, while Tanimoto remains a strong alternative when training stability is prioritized.
-
-\begin{table}[!htbp]
+\begin{table}[H]
     \centering
     \caption{Comparison of loss functions on the Maya dataset}
     \label{tab:maya_loss_metrics}
@@ -357,15 +336,17 @@ Although BCE+Dice achieved the strongest metric values in this comparison, the t
     }
 \end{table}
 
+According to the pixel-level metrics, BCE+Dice achieved the best overall result among the tested losses, with the highest foreground IoU, average IoU, recall, and F1 score. Tanimoto loss produced very similar results, with only a minor decrease in the reported metrics. Focal loss achieved the highest precision among the standard losses, but its lower recall indicates that it produced more selective predictions and missed more positive pixels. Focal+Dice showed a more balanced but weaker result. DECB loss produced very high recall, but extremely low precision and foreground IoU, indicating that it overemphasized the positive class and generated too many false-positive predictions.
+
+Although BCE+Dice achieved the strongest metric values in this comparison, the training behaviour must also be considered. The observed training curves showed that BCE+Dice was more prone to unstable validation behaviour and overfitting, whereas Tanimoto loss produced smoother and more stable convergence. Therefore, BCE+Dice can be treated as the best metric-oriented loss in this group, while Tanimoto remains a strong alternative when training stability is prioritized.
+
 \subsection{Effect of Model Architecture}
 
 The final ablation group evaluates the effect of model architecture. DeepLab V3 and DeepLab V3+ were compared using the same input representation, label representation, loss function, tile configuration, training procedure, validation split, and threshold optimization strategy. Thus, the architecture is the only controlled component in this comparison.
 
 The results in Table~\ref{tab:maya_architecture_metrics} show that both architectures performed at a similar level. DeepLab V3+ achieved slightly higher foreground IoU, average IoU, precision, and F1 score, while DeepLab V3 achieved slightly higher recall. The difference between the two models is small, which suggests that both architectures are capable of learning the main terrain patterns associated with Maya structures under the selected setup.
 
-Nevertheless, DeepLab V3+ remains preferable in this experiment because it provides a slightly more balanced precision--recall trade-off and higher F1 score. In addition, the observed training behaviour indicated lower overfitting and more stable error development, although convergence required more time. This supports the use of DeepLab V3+ as the reference architecture for the final configuration.
-
-\begin{table}[!htbp]
+\begin{table}[H]
     \centering
     \caption{Comparison of DeepLab V3 and DeepLab V3+ architectures on the Maya dataset}
     \label{tab:maya_architecture_metrics}
@@ -385,6 +366,8 @@ Nevertheless, DeepLab V3+ remains preferable in this experiment because it provi
     \end{tabular}
 \end{table}
 
+Nevertheless, DeepLab V3+ remains preferable in this experiment because it provides a slightly more balanced precision--recall trade-off and higher F1 score. In addition, the observed training behaviour indicated lower overfitting and more stable error development, although convergence required more time. This supports the use of DeepLab V3+ as the reference architecture for the final configuration.
+
 \section{Error Analysis}
 
 The error analysis was conducted to identify the main failure modes of the trained segmentation models and to relate them to the properties of archaeological LiDAR data. The analysis is based on qualitative inspection of selected prediction maps in a GIS environment. The examples distinguish between false positives, false negatives, true positives, and boundary-related errors. This qualitative step is necessary because pixel-wise metrics alone do not fully explain whether a prediction is archaeologically meaningful or merely numerically correct.
@@ -393,49 +376,49 @@ The observed errors can be divided into three main categories: false-positive pr
 
 False-positive predictions occur when the model identifies terrain forms as archaeological structures even though they are not included in the reference annotation. An example is shown in Figure~\ref{fig:maya_fp_example_1}. The predicted regions are located on local relief anomalies that visually resemble archaeological remains. These forms include curved, rectangular, or edge-like terrain patterns with strong local contrast. From the model perspective, such areas are difficult to distinguish from actual structures because they contain similar geometric and topographic cues. Therefore, false positives are not random noise, but usually appear in places where the terrain morphology is similar to the learned archaeological class.
 
-Several sources of false positives were identified. The first source is natural terrain morphology that resembles anthropogenic structures, especially small mounds, depressions, sharp slope transitions, or locally regular relief forms. The second source is modern disturbance, such as tracks, edges of modified terrain, or other recent landscape changes. The third source is the visualization itself: LiDAR-derived representations may enhance local contrast and create artefacts that appear structurally meaningful to the model. In addition, some predictions classified as false positives may represent unannotated or ambiguous candidates rather than clear model errors, since the available labels should not be interpreted as a perfect archaeological inventory.
-
-False-negative errors occur when annotated archaeological objects are missed by the model. Figure~\ref{fig:maya_fn_example} shows that this problem is especially common for small, isolated, weakly preserved, or low-contrast structures. In many cases, the objects are visible in the reference annotation but only weakly expressed in the terrain visualization. Such objects provide limited visual evidence for the model and can easily be suppressed as background, particularly when they are surrounded by heterogeneous natural terrain.
-
-The false-negative examples also show that the model performs better on larger or more coherent groups of structures than on individual small objects. In the lower part of Figure~\ref{fig:maya_fn_example}, several structures are partially detected, but the segmentation remains incomplete. This indicates that the model can recognize stronger archaeological morphology, but it often fails to recover the complete set of small neighbouring structures. For archaeological prospection, this is an important limitation because small structures form a substantial part of the reference dataset and may be relevant for settlement interpretation.
-
-Boundary errors represent a separate class of problems. They occur when the model detects the correct archaeological object or terrain feature, but its predicted extent does not match the reference mask. Figure~\ref{fig:maya_boundaries_error} illustrates a strong boundary mismatch. The model identifies only parts of the visible relief expression, while a large part of the annotated area remains classified as false negative. This suggests that the model follows the present-day terrain signal rather than the full idealized or expert-interpreted outline stored in the reference annotation.
-
-This behaviour is expected in archaeological LiDAR segmentation. Expert annotations often represent interpreted archaeological objects rather than exact present-day relief boundaries. As a result, a structure may be annotated as a coherent polygon, while the visible terrain expression is fragmented, eroded, or shifted. The model, however, learns directly from raster appearance. It therefore tends to activate on the most visually expressed parts of the object, such as edges, mounds, walls, or slope transitions, instead of reproducing the full archaeological outline.
-
-A contrasting example is shown in Figure~\ref{fig:maya_boundaries_success}. In this case, the model successfully identifies the main structure and produces a spatially coherent prediction. Nevertheless, small red and blue regions remain along the object boundary. This demonstrates that even successful predictions often contain minor boundary disagreement. Such errors may reduce pixel-wise metrics, although the result remains useful for expert inspection because the main archaeological object is correctly localized.
-
-Soft masks partially address this problem by reducing the penalty for small boundary deviations. However, they do not eliminate the underlying mismatch between the raster-visible relief and the expert-defined archaeological outline. Moreover, softer supervision can encourage broader predictions and increase false positives. Therefore, boundary errors should be interpreted not only as model inaccuracies, but also as evidence of uncertainty in the relation between annotation geometry and terrain expression.
-
-Overall, the error analysis shows that the model is more reliable at identifying distinct and morphologically clear archaeological structures than at precisely delineating all reference boundaries. The main practical limitation is not only the presence of false positives or false negatives, but the ambiguity of the target class itself. Archaeological structures are often eroded, partially preserved, visually similar to natural forms, and represented by annotations that may be schematic or conservative. For this reason, the model output should be treated as a candidate layer for expert-guided interpretation rather than as a final archaeological map.
-
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/maya_fp_example_1.pdf}
     \caption{Example of false-positive predictions on the Maya dataset. The model activates on terrain forms that are not included in the reference annotation but visually resemble archaeological structures.}
     \label{fig:maya_fp_example_1}
 \end{figure}
 
-\begin{figure}[htbp]
+Several sources of false positives were identified. The first source is natural terrain morphology that resembles anthropogenic structures, especially small mounds, depressions, sharp slope transitions, or locally regular relief forms. The second source is modern disturbance, such as tracks, edges of modified terrain, or other recent landscape changes. The third source is the visualization itself: LiDAR-derived representations may enhance local contrast and create artefacts that appear structurally meaningful to the model. In addition, some predictions classified as false positives may represent unannotated or ambiguous candidates rather than clear model errors, since the available labels should not be interpreted as a perfect archaeological inventory.
+
+False-negative errors occur when annotated archaeological objects are missed by the model. Figure~\ref{fig:maya_fn_example} shows that this problem is especially common for small, isolated, weakly preserved, or low-contrast structures. In many cases, the objects are visible in the reference annotation but only weakly expressed in the terrain visualization. Such objects provide limited visual evidence for the model and can easily be suppressed as background, particularly when they are surrounded by heterogeneous natural terrain.
+
+The false-negative examples also show that the model performs better on larger or more coherent groups of structures than on individual small objects. In the lower part of Figure~\ref{fig:maya_fn_example}, several structures are partially detected, but the segmentation remains incomplete. This indicates that the model can recognize stronger archaeological morphology, but it often fails to recover the complete set of small neighbouring structures. For archaeological prospection, this is an important limitation because small structures form a substantial part of the reference dataset and may be relevant for settlement interpretation.
+
+\begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figures/maya_fn_example.pdf}
     \caption{Examples of false-negative predictions on the Maya dataset. Small, isolated, weakly preserved, and low-contrast structures are frequently missed, while larger groups are more often partially detected.}
     \label{fig:maya_fn_example}
 \end{figure}
 
-\begin{figure}[htbp]
+Boundary errors represent a separate class of problems. They occur when the model detects the correct archaeological object or terrain feature, but its predicted extent does not match the reference mask. Figure~\ref{fig:maya_boundaries_error} illustrates a strong boundary mismatch. The model identifies only parts of the visible relief expression, while a large part of the annotated area remains classified as false negative. This suggests that the model follows the present-day terrain signal rather than the full idealized or expert-interpreted outline stored in the reference annotation.
+
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/maya_boundaries_error.pdf}
     \caption{Example of a boundary error on the Maya dataset. The model detects only the most visible parts of the relief expression, while the larger annotated structure remains partly undetected.}
     \label{fig:maya_boundaries_error}
 \end{figure}
 
-\begin{figure}[htbp]
+This behaviour is expected in archaeological LiDAR segmentation. Expert annotations often represent interpreted archaeological objects rather than exact present-day relief boundaries. As a result, a structure may be annotated as a coherent polygon, while the visible terrain expression is fragmented, eroded, or shifted. The model, however, learns directly from raster appearance. It therefore tends to activate on the most visually expressed parts of the object, such as edges, mounds, walls, or slope transitions, instead of reproducing the full archaeological outline.
+
+A contrasting example is shown in Figure~\ref{fig:maya_boundaries_success}. In this case, the model successfully identifies the main structure and produces a spatially coherent prediction. Nevertheless, small red and blue regions remain along the object boundary. This demonstrates that even successful predictions often contain minor boundary disagreement. Such errors may reduce pixel-wise metrics, although the result remains useful for expert inspection because the main archaeological object is correctly localized.
+
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/maya_boundaries_success.pdf}
     \caption{Example of a successful boundary prediction on the Maya dataset. The main archaeological structure is correctly localized, although minor boundary disagreement remains visible along the object edges.}
     \label{fig:maya_boundaries_success}
 \end{figure}
+
+Soft masks partially address this problem by reducing the penalty for small boundary deviations. However, they do not eliminate the underlying mismatch between the raster-visible relief and the expert-defined archaeological outline. Moreover, softer supervision can encourage broader predictions and increase false positives. Therefore, boundary errors should be interpreted not only as model inaccuracies, but also as evidence of uncertainty in the relation between annotation geometry and terrain expression.
+
+Overall, the error analysis shows that the model is more reliable at identifying distinct and morphologically clear archaeological structures than at precisely delineating all reference boundaries. The main practical limitation is not only the presence of false positives or false negatives, but the ambiguity of the target class itself. Archaeological structures are often eroded, partially preserved, visually similar to natural forms, and represented by annotations that may be schematic or conservative. For this reason, the model output should be treated as a candidate layer for expert-guided interpretation rather than as a final archaeological map.
 
 \section{Archaeological Usefulness of the Results}
 
@@ -445,18 +428,7 @@ From this perspective, false positives and false negatives do not have the same 
 
 For the Maya dataset, the model output is particularly useful for candidate structure detection. The object-level hit rates by size category are shown in Table~\ref{tab:maya_hit_rate_by_size}. The results demonstrate a strong dependence on object size. Large structures were detected most reliably, with 400 detected objects out of 472, corresponding to a hit rate of 0.8475. Medium-sized structures were also detected relatively well, with 1383 detected objects out of 2182 and a hit rate of 0.6338. In contrast, small structures were considerably more difficult to detect, with only 470 detected objects out of 1430 and a hit rate of 0.3287. Figure~\ref{fig:maya_objects_hitrate_barchart} illustrates the dependence of the hit rate on the object size and supports this observation.
 
-This trend is consistent with the qualitative error analysis. Larger structures usually have a stronger and more coherent terrain expression, which makes them more visible in the LiDAR-derived representation and easier for the model to identify. Small structures, on the other hand, are often weakly preserved, fragmented, or visually similar to natural terrain irregularities. As a result, they are more frequently missed or only partially detected.
-
-Overall, the best Maya configuration detected 2253 out of 4084 reference objects, corresponding to an object-level hit rate of 0.5517. This result is not sufficient for fully automatic archaeological mapping, but it is useful for prioritizing areas of interest. In practical terms, the model can help an expert focus attention on a reduced set of candidate locations, especially for medium and large structures, where the detection rate is substantially higher than for small objects.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\textwidth]{figures/maya_objects_hitrate_barchart.png}
-    \caption{Hit rates for different object size categories on the Maya dataset. A hit is defined as intersection over union (IoU) $\geq 0.1$.}
-    \label{fig:maya_objects_hitrate_barchart}
-\end{figure}
-
-\begin{table}[!htbp]
+\begin{table}[H]
     \centering
     \caption{Hit rates for different object size categories on the Maya dataset. A hit is defined as intersection over union (IoU) $\geq 0.1$.}
     \label{tab:maya_hit_rate_by_size}
@@ -475,13 +447,20 @@ Overall, the best Maya configuration detected 2253 out of 4084 reference objects
     \end{tabular}
 \end{table}
 
+This trend is consistent with the qualitative error analysis. Larger structures usually have a stronger and more coherent terrain expression, which makes them more visible in the LiDAR-derived representation and easier for the model to identify. Small structures, on the other hand, are often weakly preserved, fragmented, or visually similar to natural terrain irregularities. As a result, they are more frequently missed or only partially detected.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{figures/maya_objects_hitrate_barchart.png}
+    \caption{Hit rates for different object size categories on the Maya dataset. A hit is defined as intersection over union (IoU) $\geq 0.1$.}
+    \label{fig:maya_objects_hitrate_barchart}
+\end{figure}
+
+Overall, the best Maya configuration detected 2253 out of 4084 reference objects, corresponding to an object-level hit rate of 0.5517. This result is not sufficient for fully automatic archaeological mapping, but it is useful for prioritizing areas of interest. In practical terms, the model can help an expert focus attention on a reduced set of candidate locations, especially for medium and large structures, where the detection rate is substantially higher than for small objects.
+
 For the Slovak terrace dataset, the practical usefulness of the model is different. The model is less suitable for producing a precise segmentation of individual terrace lines, but it can still highlight probable terrace areas or terrace complexes. The object-level hit rates are shown in Table~\ref{tab:slovakia_hit_rate_by_size}. The model detected 13 out of 21 medium-sized terrace objects and all 3 large terrace objects, resulting in an overall hit rate of 0.666.
 
-However, these results must be interpreted carefully. The Slovak reference data are based on buffered polylines, while the model often responds to broader terrain morphology rather than to individual terrace centre lines. Therefore, a detected object may indicate the correct general location of a terrace system while still failing to match the reference geometry precisely. This explains why the object-level hit rate can appear practically useful even when pixel-wise segmentation metrics remain low.
-
-The main practical value of the Slovak model is therefore candidate localization rather than final delineation. It can help identify zones where terrace-like morphology is present, but the continuity of individual terrace segments, their archaeological interpretation, and the rejection of false positives require expert verification. This is especially important because natural slope edges, erosion forms, and other relief anomalies can produce predictions that resemble terrace segments.
-
-\begin{table}[!htbp]
+\begin{table}[H]
     \centering
     \caption{Hit rates for different object size categories on the Slovakia dataset. A hit is defined as intersection over union (IoU) $\geq 0.1$.}
     \label{tab:slovakia_hit_rate_by_size}
@@ -498,6 +477,10 @@ The main practical value of the Slovak model is therefore candidate localization
         \bottomrule
     \end{tabular}
 \end{table}
+
+However, these results must be interpreted carefully. The Slovak reference data are based on buffered polylines, while the model often responds to broader terrain morphology rather than to individual terrace centre lines. Therefore, a detected object may indicate the correct general location of a terrace system while still failing to match the reference geometry precisely. This explains why the object-level hit rate can appear practically useful even when pixel-wise segmentation metrics remain low.
+
+The main practical value of the Slovak model is therefore candidate localization rather than final delineation. It can help identify zones where terrace-like morphology is present, but the continuity of individual terrace segments, their archaeological interpretation, and the rejection of false positives require expert verification. This is especially important because natural slope edges, erosion forms, and other relief anomalies can produce predictions that resemble terrace segments.
 
 In summary, the archaeological usefulness of the results depends strongly on the intended use case. For the Maya dataset, the model is useful as a candidate detector for medium and large structures, but it remains limited for small and weakly preserved features. For the Slovak terrace dataset, the model is useful for highlighting probable terrace zones, but not for automatically extracting complete and reliable terrace geometries. In both cases, the output should be treated as a supporting layer for expert-guided inspection rather than as a final archaeological interpretation.
 
