@@ -17,16 +17,16 @@
 \department{Department of Artificial Intelligence}{Ústav umelej inteligencie}  % katedra
 \departmentacr{DAI}{ÚUI}  % skratka katedry
 \submissiondate{29}{5}{2026}
-% \fieldofstudy{Informatika}
-\studyprogramme{Inteligentné systémy}  % iba názov bez číselného kódu
+\fieldofstudy{Informatics}
+\studyprogramme{Intelligent Systems}  % iba názov bez číselného kódu
 % \city{Košice}  % mesto
 
 \keywords{%
   % english
-  \LaTeX, programming, typesetting
+  aerial LiDAR, archaeology, semantic segmentation, deep learning, convolutional neural networks, remote sensing, geographic information system, digital elevation model
 }{%
   % slovak
-  \LaTeX, programovanie, sadzba textu
+  letecký LiDAR, archeológia, sémantická segmentácia, hlboké učenie, konvolučné neurónové siete, diaľkový prieskum Zeme, geoinformačný systém, digitálny model územia
 }
 
 \declaration{%
@@ -42,16 +42,29 @@ authorship integrity.
 % https://pdf.tuke.sk/legislativa/Disciplinarny_poriadok_TUKE_Uplne_znenie_v_zneni_D1_az_D3.pdf
 
 \abstract{%
-  % english
-  Abstract in English.
+% english
+  This bachelor thesis addresses the problem of semantic segmentation of archaeological features in aerial LiDAR-derived data. The work is motivated by the need to support expert interpretation of large LiDAR datasets, where manual inspection remains time-consuming and difficult to scale. The study focuses on two different datasets: compact Maya structures in Guatemala and linear terrace features in Slovakia.
+
+  A reproducible experimental workflow was designed for data preparation, label construction, tiled dataset generation, model training, threshold-based inference, quantitative evaluation, and qualitative GIS inspection. The experiments compared DeepLab-based segmentation models under several controlled variables, including LiDAR-derived input representation, hard and soft labels, tile size, loss function, and model architecture.
+
+  The results show that segmentation quality depends strongly on domain-specific methodological choices. For Maya structures, the best DeepLab~V3+ configuration achieved substantially stronger foreground segmentation and object detection completeness than the baseline model. For Slovak terraces, pixel-level segmentation remained limited, but the model was still able to indicate relevant terrace-like areas at the object level.
+
+  The main contribution of the thesis is a controlled evaluation of the conditions under which deep learning can support archaeological LiDAR interpretation. The proposed workflow is not sufficient for fully automatic archaeological mapping, but it can be used as a decision-support approach for candidate detection and expert-guided prioritization.
 }{%
-  % slovak
-  Abstrakt v slovenčine.
+% slovak
+  Táto bakalárska práca sa zaoberá problémom sémantickej segmentácie archeologických štruktúr v dátach odvodených z leteckého LiDARu. Motiváciou práce je potreba podporiť expertnú interpretáciu rozsiahlych LiDARových dát, pri ktorých manuálna kontrola zostáva časovo náročná a ťažko škálovateľná. Práca sa zameriava na dve odlišné dátové množiny: kompaktné mayské štruktúry v Guatemale a lineárne terasovité prvky na Slovensku.
+
+  V práci bol navrhnutý reprodukovateľný experimentálny postup zahŕňajúci prípravu dát, tvorbu anotácií, generovanie dlaždicovej dátovej množiny, trénovanie modelov, prahovanú inferenciu, kvantitatívne vyhodnotenie a kvalitatívnu kontrolu v prostredí GIS. Experimenty porovnávali segmentačné modely založené na architektúrach DeepLab pri viacerých kontrolovaných premenných, najmä vstupnej reprezentácii odvodenej z LiDARu, tvrdých a mäkkých maskách, veľkosti dlaždíc, stratovej funkcii a architektúre modelu.
+
+  Výsledky ukazujú, že kvalita segmentácie výrazne závisí od doménovo špecifických metodických rozhodnutí. Pri mayských štruktúrach dosiahla najlepšia konfigurácia DeepLab~V3+ podstatne lepšiu segmentáciu cieľovej triedy a úplnosť detekcie objektov ako základný model. Pri slovenských terasách zostala pixelová segmentácia obmedzená, no model dokázal na objektovej úrovni označiť relevantné terasovité oblasti.
+
+  Hlavným prínosom práce je kontrolované vyhodnotenie podmienok, za ktorých môže hlboké učenie podporiť interpretáciu archeologických LiDARových dát. Navrhnutý postup nie je dostatočný na plne automatické archeologické mapovanie, ale môže slúžiť ako rozhodovacia podpora pri detekcii kandidátnych oblastí a ich prioritizácii expertom.
 }
 
-\acknowledgment{%
-  Na tomto mieste by som sa rád poďakoval svojmu vedúcemu práce za jeho čas a odborné vedenie počas riešenia mojej záverečnej práce.
-  Rovnako by som sa rád poďakoval svojim rodičom a priateľom za ich podporu a povzbudzovanie počas celého môjho štúdia.
+\acknowledgment{
+At this point, I would like to express my sincere gratitude to my thesis supervisor for giving me the opportunity to work on this topic, as well as for his guidance, time, and professional support throughout the preparation of this thesis.
+I would also like to express my heartfelt gratitude to my dear friend Anastasiia for being by my side from the very beginning of my work on this thesis and for her continuous support during this period.
+Finally, I am deeply grateful to my parents for their boundless support, encouragement, and belief in me throughout my studies and throughout my life.
 }
 
 \thesisspec{figures/zadavaci-list.png}
@@ -59,5 +72,5 @@ authorship integrity.
 % When defined, final PDF will not contain colored links, which is useful for printing.
 % WARNING: Uncomment ONLY when used manually without the Docker image for building the thesis. By uncommenting this line, you will manually override the printable flag and behavior of the Docker image will not work as expected.
 % If you want to use the Docker image for building the document, please do not uncomment this line.
-%\def\printable{}
+\def\printable{}
 
