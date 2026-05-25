@@ -11,6 +11,21 @@ As a result, early archaeological remote sensing relied primarily on indirect vi
 Before LiDAR became a routine source of archaeological terrain data, experts mainly worked with data sources that were informative, but limited in their ability to capture subtle terrain deformations. The most important of these were:
 \begin{itemize}
     \item \textbf{Optical aerial photographs:} Since the 1930s, archaeological prospection has relied on visual analysis of photographs captured from aircraft flying over the investigated area~\cite{cowley_what_2016}. Because of the limited spatial resolution and the dependence on weather, season, and illumination conditions, these images were usually not sufficient for identifying small archaeological microforms directly. Instead, experts searched for indirect indicators such as crop marks~\cite{cowley_what_2016}, soil marks, and shadows cast by structures under favourable lighting conditions~\cite{HUERTAS1988131,liow_use_1990}.
+
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{0.48\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{figures/aerial_photography_1.jpg}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.48\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{figures/aerial_photography_2.jpg}
+        \end{subfigure}
+        \caption{Aerial photographer during World War I and a French airfield. Credit:~\cite{baumann_history_2014}}
+        \label{fig:remote_sensing_examples}
+    \end{figure}
     
     \item \textbf{Satellite data:} Programs such as Landsat~\cite{wulder_fifty_2022,williams_landsat_nodate}, declassified CORONA~\cite{ur_corona_2003,altmaier_digital_2002}, and Sentinel-1~\cite{michenot_identification_2024} provided access to large volumes of Earth observation data from many regions. However, low- and medium-resolution imagery was usually more suitable for identifying large landscape patterns than for detecting small archaeological features. In addition, optical satellite imagery remained strongly limited by vegetation cover, which often obscured the bare ground and reduced the visibility of terrain-based structures~\cite{thompson_detecting_2020,michenot_identification_2024}.
     
@@ -74,10 +89,25 @@ In cases where raster visualizations did not provide sufficient visibility becau
 
 \begin{itemize}
     \item \textbf{Region growing methods:} These approaches start from seed cells and iteratively merge neighbouring cells according to similarity criteria such as elevation, slope, or local terrain continuity~\cite{adams_seeded_1994,MILIARESIS20071076,zhu_loess_2018}. Their advantage is conceptual simplicity and the ability to exploit local terrain structure. Their weakness is high sensitivity to threshold selection and to local noise~\cite{adams_seeded_1994,castilla_size-constrained_nodate}.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{figures/region_growing.png}
+        \caption{Result of performing the seeded region growing algorithm and correcting the abnormal pixel. Credit:~\cite{lee_comparison_2019}}
+        \label{fig:region_growing}
+    \end{figure}
     
     \item \textbf{Segmentation based on geomorphometric features:} In these approaches, terrain forms are represented by descriptors such as average height, slope, curvature~\cite{evans_geomorphometry_2012}, or shape-related parameters, after which clustering or rule-based classification is applied~\cite{MILIARESIS20071076,zhu_loess_2018}. Such methods made it possible to distinguish between broader classes of terrain forms, including potential anthropogenic features. However, their performance depended strongly on the quality of the selected descriptors and on how well archaeological objects could be represented by them~\cite{MILIARESIS20071076}.
     
     \item \textbf{Contour regularization and shape refinement:} Because initial segmentations were often noisy or geometrically unstable, additional post-processing procedures were applied to regularize contours~\cite{liow_use_1990}. These included straight-line approximation~\cite{douglas_algorithms_1973} and other knowledge-driven corrections intended to produce more plausible outlines of archaeological features~\cite{liow_use_1990,HUERTAS1988131}. While such procedures improved the visual quality of results, they also introduced additional assumptions and parameters that required expert tuning.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{figures/contour_reconstruction.png}
+        \caption{Morphology detection algorithm reconstruction process. Credit:~\cite{zhao_building_2026}}
+        \label{fig:contour_regularization}
+    \end{figure}
+
 \end{itemize}
 
 Overall, indirect methods were useful when archaeological objects could be characterized by relatively stable local terrain properties~\cite{guyot_objective_2021}. At the same time, they remained limited in heterogeneous landscapes, where natural and anthropogenic forms often overlap in their geomorphometric characteristics~\cite{trier_using_2019,bundzel_semantic_2020}.
@@ -89,6 +119,14 @@ Some terrain representations derived from DEM made archaeological features more 
     \item \textbf{Template matching~\cite{brunelli2008template,brunelli2009template}:} This method was widely used for searching for discrete archaeological structures with relatively predictable shapes~\cite{trier_using_2019,guyot_objective_2021}. The algorithm scanned raster images for patterns corresponding to predefined templates or geometric forms~\cite{trier_automatic_2012}. Its main advantage was simplicity and direct applicability to visually distinctive objects. However, it performed poorly when object morphology varied substantially or when the background was heterogeneous, often resulting in a large number of false negatives and unstable performance across sites~\cite{trier_using_2019,guyot_objective_2021}.
     
     \item \textbf{Object-based image analysis (GEOBIA~\cite{Hay2008,blaschke_object_2010}):} This approach represented an important transition toward more structured automated interpretation~\cite{blaschke_object_2010,Castilla2008,chen_geographic_2018,hay_special_nodate}. Instead of classifying individual pixels, it first grouped pixels into meaningful image objects and then classified these objects using spatial, textural, and contextual descriptors such as area, compactness, or elongation~\cite{blaschke_object_2010,MILIARESIS20071076}. Compared with purely pixel-based methods, GEOBIA could better reflect the spatial organization of archaeological forms. Nevertheless, it still depended strongly on segmentation settings and manually selected descriptors, which limited its transferability between landscapes~\cite{castilla_size-constrained_nodate,diakogiannis_resunet-_2020}.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{figures/geobia.png}
+        \caption{Workflow of the Geographic Object-Based Image Analysis (GEOBIA) classification framework. Credit:~\cite{ribeiro_geographic_2020}}
+        \label{fig:geobia}
+    \end{figure}
+
 \end{itemize}
 
 Although these approaches increased the efficiency of expert work, they still required substantial manual intervention. In practice, the analyst often had to adjust numerous parameters, such as contrast thresholds, filter radius, segmentation settings, or template definitions~\cite{somrak_learning_2020,kokalj_standardizing_2025}. As a result, these methods were difficult to scale reliably to large areas and remained sensitive to noise, relief complexity, and local landscape variability~\cite{zhang_unveiling_2024,bundzel_semantic_2020}. This limitation is one of the main reasons why later research increasingly shifted toward data-driven learning approaches, especially CNN~\cite{lecun_convolutional_1998}-based semantic segmentation~\cite{bundzel_semantic_2020,fiorucci_deep_2022}.
