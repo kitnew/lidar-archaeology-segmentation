@@ -2,8 +2,6 @@
 
 \chapter{Results and Discussion}\label{ch:results_discussion}
 
-\section{Overview of Conducted Experiments}
-
 This chapter presents the quantitative and qualitative results of the conducted experiments. The experiments were treated not as an independent sequence of model runs, but as a set of controlled experimental groups. Each group was designed to assess the impact of a single methodological component, such as input data representation, label representation, loss function, sampling strategy, or model architecture. This structure allows us to distinguish general trends from the specific results of individual configurations. A detailed description of all configurations will not be provided due to their high variability; they follow directly from the methodology described above and adhere to a defined evaluation protocol.
 
 Experiments were conducted separately for the datasets on Maya structures and Slovak terraces, as these two study areas differ in object morphology, terrain context, and annotation characteristics. The Maya dataset focuses primarily on compact archaeological structures, whereas the Slovak dataset contains linear objects similar to terraces. Therefore, the results are presented separately for both areas and only then compared at the level of methodological trends. A complete description of the characteristics of the available data is provided in Chapter 4.
@@ -61,14 +59,17 @@ Slovakia & DeepLab V3, DeepLab V3+, pretrained DeepLab V3+ \\
 
 Table ~\ref{tab:experiments_overview} provides an overview of the main experimental groups that will be analyzed in this section. The table intentionally lists only the main controlled variables and comparison options. A complete list of experiments, including the number of configurations, settings with the best results, and detailed observations, is provided in the appendix ~\ref{app:tab:experiments_summary}. As noted earlier, the control variables consist of identified approaches by various authors proposing specific methods; however, most of them lack broader validation beyond the specific domain and selected configuration. In this context, the main goal of improving the stability of the results is not to segment existing structures while preserving the correct geometry, but rather to ensure that no potential candidate objects are overlooked that might be of interest in an expert review.
 
-\section{Reference and Best-Performing Configurations}
+\section{Reference Configurations and Main Results}
+
+This section presents the reference configurations selected for detailed comparison in the results chapter. For each study domain, the best-performing configuration is first described in terms of model architecture, input representation, label representation, loss function, and tile configuration. The reported results are then compared with a representative baseline in order to show how the final configuration differs from earlier or simpler experimental variants.
+
 \subsection{Best-Performing Configuration for Maya Structures}
 
 For the Maya dataset, the best-performing configuration was obtained with the following setup:
 \begin{itemize}
     \item Model: DeepLab V3+ with an ImageNet-pretrained ResNet-101 backbone;
-    \item Input representation: SPS visualization with radius = 10 m, n\_dir = 16, noise\_sup = 0, and z-score normalization;
-    \item Label representation: soft mask with radius = 2 m;
+    \item Input representation: z-score-normalized SPS representation;
+    \item Label representation: soft mask with a 2~m confidence-shadow radius;
     \item Loss function: Tanimoto with complement loss;
     \item Tile size: $128 \times 128$ pixels with a stride of 32 pixels.
 \end{itemize}
@@ -111,22 +112,22 @@ Since pixel-wise metrics do not fully describe the practical usefulness of the p
     \label{tab:maya_v3_v3plus_object_metrics}
 \end{table}
 
-This behaviour is consistent with the practical objective of the task. In the context of archaeological candidate detection, missing a potential structure may be more problematic than producing additional candidates that can later be reviewed by an expert. The qualitative comparison in Figure~\ref{fig:maya_tp_fp_fn_comparison} supports this interpretation. Both models tend to fail in similar situations: small isolated structures with weak terrain expression are often missed, while natural terrain forms with morphology similar to anthropogenic structures may produce false positives. However, the DeepLab V3+ configuration identifies a larger portion of potential structures and therefore provides a more useful basis for subsequent expert-guided interpretation.
+This behaviour is consistent with the practical objective of the task. In the context of archaeological candidate detection, missing a potential structure may be more problematic than producing additional candidates that can later be reviewed by an expert. The qualitative comparison in Figure~\ref{fig:maya_tp_fp_fn_comparison} supports this interpretation. Both models tend to fail in similar situations, but the comparison also shows several important qualitative differences. In panel (a), most errors occur near correctly segmented structures: false-negative pixels are often located directly next to true-positive regions, which indicates boundary mismatch rather than a complete failure to localize the object. In panel (b), the missed structures are located in areas where the terrain expression is weaker and the object morphology is less clearly separated from the surrounding background. In this case, the DeepLab V3+ configuration detects one additional structure compared with DeepLab V3. Panel (c) illustrates false-positive predictions, where the models activate on terrain forms that visually resemble archaeological structures but are not included in the reference annotation. Overall, the DeepLab V3+ configuration identifies a larger portion of potential structures and therefore provides a more useful basis for subsequent expert-guided interpretation.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.49\textwidth}
         \includegraphics[width=\textwidth]{figures/maya_tp_fp_fn_sps_v3.pdf}
-        \caption{DeepLab V3}
+        \caption*{DeepLab V3}
         \label{fig:maya_v3}
     \end{subfigure}
     \hfill
     \begin{subfigure}{0.49\textwidth}
         \includegraphics[width=\textwidth]{figures/maya_tp_fp_fn_sps_v3+.pdf}
-        \caption{DeepLab V3+}
+        \caption*{DeepLab V3+}
         \label{fig:maya_v3_plus}
     \end{subfigure}
-    \caption{Comparison of the number of true positives, false positives, and false negatives for DeepLab V3 and DeepLab V3+ models on the Maya dataset.}
+    \caption{Qualitative comparison of DeepLab V3 and DeepLab V3+ predictions on the Maya dataset. In each map, blue denotes false negatives, red denotes false positives, and white denotes true-positive overlap. Panel (a) shows mostly correct detections with boundary-related false negatives close to true-positive regions; panel (b) shows missed structures with weak terrain expression; panel (c) shows false positives on terrain forms visually similar to archaeological structures.}
     \label{fig:maya_tp_fp_fn_comparison}
 \end{figure}
 
@@ -136,7 +137,7 @@ For the Slovak terrace dataset, the best-performing configuration was obtained w
 \begin{itemize}
     \item Model: DeepLab V3+ with a ResNet-101 backbone;
     \item Input representation: ANISO visualization;
-    \item Label representation: soft mask with radius = 2 m;
+    \item Label representation: soft mask with a 2~m confidence-shadow radius;
     \item Loss function: BCE+Dice loss;
     \item Tile size: $512 \times 512$ pixels with a stride of 128 pixels.
 \end{itemize}
@@ -179,21 +180,21 @@ The object-wise evaluation in Table~\ref{tab:slovakia_v3plus_object_metrics} con
     \label{tab:slovakia_v3plus_object_metrics}
 \end{table}
 
-The qualitative inspection in Figure~\ref{fig:terraces_ladzany_sasovske_tp_fp_fn} supports this interpretation. The non-pretrained model often identifies the approximate location of terrace complexes, especially in areas where the terrain morphology is visually pronounced. However, it does not reliably separate individual terrace lines. Instead, it tends to merge parts of the terrace system into larger connected regions or to activate on neighbouring terrain forms with similar morphology. This behaviour increases recall but also produces a large number of false-positive predictions.
+The qualitative inspection in Figure~\ref{fig:terraces_ladzany_sasovske_tp_fp_fn} supports this interpretation. Panel (a) shows an example where the model partially follows the general direction of terrace-like relief, but many reference terrace segments remain false negatives and several additional activations appear outside the annotated masks. Panel (b) shows an even more difficult case, where a large terrace system is mostly missed and the prediction is concentrated only in a limited central part of the slope. In both cases, the model responds to broader terrace-like morphology rather than to individual buffered terrace lines. This behaviour explains the relatively low pixel-wise overlap and the high number of false-positive predictions.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figures/ladzany_sasovske_tp_fp_fn.pdf}
-    \caption{Comparison of the number of true positives, false positives, and false negatives for DeepLab V3 and DeepLab V3+ models on the terraces dataset.}
+    \includegraphics[width=0.9\textwidth]{figures/ladzany_sasovske_tp_fp_fn.pdf}
+    \caption{Qualitative evaluation of the selected non-pretrained DeepLab V3+ configuration on Slovak terrace areas. Blue denotes false negatives, red denotes false positives, and white denotes true-positive overlap. Panel (a) shows partial detection of terrace-like relief with many missed reference segments; panel (b) shows a larger terrace system where most annotated terrace lines remain undetected.}
     \label{fig:terraces_ladzany_sasovske_tp_fp_fn}
 \end{figure}
 
-The detailed example in Figure~\ref{fig:terraces_ladzany_tp_fp_fn} illustrates the same limitation at a smaller scale. Several terrace segments are partially detected, but many annotated lines remain false negatives, while additional predictions appear in nearby areas without positive reference pixels. This indicates that the model learned a general representation of terrace-like relief, but did not achieve precise segmentation of individual terrace structures.
+The detailed example in Figure~\ref{fig:terraces_ladzany_tp_fp_fn} illustrates the same limitation at a smaller scale. Several terrace segments are partially detected, as indicated by the true-positive overlaps, but many buffered terrace lines remain false negatives. At the same time, false-positive predictions appear near visually similar slope edges and neighbouring terrain forms. This indicates that the model learned a general representation of terrace-like relief, but did not achieve precise segmentation of individual terrace structures.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/ladzany_tp_fp_fn.pdf}
-    \caption{Comparison of the number of true positives, false positives, and false negatives for DeepLab V3 and DeepLab V3+ models on the terraces dataset.}
+    \caption{Detailed example of Slovak terrace prediction errors for the selected pretrained DeepLab V3+ configuration. Blue denotes false negatives, red denotes false positives, and white denotes true-positive overlap. The example shows partial detection of several terrace segments, but also many missed annotated lines and additional predictions on nearby terrain forms.}
     \label{fig:terraces_ladzany_tp_fp_fn}
 \end{figure}
 
@@ -374,47 +375,55 @@ The error analysis was conducted to identify the main failure modes of the train
 
 The observed errors can be divided into three main categories: false-positive predictions, false-negative predictions, and boundary errors. These categories are closely related to the morphology of archaeological objects, the visual similarity between anthropogenic and natural terrain forms, and the uncertainty of expert annotations.
 
-False-positive predictions occur when the model identifies terrain forms as archaeological structures even though they are not included in the reference annotation. An example is shown in Figure~\ref{fig:maya_fp_example_1}. The predicted regions are located on local relief anomalies that visually resemble archaeological remains. These forms include curved, rectangular, or edge-like terrain patterns with strong local contrast. From the model perspective, such areas are difficult to distinguish from actual structures because they contain similar geometric and topographic cues. Therefore, false positives are not random noise, but usually appear in places where the terrain morphology is similar to the learned archaeological class.
+False-positive predictions occur when the model identifies terrain forms as archaeological structures even though they are not included in the reference annotation. An example is shown in Figure~\ref{fig:maya_fp_example_1}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{figures/maya_fp_example_1.pdf}
+    \includegraphics[width=0.8\textwidth]{figures/maya_fp_example_1.pdf}
     \caption{Example of false-positive predictions on the Maya dataset. The model activates on terrain forms that are not included in the reference annotation but visually resemble archaeological structures.}
     \label{fig:maya_fp_example_1}
 \end{figure}
 
+The predicted regions are located on local relief anomalies that visually resemble archaeological remains. These forms include curved, rectangular, or edge-like terrain patterns with strong local contrast. From the model perspective, such areas are difficult to distinguish from actual structures because they contain similar geometric and topographic cues. Therefore, false positives are not random noise, but usually appear in places where the terrain morphology is similar to the learned archaeological class.
+
 Several sources of false positives were identified. The first source is natural terrain morphology that resembles anthropogenic structures, especially small mounds, depressions, sharp slope transitions, or locally regular relief forms. The second source is modern disturbance, such as tracks, edges of modified terrain, or other recent landscape changes. The third source is the visualization itself: LiDAR-derived representations may enhance local contrast and create artefacts that appear structurally meaningful to the model. In addition, some predictions classified as false positives may represent unannotated or ambiguous candidates rather than clear model errors, since the available labels should not be interpreted as a perfect archaeological inventory.
 
-False-negative errors occur when annotated archaeological objects are missed by the model. Figure~\ref{fig:maya_fn_example} shows that this problem is especially common for small, isolated, weakly preserved, or low-contrast structures. In many cases, the objects are visible in the reference annotation but only weakly expressed in the terrain visualization. Such objects provide limited visual evidence for the model and can easily be suppressed as background, particularly when they are surrounded by heterogeneous natural terrain.
-
-The false-negative examples also show that the model performs better on larger or more coherent groups of structures than on individual small objects. In the lower part of Figure~\ref{fig:maya_fn_example}, several structures are partially detected, but the segmentation remains incomplete. This indicates that the model can recognize stronger archaeological morphology, but it often fails to recover the complete set of small neighbouring structures. For archaeological prospection, this is an important limitation because small structures form a substantial part of the reference dataset and may be relevant for settlement interpretation.
+False-negative errors occur when annotated archaeological objects are missed by the model. Figure~\ref{fig:maya_fn_example} shows that this problem is especially common for small, isolated, weakly preserved, or low-contrast structures. 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{figures/maya_fn_example.pdf}
-    \caption{Examples of false-negative predictions on the Maya dataset. Small, isolated, weakly preserved, and low-contrast structures are frequently missed, while larger groups are more often partially detected.}
+    \includegraphics[width=0.8\textwidth]{figures/maya_fn_example.pdf}
+    \caption{Examples of false-negative predictions on the Maya dataset. Blue denotes false negatives, red denotes false positives, and white denotes true-positive overlap. Panels (a1--a3) show small, isolated, or weakly expressed structures that are mostly missed by the model. Panels (b1--b3) show larger or more coherent structure groups, where some parts are detected but many neighbouring annotated structures remain false negatives.}
     \label{fig:maya_fn_example}
 \end{figure}
 
-Boundary errors represent a separate class of problems. They occur when the model detects the correct archaeological object or terrain feature, but its predicted extent does not match the reference mask. Figure~\ref{fig:maya_boundaries_error} illustrates a strong boundary mismatch. The model identifies only parts of the visible relief expression, while a large part of the annotated area remains classified as false negative. This suggests that the model follows the present-day terrain signal rather than the full idealized or expert-interpreted outline stored in the reference annotation.
+In many cases, the objects are visible in the reference annotation but only weakly expressed in the terrain visualization. Such objects provide limited visual evidence for the model and can easily be suppressed as background, particularly when they are surrounded by heterogeneous natural terrain.
+
+The false-negative examples also show that the model performs better on larger or more coherent groups of structures than on individual small objects. In the lower part of Figure~\ref{fig:maya_fn_example}, several structures are partially detected, but the segmentation remains incomplete. This indicates that the model can recognize stronger archaeological morphology, but it often fails to recover the complete set of small neighbouring structures. For archaeological prospection, this is an important limitation because small structures form a substantial part of the reference dataset and may be relevant for settlement interpretation.
+
+Boundary errors represent a separate class of problems. They occur when the model detects the correct archaeological object or terrain feature, but its predicted extent does not match the reference mask. Figure~\ref{fig:maya_boundaries_error} illustrates a strong boundary mismatch. 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{figures/maya_boundaries_error.pdf}
-    \caption{Example of a boundary error on the Maya dataset. The model detects only the most visible parts of the relief expression, while the larger annotated structure remains partly undetected.}
+    \includegraphics[width=0.85\textwidth]{figures/maya_boundaries_error.pdf}
+    \caption{Example of a strong boundary mismatch on the Maya dataset. Panel (a) shows the LiDAR-derived terrain visualization, while panel (b) shows the evaluation overlay, where blue denotes false negatives, red denotes false positives, and white denotes true-positive overlap. The model detects only the most visually expressed parts of the structure, while a large part of the annotated area remains false negative.}
     \label{fig:maya_boundaries_error}
 \end{figure}
 
+The model identifies only parts of the visible relief expression, while a large part of the annotated area remains classified as false negative. This suggests that the model follows the present-day terrain signal rather than the full idealized or expert-interpreted outline stored in the reference annotation.
+
 This behaviour is expected in archaeological LiDAR segmentation. Expert annotations often represent interpreted archaeological objects rather than exact present-day relief boundaries. As a result, a structure may be annotated as a coherent polygon, while the visible terrain expression is fragmented, eroded, or shifted. The model, however, learns directly from raster appearance. It therefore tends to activate on the most visually expressed parts of the object, such as edges, mounds, walls, or slope transitions, instead of reproducing the full archaeological outline.
 
-A contrasting example is shown in Figure~\ref{fig:maya_boundaries_success}. In this case, the model successfully identifies the main structure and produces a spatially coherent prediction. Nevertheless, small red and blue regions remain along the object boundary. This demonstrates that even successful predictions often contain minor boundary disagreement. Such errors may reduce pixel-wise metrics, although the result remains useful for expert inspection because the main archaeological object is correctly localized.
+A contrasting example is shown in Figure~\ref{fig:maya_boundaries_success}. In this case, the model successfully identifies the main structure and produces a spatially coherent prediction. 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{figures/maya_boundaries_success.pdf}
-    \caption{Example of a successful boundary prediction on the Maya dataset. The main archaeological structure is correctly localized, although minor boundary disagreement remains visible along the object edges.}
+    \includegraphics[width=0.85\textwidth]{figures/maya_boundaries_success.pdf}
+    \caption{Example of a successful but not perfect boundary prediction on the Maya dataset. Panel (a) shows the LiDAR-derived terrain visualization, while panel (b) shows the evaluation overlay, where blue denotes false negatives, red denotes false positives, and white denotes true-positive overlap. The main archaeological structure is correctly localized as a coherent prediction, although minor boundary disagreement remains along the object edges.}
     \label{fig:maya_boundaries_success}
 \end{figure}
+
+Nevertheless, small red and blue regions remain along the object boundary. This demonstrates that even successful predictions often contain minor boundary disagreement. Such errors may reduce pixel-wise metrics, although the result remains useful for expert inspection because the main archaeological object is correctly localized.
 
 Soft masks partially address this problem by reducing the penalty for small boundary deviations. However, they do not eliminate the underlying mismatch between the raster-visible relief and the expert-defined archaeological outline. Moreover, softer supervision can encourage broader predictions and increase false positives. Therefore, boundary errors should be interpreted not only as model inaccuracies, but also as evidence of uncertainty in the relation between annotation geometry and terrain expression.
 

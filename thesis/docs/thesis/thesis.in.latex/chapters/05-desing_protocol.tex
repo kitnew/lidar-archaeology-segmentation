@@ -2,8 +2,6 @@
 
 \chapter{Experimental Design and Evaluation Protocol}\label{ch:design_protocol}
 
-\section{Overview of the Experiment Series}
-
 The purpose of the experimental part of this thesis is to evaluate how selected methodological components influence the quality of binary semantic segmentation of archaeological features in LiDAR-derived raster data. The experiments are designed to compare different configurations under a consistent pipeline, so that the observed differences can be attributed to controlled variables rather than to changes in data preparation, splitting, validation, or evaluation procedure.
 
 The experiment series follows the workflow described in Chapter~\ref{ch:methodology}. Each experiment uses a defined input representation, label type, model architecture, loss function, tile configuration, and validation strategy. The output of each experiment is a probability map, which is converted into a binary prediction by threshold optimization. The resulting predictions are then evaluated using pixel-wise metrics and, for selected models, by qualitative inspection in a GIS environment.
@@ -22,18 +20,12 @@ The following experiment groups are considered:
 
     \item \textbf{Loss function.} This group evaluates loss functions designed for highly imbalanced binary segmentation. Since archaeological targets occupy only a small fraction of the raster area, the loss function strongly influences whether the model learns to detect rare positive pixels or collapses toward the dominant background class.
 
-    \item \textbf{Patch size and sampling strategy.} This group evaluates how the size of input tiles and the selection of training samples influence the model. This is important because tile size determines the physical context visible to the model, while sampling controls the ratio between positive and background-dominated examples.
+    \item \textbf{Patch size.} This group evaluates how the size of input tiles and the selection of training samples influence the model. This is important because tile size determines the physical context visible to the model.
 
-    \item \textbf{Model architecture.} This group compares the selected DeepLab-based segmentation models. The goal is to evaluate whether the architectural differences between DeepLabV3 and DeepLabV3+ affect the segmentation of compact Maya structures and elongated Slovak terraces.
-
-    \item \textbf{Post-processing and thresholding.} This group evaluates how probability smoothing and threshold selection affect the final binary prediction. This is especially relevant because the raw model output is a continuous probability map, while archaeological interpretation and metric calculation require a binary mask.
+    \item \textbf{Model architecture.} This group compares the selected DeepLab-based segmentation models. The goal is to evaluate whether the architectural differences between DeepLabV3 and DeepLab V3+ affect the segmentation of compact Maya structures and elongated Slovak terraces.
 \end{enumerate}
 
-% TODO: Keep only the experiment groups that are actually used in the final results chapter. If model architecture or post-processing is not compared explicitly, remove or rewrite those groups.
-
-Unless stated otherwise, all experiments use the Adam optimizer with a learning rate of $10^{-5}$. The same dataset split, augmentation strategy, valid-pixel masking, and validation procedure are preserved within each experiment group.
-
-% TODO: Add final values for batch size, number of epochs, early stopping criterion, scheduler, and backbone if these are fixed across experiments.
+All experiments use the Adam optimizer with a learning rate of $10^{-5}$. The same dataset split, augmentation strategy, valid-pixel masking, and validation procedure are preserved within each experiment group.
 
 \subsection{Compared Loss Functions}
 

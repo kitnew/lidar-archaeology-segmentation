@@ -2,11 +2,9 @@
 
 \chapter{Materials and Methodology}\label{ch:methodology}
 
-\section{Overview of the Proposed Workflow}
+The methodology of this thesis is designed as a reproducible workflow for binary semantic segmentation of archaeological objects and terrain features in LiDAR-derived raster data. The workflow connects the available geospatial data, reference annotations, input raster representations, dataset construction, model training, inference, and GIS-based interpretation into a single experimental pipeline.
 
-The methodology of this thesis is designed as a reproducible workflow for binary semantic segmentation of archaeological features in LiDAR-derived raster data. The workflow connects the available geospatial data, reference annotations, input raster representations, dataset construction, model training, inference, and GIS-based interpretation into a single experimental pipeline.
-
-The proposed workflow consists of the following main stages. First, the available LiDAR-derived data from Guatemala and Slovakia are described and prepared for further processing. Second, the reference annotations are converted into raster masks suitable for pixel-wise supervised learning. Third, several input representations are prepared from the available terrain data and used as alternative inputs for segmentation models. Fourth, the raster data and masks are divided into tiles and organized into training, validation, and testing subsets. Fifth, segmentation models are trained under controlled experimental settings. Finally, the trained models are applied to larger raster areas, and their predictions are exported for quantitative evaluation and qualitative GIS-based assessment.
+The proposed workflow consists of the following main stages. First, the available LiDAR-derived data from Guatemala and Slovakia are described and prepared for further processing. Second, the reference annotations are converted into raster masks suitable for pixel-wise supervised learning. Third, several input representations are prepared from the available terrain data and used as alternative inputs for segmentation models. Fourth, the raster data and masks are divided into tiles and organized into training, validation, and testing subsets. Fifth, segmentation models are trained under controlled experimental settings. Finally, the trained models are applied to larger raster areas, and their predictions are exported for quantitative evaluation and qualitative GIS-based visual assessment.
 
 This chapter describes the materials and methodological decisions used to construct the workflow. The detailed experimental comparison of individual configurations, including the evaluation metrics and experiment groups, is provided separately in Chapter~\ref{ch:design_protocol}.
 
@@ -20,23 +18,14 @@ The use of both datasets is important for two reasons. First, they allow the met
 
 The Maya LiDAR dataset is one of the central data sources used in this thesis. It originates from the Pacunam LiDAR Initiative (PLI), which conducted a large-scale airborne LiDAR survey of the Maya Biosphere Reserve in the department of Petén, Guatemala, in 2016. Within this broader survey, the area around the ancient city of Uaxactun, corresponding to the PARU\footnote{Proyecto Arqueológico Regional Uaxactún} research zone, is used as the primary Maya study area.
 
-\begin{figure}[htb!]
-	\centering
-	\includegraphics[width=\textwidth]{figures/Maya_Big_Medium_Small_Buildings.pdf}
-	\caption{Examples of Maya structures by size category: a) large structures (\textgreater{}200~m\textsuperscript{2}), b) medium-sized structures (50--200~m\textsuperscript{2}), and c) small structures (\textless{}50~m\textsuperscript{2}).}
-	\label{fig:maya_structures_visualization}
-\end{figure}
+The area was scanned using a Teledyne Optech Titan MW airborne laser scanner installed in a DHC-6 Twin Otter aircraft from an altitude of approximately 650~m above ground level. The scanner installation is shown in Figure~\ref{fig:lidar_sensor}. It was designed to produce a nominal pulse density of 15 pulses per square metre. However, due to dense tropical vegetation, the average ground return density varied approximately between 1.1 and 5.3 returns per square metre~\cite{bundzel_semantic_2020}. The available raster data are represented as a bare-earth Digital Elevation Model (DEM) with a spatial resolution of 1~m per pixel.
 
-The area was scanned using a Teledyne Optech Titan MW airborne laser scanner from an altitude of approximately 650~m above ground level. The scanner was designed to produce a nominal pulse density of 15 pulses per square metre. However, due to dense tropical vegetation, the average ground return density varied approximately between 1.1 and 5.3 returns per square metre~\cite{bundzel_semantic_2020}. The available raster data are represented as a bare-earth Digital Elevation Model (DEM) with a spatial resolution of 1~m per pixel.
-
-\begin{figure}[H]
+\begin{figure}[htbp]
 	\centering
-	\includegraphics[width=\textwidth]{figures/lidar.png}
-	\caption{The Titan multspectral lidar sensor integrated into a DHC-6 Twin Otter aircraft: (a) Overview of installation layout from the port side of sensor head; (b) View from front looking aft, sensor control rack is in the foreground, sensor head in the background; (c) View of the sensor head through the mapping port of the aircraft. The laser output window is the rectangular window on the right, and the DIMAC camera lens is behind the circular window. \textit{Credits: \cite{fernandez_diaz_capability_2016}}}
+	\includegraphics[width=0.8\textwidth]{figures/lidar.png}
+	\caption{The Titan multispectral LiDAR sensor integrated into a DHC-6 Twin Otter aircraft: (a) Overview of installation layout from the port side of sensor head; (b) View from front looking aft, sensor control rack is in the foreground, sensor head in the background; (c) View of the sensor head through the mapping port of the aircraft. The laser output window is the rectangular window on the right, and the DIMAC camera lens is behind the circular window. Source:~\cite{fernandez_diaz_capability_2016}.}
 	\label{fig:lidar_sensor}
 \end{figure}
-
-
 
 The archaeological interpretation of the Uaxactun area was carried out by PARU experts. The structures were identified by visual interpretation of LiDAR-derived terrain products and by using archaeological domain knowledge and field experience. The resulting reference data were stored as georeferenced vector polygons in a GIS environment. The annotations were also verified to a large extent through fieldwork. According to Bundzel et al.~\cite{bundzel_semantic_2020}, the available field validation suggests that the identifications are accurate but slightly conservative, and that field verification revealed approximately 15\% more structures than were visible in the LiDAR-based interpretation.
 
@@ -51,7 +40,7 @@ In this thesis, the Maya data are used for the segmentation of annotated archaeo
 \begin{figure}[hp]
 	\centering
 	\includegraphics[width=\textwidth]{figures/Maya_Full_Map.pdf}
-	\caption{Overview of the available Maya LiDAR data used in the research.}
+	\caption{Overview of an example of the available Maya LiDAR coverage used in this thesis. The inset shows a detailed view of the Uaxactun research area with labelled structures and selected contextual features.}
 	\label{fig:maya_map_overview}
 \end{figure}
 
@@ -60,12 +49,12 @@ In this thesis, the Maya data are used for the segmentation of annotated archaeo
 \begin{tabular}{lrrrr}
 \hline
 Size category & Count & Total area (m\textsuperscript{2}) & Objects (\%) & Map area (\%) \\ \hline
-Small  & 1430 & 45366.0 & 35.01 & 0.0271 \\
-Medium & 2182 & 212186.0 & 53.43 & 0.1268 \\
-Large  & 472  & 194331.0 & 11.56 & 0.1161 \\ \hline
-All    & 4084 \\
+Small  & 1430 & 45366 & 35.01 & 0.0271 \\
+Medium & 2182 & 212186 & 53.43 & 0.1268 \\
+Large  & 472  & 194331 & 11.56 & 0.1161 \\ \hline
+All    & 4084 & 451883 & 100.00 & 0.2700 \\
 \end{tabular}
-\caption{Distribution of Maya archaeological structures by size category and their coverage within the mapped area.}
+\caption[Distribution of annotated Maya archaeological objects]{Distribution of annotated Maya archaeological objects by size category and their coverage within the mapped area.}
 \label{tab:maya_structures_size}
 \end{table}
 
@@ -76,10 +65,17 @@ The spatial extent of the Maya LiDAR data used in this thesis is shown in Figure
     \item \textbf{Large structures} --- complex structures covering more than 200~m\textsuperscript{2}, often formed by platforms and associated construction remains.
 \end{itemize}
 
+\begin{figure}[htb!]
+	\centering
+	\includegraphics[width=\textwidth]{figures/Maya_Big_Medium_Small_Buildings.pdf}
+	\caption{Examples of Maya structures by size category: a) large structures (\textgreater{}200~m\textsuperscript{2}), b) medium-sized structures (50--200~m\textsuperscript{2}), and c) small structures (\textless{}50~m\textsuperscript{2}).}
+	\label{fig:maya_structures_visualization}
+\end{figure}
+
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=\textwidth]{figures/maya_objects_distribution.png}
-	\caption{Distribution of Maya archaeological structures by size category within the mapped area.}
+	\caption{Distribution of annotated Maya archaeological object footprint areas on a logarithmic scale. Vertical dashed lines indicate the median and mean area.}
 	\label{fig:maya_structures_histogram}
 \end{figure}
 
@@ -89,26 +85,26 @@ Figure~\ref{fig:maya_structures_visualization} illustrates the visual appearance
 
 The Slovak LiDAR data used in this thesis were provided by the Slovak University of Technology in Bratislava, Faculty of Civil Engineering (STU, StF), in cooperation with the Department of Archaeology of the Monuments Board of the Slovak Republic. This dataset represents a second, independent geographical and archaeological context, complementing the Maya data from Guatemala. While the Guatemalan data focus mainly on ancient Maya buildings and construction activity, the Slovak data are oriented toward the detection of archaeological terrace systems in Central European terrain.
 
+The Slovak dataset contains four locations: Ladzany, Sitno, \v{S}\'{a}\v{s}ovsk\'{e} Podhradie, and Tribe\v{c}. All locations except Tribe\v{c} include reference annotations in the form of vector polylines representing the central lines of terraces. The raster resolution is 0.25~m per pixel, which is four times finer in linear resolution than the 1~m Maya DEM. This higher resolution is important for terrace detection, because terraces are narrow and elongated micro-relief structures whose visibility may be strongly affected by the spatial resolution of the raster data. A summary of the annotated Slovak regions after labels bufferization is provided in Table~\ref{tab:slovak_structures_by_region} while the spatial distribution and overview of the available Slovak LiDAR locations are shown in Figure~\ref{fig:slovak_lidar_data_views}.
+
 \begin{table}[h!]
 \centering
 \begin{tabular}{lrrr}
 \hline
-Region & Count & Total area (m\textsuperscript{2}) & Map area (\%) \\ \hline
-Sitno       & 142 & 231159.0 & 1.0395 \\
-Sásovské    &  91 & 187406.0 & 2.1055 \\
-Ladzany     &  24 &  51903.0 & 0.3313 \\ \hline
-All         & 257 \\
+Region & Count & Rasterized label area (m\textsuperscript{2}) & Map area (\%) \\ \hline
+Sitno                              & 142 & 231159 & 1.0395 \\
+\v{S}\'{a}\v{s}ovsk\'{e} Podhradie &  91 & 187406 & 2.1055 \\
+Ladzany                            &  24 &  51903 & 0.3313 \\ \hline
+All                                & 257 & 470468 & 1.0052 \\
 \end{tabular}
-\caption{Distribution of Slovak archaeological structures by size category and their coverage within the mapped area.}
-\label{tab:slovak_structures_size}
+\caption{Distribution of annotated Slovak terrace features by region and their coverage within the corresponding mapped area.}
+\label{tab:slovak_structures_by_region}
 \end{table}
 
-The Slovak dataset contains four locations: Ladzany, Sitno, \v{S}\'{a}\v{s}ovsk\'{e} Podhradie, and Tribe\v{c}. All locations except Tribe\v{c} include reference annotations in the form of vector polylines representing the central lines of terraces. The raster resolution is 0.25~m per pixel, which is four times finer in linear resolution than the 1~m Maya DEM. This higher resolution is important for terrace detection, because terraces are narrow and elongated micro-relief structures whose visibility may be strongly affected by the spatial resolution of the raster data.
-
-\begin{figure}[htb]
+\begin{figure}[htbp]
 	\centering
-	\includegraphics[width=\textwidth]{figures/slovakia_full_map.pdf}
-    \caption{Overview of the available Slovak LiDAR datasets used in the research.}
+	\includegraphics[width=\textwidth]{figures/Slovakia_full_map.pdf}
+    \caption{Overview of the Slovak LiDAR locations used in this thesis, including (a) Ladzany, (b) Sitno, (c) Tribe\v{c}, and (d) \v{S}\'{a}\v{s}ovsk\'{e} Podhradie.}
     \label{fig:slovak_lidar_data_views}
 \end{figure}
 
@@ -122,12 +118,41 @@ A known issue in the Maya dataset is the so-called \textit{malerization}, where 
 
 For the Maya dataset, the original vector annotations were converted into raster masks aligned with the DEM grid. Two types of binary masks are available in the original methodology: the \textit{Structures} mask, containing buildings and platforms, and the \textit{Mounds} mask, containing building remains only~\cite{bundzel_semantic_2020}. In this thesis, the original binary masks are preserved as the baseline form of reference data.
 
-Although the Maya annotations are based on expert interpretation and field verification, they are not treated as perfectly certain labels. Bundzel et al.~\cite{bundzel_semantic_2020} proposed the use of \textit{confidence shadows} to reduce the negative effect of hard and potentially uncertain object boundaries. A confidence shadow replaces a strictly binary transition at the object boundary with a gradual decrease of label confidence from 1 to 0 within a defined neighbourhood around the object. In this thesis, this idea is used to prepare additional soft-mask variants of the reference labels.
+Although the Maya annotations are based on expert interpretation and field verification, they are not treated as perfectly certain labels. Bundzel et al.~\cite{bundzel_semantic_2020} proposed the use of \textit{confidence shadows} to reduce the negative effect of hard and potentially uncertain object boundaries. A confidence shadow replaces a strictly binary transition at the object boundary with a gradual decrease of label confidence from 1 to 0 within a defined neighbourhood around the object.
+
+Let \(M(x,y) \in \{0,1\}\) denote the binary reference mask, where foreground pixels have value 1 and background pixels have value 0. For each pixel \((x,y)\), the Euclidean distance to the nearest foreground pixel is defined as
+
+\begin{equation}
+d(x,y) = \min_{(u,v):\,M(u,v)=1} \sqrt{(x-u)^2 + (y-v)^2}.
+\label{eq:distance_to_mask}
+\end{equation}
+
+Given a confidence-shadow length \(L\), expressed in pixels, the soft confidence mask \(C(x,y)\) is computed as
+
+\begin{equation}
+C(x,y) =
+\begin{cases}
+1, & \text{if } M(x,y)=1, \\
+\max\left(0, 1 - \dfrac{d(x,y)}{L}\right), & \text{if } M(x,y)=0.
+\end{cases}
+\label{eq:confidence_shadow}
+\end{equation}
+
+The shadow length in pixels is obtained from the physical shadow length \(L_m\) and raster resolution \(r\) as
+
+\begin{equation}
+L = \frac{L_m}{r},
+\label{eq:shadow_length_pixels}
+\end{equation}
+
+where \(r\) is the raster grid spacing in metres per pixel.
+
+In this thesis, this idea is used to prepare additional soft-mask variants of the reference labels. Multiple soft-mask variants with different shadow radii were prepared to evaluate the effect of soft mask on model performance. An example of the resulting confidence shadow is shown in Figure~\ref{fig:maya_confidence_shadow_example}.
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/maya_confidence_shadow_example.png}
-	\caption{Example of a \textit{confidence shadow} for a Maya archaeological structure. The original boundary is shown in yellow, while the confidence shadow gradually decreases in intensity from 1 to 0 within a defined neighbourhood around the object to purple.}
+	\includegraphics[width=\textwidth]{figures/maya_confidence_shadow_example.png}
+	\caption{Example of a \textit{confidence shadow} derived from a Maya reference mask. High-confidence object interiors are shown in yellow, and confidence gradually decreases toward the background, shown in dark purple.}
 	\label{fig:maya_confidence_shadow_example}
 \end{figure}
 
@@ -137,16 +162,16 @@ The resulting Maya reference data therefore include both binary masks and soft m
 
 The Slovak reference annotations differ from the Maya annotations in both geometry and interpretation. Instead of polygonal object boundaries, the terrace annotations are available as vector polylines representing the approximate central lines of terraces. Direct rasterization of these polylines would produce extremely thin masks. At a resolution of 0.25~m per pixel, such one-pixel-wide labels would be too sparse for stable training and would not represent the possible physical width of the terrace feature.
 
-For this reason, the Slovak terrace annotations were buffered before rasterization. Each terrace polyline was expanded by 2~m, corresponding to 8 pixels at 0.25~m resolution, on each side of the central line. This buffering was used as a compromise between preserving the original annotation geometry and creating a learnable target area for semantic segmentation. The polyline endpoints were rounded during buffering in order to avoid artificial rectangular endings in the rasterized mask.
+For this reason, the Slovak terrace annotations were buffered before rasterization. Each terrace polyline was expanded using a 2~m buffer radius, corresponding to 8 pixels at a 0.25~m grid spacing. This buffering was used as a compromise between preserving the original annotation geometry and creating a learnable target area for semantic segmentation. The polyline endpoints were rounded during buffering in order to avoid artificial rectangular endings in the rasterized mask. The difference between direct rasterization of terrace polylines and buffered raster masks is illustrated in Figure~\ref{fig:slovakia_raw_buffered_masks}.
 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.8\textwidth]{figures/slovakia_raw_buffered_masks.pdf}
-	\caption{Overview on how buffered (b) masks distinguish from raw (a) rasterized polylines in width and shape for the terrace structures in Slovak dataset.}
+	\caption{Comparison of Slovak terrace reference masks: (a) directly rasterized terrace polylines and (b) terrace masks after applying a 2~m buffer around the original centre lines.}
 	\label{fig:slovakia_raw_buffered_masks}
 \end{figure}
 
-As in the Maya dataset, two label variants were prepared for the Slovak terrace data. The first variant is a binary mask obtained from the buffered terrace annotations. The second variant is a soft mask based on the same buffered geometry, where the label confidence decreases gradually near the boundary. These two variants make it possible to compare the effect of hard and soft supervision on the segmentation of elongated archaeological features.
+As in the Maya dataset, two label variants were prepared for the Slovak terrace data. The first variant is a binary mask obtained from the buffered terrace annotations. The second variant is a soft mask based on the same buffered geometry, where the label confidence decreases gradually near the boundary according to Equation~\ref{eq:confidence_shadow}. These two variants make it possible to compare the effect of hard and soft supervision on the segmentation of elongated archaeological features. This distinction is important because the buffered binary masks define the strict target geometry, whereas the soft masks introduce spatial uncertainty at the terrace boundaries.
 
 \section{LiDAR-Derived Input Representations}\label{sec:lidar_input_representations}
 
@@ -156,7 +181,7 @@ The input representations used in this thesis can be divided into two main group
 
 Several basic LiDAR-derived visualizations and terrain derivatives were discussed in Chapter~\ref{ch:analysis}. Individually, each representation emphasizes only a specific aspect of the terrain. For example, hillshade provides an intuitive visual impression of relief, but it depends on the selected illumination direction and can therefore introduce orientation bias. Slope highlights changes in elevation, while sky-view factor and positive openness provide alternative descriptions of local terrain visibility and openness that are less dependent on a single illumination angle~\cite{thompson_detecting_2020,kokalj_standardizing_2025}.
 
-For deep learning, a single representation may not provide sufficient contextual information. Therefore, multi-channel combinations are often used to combine complementary terrain properties in one input tensor. A relevant example is the SPS representation, which combines Slope, Positive Openness, and Sky-View Factor into a three-channel image. This representation has been used in recent work on Maya LiDAR segmentation because it combines local gradient information with illumination-independent topographic descriptors and is suitable for CNN-based processing~\cite{zhang_unveiling_2024}.
+For deep learning, a single representation may not provide sufficient contextual information. Therefore, multi-channel combinations are often used to combine complementary terrain properties in one input tensor. A relevant example is the SPS representation, which combines Slope, Positive Openness, and Sky-View Factor into a three-channel image. This representation has been used and follows the logic of multi-channel ALS-derived visualizations in recent work on Maya LiDAR segmentation because it combines local gradient information with illumination-independent topographic descriptors and is suitable for CNN-based processing~\cite{somrak_learning_2020,zhang_unveiling_2024}.
 
 In this thesis, all input representations are converted into a three-channel format. This decision has two practical advantages. First, it allows different LiDAR-derived layers to be combined in a controlled way. Second, it makes the input compatible with standard convolutional architectures and pre-trained backbones that are commonly designed for three-channel image inputs. This is especially useful when using models whose encoders were originally trained on natural image datasets.
 
@@ -173,29 +198,31 @@ Based on this categorization, the following input representations were used in t
 \begin{enumerate}
     \item \textbf{DEM} --- the original Digital Elevation Model used as the most direct terrain-based baseline. Since the DEM is a single-channel raster, it was converted into a three-channel input by repeating the same normalized elevation layer across all three channels.
 
-    \item \textbf{RGB} --- a three-channel raster visualization derived from LiDAR data. This representation is used as an image-like input intended to approximate the type of visually enhanced terrain representation used during manual inspection. 
+    \item \textbf{RGB} --- a provided three-channel raster visualization derived from LiDAR data. This representation is used as an image-like input intended to approximate the type of visually enhanced terrain representation used during manual inspection.
 
     \item \textbf{RGDEM} --- a hybrid representation combining the red and green channels from the RGB visualization with the DEM as the third channel. This representation was introduced to preserve part of the visual contrast from the RGB raster while adding explicit elevation information from the DEM. Since this representation combines image-like and numerical channels, z-score normalization was applied as described in Section~\ref{sec:dataset_construction}.
 
     \item \textbf{SPS} --- a three-channel numerical representation composed of Slope, Positive Openness, and Sky-View Factor. Each channel was computed separately from the original DEM. This representation was included because it combines local gradient information with illumination-independent topographic descriptors and has been shown to be suitable for CNN-based processing of archaeological LiDAR data~\cite{zhang_unveiling_2024}.
 
-    \item \textbf{ISO} and \textbf{ANISO} --- raster representations used only for the Slovak terrace dataset. They were included because the Slovak terrace task involves narrow elongated structures, for which different isotropic and anisotropic visual enhancement strategies may affect feature visibility.
+    \item \textbf{ISO} and \textbf{ANISO} --- raster representations used only for the Slovak terrace dataset. They were included because the Slovak terrace task involves narrow elongated structures, for which different isotropic and anisotropic visual enhancement strategies may affect feature visibility. Here, ISO denotes an isotropic visualization variant, while ANISO denotes an anisotropic visualization variant emphasizing direction-dependent terrain structures.
 
 \end{enumerate}
 
-The DEM, RGB, RGDEM, and SPS representations were used as the main input variants for the Maya dataset. For the Slovak terrace dataset, the same general experimental logic was preserved, but the ISO and ANISO representations were mainly used because they were available for this dataset and were expected to be relevant for elongated terrace-like features.
+Note that in this thesis, the term \textbf{RGB} is used as a dataset-specific shorthand for the provided precomputed three-channel LiDAR-derived visualization. According to the information available for this dataset, this raster corresponds to a colour composite terrain visualization of the combined Visualization for Archaeological Topography (combined VAT, cVAT) type. However, because the exact processing parameters used to generate this raster were not available, it is treated in this thesis primarily as an image-like LiDAR-derived input representation rather than as a fully reproducible terrain derivative. Therefore, the term RGB does not refer to optical imagery, but only to the red, green, and blue channels of the provided visualization raster~\cite{kokalj2017airborne,kokalj_standardizing_2025}.
+
+The DEM, RGB, RGDEM, and SPS representations were used as the main input variants for the Maya dataset. For the Slovak terrace dataset, the same general experimental logic was preserved, but the ISO and ANISO representations were mainly used because they were available for this dataset and were expected to be relevant for elongated terrace-like features. Examples of DEM, hillshade, and RGB visualization for the Maya dataset are shown in Figure~\ref{fig:maya_input_representations} while examples for the Slovak dataset are shown in Figure~\ref{fig:ladzany_input_representations}.
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=\textwidth]{figures/maya_DEM_Hillshade_RGB.pdf}
-    \caption{Example of input representations for the Maya dataset. From left to right: DEM (a), Hillshade (b), RGB visualization (c).}
+    \includegraphics[width=\textwidth]{figures/Maya_DEM_Hillshade_RGB.pdf}
+    \caption{Examples of selected LiDAR-derived terrain representations for the Maya dataset: (a) DEM, (b) hillshade visualization, and (c) RGB visualization. Note that not all shown representations were used in the experiments as well as not all used representations are shown here.}
     \label{fig:maya_input_representations}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=\textwidth]{figures/ladzany_DEM_Hillshade_ISO_ANISO.pdf}
-    \caption{Example of input representations for the Slovak dataset. From left to right: DEM (a), Hillshade (b), ISO visualization (c), ANISO visualization (d).}
+    \caption{Examples of LiDAR-derived terrain representations for the Slovak dataset: (a) DEM, (b) hillshade visualization, (c) ISO visualization, and (d) ANISO visualization.}
     \label{fig:ladzany_input_representations}
 \end{figure}
 
@@ -213,35 +240,199 @@ Each dataset sample consists of four main components:
 
 The input raster contains the three-channel representation used by the segmentation model. The binary mask defines the target class as archaeological structure or background. The soft mask, when used, provides a continuous version of the target mask with gradually decreasing confidence near object boundaries. The valid pixel mask indicates which pixels belong to valid data areas and must be used during training and evaluation.
 
-For DEM-based inputs and numerical terrain-derived representations, z-score normalization was applied independently to each input channel. The mean and standard deviation were computed only from valid pixels, using the valid pixel mask. This prevents missing-data regions from affecting the normalization statistics and reduces the risk of scale distortion caused by invalid values. After normalization, invalid pixels were assigned the value 0. In the normalized representation, this value corresponds to the mean of the valid data and therefore provides a neutral fill value for areas excluded from training and evaluation.
+For DEM-based inputs and numerical terrain-derived representations, z-score normalization was applied independently to each input channel. The mean and standard deviation were computed only from valid pixels, using the valid pixel mask as described in Equations~\eqref{eq:valid_pixel_set} -- \eqref{eq:zscore_normalization}.
 
-Image-like raster visualizations already have a bounded display-oriented value range. Therefore, they do not necessarily require the same normalization as raw elevation-derived data. However, when image-like visualizations are combined with numerical terrain derivatives, normalization is required to reduce differences in value scale between channels. In such mixed representations, z-score normalization was applied to ensure that no channel dominated the model input only because of its numerical range.
+Let \(X_c(i,j)\) denote the value of input channel \(c\) at pixel location \((i,j)\), and let \(V(i,j) \in \{0,1\}\) denote the valid pixel mask. The set of valid pixels is defined as
+
+\begin{equation}
+\Omega = \{(i,j) \mid V(i,j)=1\}.
+\label{eq:valid_pixel_set}
+\end{equation}
+
+For each channel \(c\), the mean and standard deviation were computed only over valid pixels:
+
+\begin{equation}
+\mu_c = \frac{1}{|\Omega|} \sum_{(i,j)\in\Omega} X_c(i,j),
+\label{eq:zscore_mean}
+\end{equation}
+
+\begin{equation}
+\sigma_c =
+\sqrt{
+\frac{1}{|\Omega|}
+\sum_{(i,j)\in\Omega}
+\left(X_c(i,j)-\mu_c\right)^2
+}.
+\label{eq:zscore_std}
+\end{equation}
+
+The normalized value \(Z_c(i,j)\) was then computed as
+
+\begin{equation}
+Z_c(i,j) =
+\begin{cases}
+\dfrac{X_c(i,j)-\mu_c}{\sigma_c + \varepsilon}, & \text{if } V(i,j)=1, \\
+0, & \text{if } V(i,j)=0,
+\end{cases}
+\label{eq:zscore_normalization}
+\end{equation}
+
+where \(\varepsilon\) is a small constant used to avoid division by zero.
+This prevents missing-data regions from affecting the normalization statistics and reduces the risk of scale distortion caused by invalid values. After normalization, invalid pixels were assigned the value 0. In the normalized representation, this value corresponds to the mean of the valid data and therefore provides a neutral fill value for areas excluded from training and evaluation. To avoid information leakage, normalization statistics were computed from the entire dataset's valid pixels.
+
+Image-like raster visualizations already have a bounded display-oriented value range. Therefore, they do not necessarily require the same normalization as raw elevation-derived data and were not z-score normalized. However, when image-like visualizations are combined with numerical terrain derivatives, normalization is required to reduce differences in value scale between channels. In such mixed representations, z-score normalization was applied to ensure that no channel dominated the model input only because of its numerical range.
 
 The segmentation masks and soft masks were stored as separate matrices. The binary mask was used for hard supervision and for final evaluation, while the soft mask was used only in experiments where soft supervision was explicitly enabled. The valid pixel mask was used to exclude invalid areas from loss computation and metric calculation.
 
 \section{Model and Training Methodology}\label{sec:model_training_methodology}
 
-The segmentation task in this thesis is formulated as binary semantic segmentation. Each valid pixel of the input raster is classified either as archaeological structure or as background. Within the scope of this thesis, DeepLabV3 and DeepLabV3+ were selected as the main segmentation architectures.
+The segmentation task in this thesis is formulated as binary semantic segmentation. Each valid pixel of the input raster is classified either as an archaeological feature or as background. Within the scope of this thesis, DeepLabV3 and DeepLab V3+ were selected as the main segmentation architectures.
 
-The choice of these architectures is motivated by their suitability for dense prediction tasks and by their ability to capture multi-scale spatial context. DeepLabV3 uses atrous convolution and Atrous Spatial Pyramid Pooling (ASPP), which allow the model to aggregate contextual information at multiple receptive-field scales without excessively reducing spatial resolution~\cite{chen_rethinking_2017}. This is important for archaeological LiDAR data because target objects may appear at different sizes and may be embedded in complex terrain backgrounds. DeepLabV3+ extends this idea with an encoder--decoder structure, improving the recovery of spatial detail in the final segmentation output~\cite{chen_encoder-decoder_2018}. This makes it more suitable for objects with narrow boundaries or elongated forms, such as terraces.
+The choice of these architectures is motivated by their suitability for dense prediction tasks and by their ability to capture multi-scale spatial context. DeepLabV3 uses atrous convolution and Atrous Spatial Pyramid Pooling (ASPP), which allow the model to aggregate contextual information at multiple receptive-field scales without excessively reducing spatial resolution~\cite{chen_rethinking_2017}. This is important for archaeological LiDAR data because target objects may appear at different sizes and may be embedded in complex terrain backgrounds. DeepLab V3+ extends this idea with an encoder--decoder structure, improving the recovery of spatial detail in the final segmentation output~\cite{chen_encoder-decoder_2018}. This makes it more suitable for objects with narrow boundaries or elongated forms, such as terraces.
 
-Compared with U-Net, DeepLab-based models provide a stronger multi-scale context module through ASPP and are widely used in remote sensing segmentation tasks. Compared with Mask R-CNN or other instance-segmentation approaches, DeepLabV3 and DeepLabV3+ are more directly aligned with the binary pixel-wise formulation used in this thesis. The goal is not to separate individual archaeological instances, but to produce a continuous segmentation mask indicating areas likely to correspond to archaeological features.
+Compared with U-Net, DeepLab-based models provide a stronger multi-scale context module through ASPP and are widely used in remote sensing segmentation tasks. Compared with Mask R-CNN or other instance-segmentation approaches, DeepLabV3 and DeepLab V3+ are more directly aligned with the binary pixel-wise formulation used in this thesis. The goal is not to separate individual archaeological instances, but to produce a continuous segmentation mask indicating areas likely to correspond to archaeological features.
 
 The original LiDAR rasters are too large to be processed by the neural network as complete images. Therefore, the data were divided into smaller tiles. A manifest-based dataset construction strategy was used to make this process reproducible. Instead of permanently creating separate physical datasets for every experiment, each manifest stores the spatial coordinates of tiles, their dataset split, and relevant metadata. During training or validation, the corresponding tile is loaded from the selected input representation using the coordinates stored in the manifest.
 
-This approach makes the dataset split independent of the input representation. Since the segmentation masks and valid pixel masks are aligned with the source raster grid, the same manifest can be reused for different input representations of the same study area. This ensures that experiments differ only in the controlled variable being tested, such as input representation, label type, or loss function.
+Let \(X \in \mathbb{R}^{C \times H \times W}\) denote the input raster representation, where \(C\) is the number of input channels, and let \(M \in \{0,1\}^{H \times W}\) and \(V \in \{0,1\}^{H \times W}\) denote the binary reference mask and the valid pixel mask, respectively. For a tile size \(T\) and stride \(S\), the set of tile origins is defined as
 
-Due to the different spatial resolutions of the datasets, different tile sizes were used. For the Maya dataset, tiles of $128 \times 128$ pixels were used. With a spatial resolution of 1~m per pixel, each tile covers an area of $128 \times 128$~m. For the Slovak terrace dataset, tiles of $256 \times 256$ pixels were used. At a spatial resolution of 0.25~m per pixel, each tile covers an area of $64 \times 64$~m. This choice keeps the physical scale of the model input comparable between datasets while respecting their different raster resolutions.
+\begin{equation}
+\mathcal{G} =
+\left\{
+(x_i,y_j) \mid
+x_i = iS,\;
+y_j = jS,\;
+0 \leq x_i \leq W-T,\;
+0 \leq y_j \leq H-T
+\right\}.
+\label{eq:tile_origins}
+\end{equation}
 
-To reduce artifacts at tile boundaries, overlapping tiles were used. The stride was set to one quarter of the tile size: 32 pixels for the Maya dataset and 64 pixels for the Slovak dataset. As a result, each interior pixel can be evaluated multiple times under different local contexts during validation and inference. The overlapping predictions are later aggregated into a single probability map, as described in Section~\ref{sec:inference_postprocessing}.
+For each tile origin \((x_i,y_j) \in \mathcal{G}\), the corresponding input tile, binary mask tile, and valid mask tile are extracted as
 
-For the Maya dataset, five spatial manifests were created following a cross-validation strategy. The annotated area was divided into five spatial folds. In each run, one fold was used for validation and the remaining four folds were used for training. A buffer of 64 pixels was introduced at the boundaries between training and validation zones to reduce spatial leakage caused by overlapping tiles. This step is important because neighbouring LiDAR tiles may contain highly similar terrain context, and without a buffer the validation metrics could be artificially inflated.
+\begin{equation}
+X_{ij} = X[:,\, y_j:y_j+T,\, x_i:x_i+T],
+\label{eq:input_tile}
+\end{equation}
 
-Only training tiles containing at least one positive pixel were used for training. This still preserves a large amount of background information inside each tile, but avoids training on a dataset dominated by fully empty background tiles. For validation, the entire relevant validation area was used in order to obtain metrics that reflect model behaviour on both positive and background regions.
+\begin{equation}
+M_{ij} = M[y_j:y_j+T,\, x_i:x_i+T],
+\qquad
+V_{ij} = V[y_j:y_j+T,\, x_i:x_i+T].
+\label{eq:mask_tiles}
+\end{equation}
 
-For the Slovak terrace dataset, a leave-one-location-out cross-validation strategy was applied. Since three labelled locations are available, each fold uses two locations for training and the remaining location for validation. This setup provides a stricter evaluation scenario than random tile-level splitting, because the validation area is geographically separated from the training areas. It also allows the experiment to assess how well the model generalizes between different Slovak terrain contexts.
+Each tile is assigned metadata describing the fraction of valid pixels and the fraction of positive pixels within the valid area:
 
-The severe class imbalance between archaeological features and background is one of the main training challenges. Archaeological structures occupy only a small fraction of the raster area, and this is especially pronounced in the Slovak terrace dataset, where the target objects are narrow and elongated. For this reason, loss functions suitable for imbalanced segmentation were used and compared. The training loss was computed only over valid pixels, so that invalid or missing-data areas did not influence the optimization process. All tested loss functions will be presented in Chapter \ref{ch:design_protocol}.
+\begin{equation}
+p^{valid}_{ij}
+=
+\frac{1}{T^2}
+\sum_{u=0}^{T-1}
+\sum_{v=0}^{T-1}
+V_{ij}(u,v),
+\label{eq:valid_fraction}
+\end{equation}
+
+\begin{equation}
+p^{pos}_{ij}
+=
+\frac{
+\sum_{u=0}^{T-1}
+\sum_{v=0}^{T-1}
+M_{ij}(u,v)V_{ij}(u,v)
+}{
+\sum_{u=0}^{T-1}
+\sum_{v=0}^{T-1}
+V_{ij}(u,v)
+}.
+\label{eq:positive_fraction}
+\end{equation}
+
+Tiles for which no valid pixels are present are excluded from the manifest. A binary indicator is also stored to mark whether the tile contains at least one positive valid pixel:
+
+\begin{equation}
+h_{ij}
+=
+\mathbb{I}
+\left[
+\sum_{u=0}^{T-1}
+\sum_{v=0}^{T-1}
+M_{ij}(u,v)V_{ij}(u,v) > 0
+\right].
+\label{eq:has_positive_tile}
+\end{equation}
+
+For the Maya dataset, spatial folds were assigned according to the vertical position of the tile centre. Given \(K\) spatial folds, the vertical centre of a tile is
+
+\begin{equation}
+c_y = y_j + \frac{T}{2}.
+\label{eq:tile_center_y}
+\end{equation}
+
+The split identifier is then computed as
+
+\begin{equation}
+s_{ij}
+=
+\min\left(
+\left\lfloor
+\frac{c_y}{H/K}
+\right\rfloor,
+K-1
+\right).
+\label{eq:vertical_split}
+\end{equation}
+
+A tile is assigned to the validation subset if its split identifier corresponds to the selected validation fold; otherwise, it is assigned to the training subset:
+
+\begin{equation}
+\text{subset}_{ij}
+=
+\begin{cases}
+\text{validation}, & \text{if } s_{ij}=s_{val},\\
+\text{training}, & \text{otherwise}.
+\end{cases}
+\label{eq:subset_assignment}
+\end{equation}
+
+For the Slovak terrace dataset, the manifest additionally stores the location identifier for each tile. This is required because the Slovak evaluation follows a leave-one-location-out strategy rather than a vertical spatial split. Let \(\ell_{ij}\) denote the location identifier of tile \((i,j)\), let \(\ell_{val}\) denote the location selected for validation, and let \(\mathcal{L}_{lab}\) denote the set of labelled Slovak locations. The subset assignment is then defined as
+
+\begin{equation}
+\text{subset}_{ij}
+=
+\begin{cases}
+\text{validation}, & \text{if } \ell_{ij}=\ell_{val},\\
+\text{training}, & \text{if } \ell_{ij}\in \mathcal{L}_{lab} \setminus \{\ell_{val}\},\\
+\text{inference}, & \text{if } \ell_{ij}\notin \mathcal{L}_{lab}.
+\end{cases}
+\label{eq:loocv_location_split}
+\end{equation}
+After the subset assignment is defined, the set of training tiles used for optimization is restricted to positive valid tiles:
+
+\begin{equation}
+\mathcal{T}_{train}^{+}
+=
+\left\{
+(i,j) \mid \text{subset}_{ij}=\text{training} \land h_{ij}=1
+\right\}.
+\label{eq:positive_training_tiles}
+\end{equation}
+Validation tiles were not filtered by \(h_{ij}\), because validation must include both positive and negative valid tiles in order to reflect the true foreground--background imbalance.
+
+The resulting manifest does not store the raster values themselves. Instead, it stores the tile identifier, spatial coordinates, tile size, stride, location identifier when applicable, split information, valid-pixel fraction, positive-pixel fraction, and a binary flag indicating whether the tile contains any positive valid pixels. Since the segmentation masks and valid pixel masks are aligned with the source raster grid, the same manifest can be reused for different input representations of the same study area. This ensures that experiments differ only in the controlled variable being tested, such as input representation, label type, or loss function. 
+
+Due to the different spatial resolutions of the datasets, different tile sizes were used. For the Maya dataset, tiles of $128 \times 128$ pixels were used. With a spatial resolution of 1~m per pixel, each tile covers an area of $128 \times 128$~m. For the Slovak terrace dataset, tiles of $512 \times 512$ pixels were used. At a spatial resolution of 0.25~m per pixel, each tile covers an area of $128 \times 128$~m. This makes the physical footprint of Slovak tiles comparable to the Maya tiles, while preserving the higher spatial detail available in the Slovak raster data.
+
+To reduce artifacts at tile boundaries, overlapping tiles were used. The stride was set to one quarter of the tile size: 32 pixels for the Maya dataset and 128 pixels for the Slovak dataset. As a result, each interior pixel can be evaluated multiple times under different local contexts during validation and inference. The overlapping predictions are later aggregated into a single probability map, as described in Section~\ref{sec:inference_postprocessing}.
+
+For the Maya dataset, five spatial manifests were created following a cross-validation strategy. The annotated area was divided into five spatial folds. In each run, one fold was used for validation and the remaining four folds were used for training. The split was therefore spatially structured by tile centres rather than randomly sampled at tile level, which reduced direct mixing of distant terrain contexts while preserving a simple and reproducible fold definition.
+
+The manifest stores both positive and negative valid tiles. During training, only tiles containing at least one positive valid pixel were selected. This still preserves a large amount of background information inside each selected tile, but avoids training on a dataset dominated by fully empty background tiles. For validation, all valid tiles from the validation area were used in order to obtain metrics that reflect model behaviour on both positive and background regions.
+
+For the Slovak terrace dataset, a LOOCV (Leave-One-Location-Out Cross-Validation) strategy was applied to the three labelled locations: Ladzany, Sitno, and \v{S}\'{a}\v{s}ovsk\'{e} Podhradie. In each fold, two locations were used for training and the remaining labelled location was used for validation. The Tribe\v{c} location was included in the master manifest for full-area inference, but it was excluded from the LOOCV evaluation because reference annotations were not available for this area.
+
+The severe class imbalance between archaeological features and background is one of the main training challenges. Archaeological features occupy only a small fraction of the raster area, and this is especially pronounced in the Slovak terrace dataset, where the target objects are narrow and elongated. For this reason, loss functions suitable for imbalanced segmentation were used and compared. The training loss was computed only over valid pixels, so that invalid or missing-data areas did not influence the optimization process. The tested loss functions are described in Chapter~\ref{ch:design_protocol}.
 
 To increase the variability of the training data and reduce overfitting, simple geometric augmentations were applied:
 \begin{enumerate}
@@ -261,8 +452,6 @@ To obtain a complete probability map, all tile-level predictions are accumulated
 The evaluation metrics are calculated on the reconstructed validation map rather than as an average of independent mini-batch results. This provides a more transparent estimate of model performance over the full validation area. It also avoids situations where the same object is partially evaluated in several disconnected tile contexts. All metric calculations are restricted to valid pixels using the valid pixel mask.
 
 In a binary segmentation task, threshold selection is required to convert the probability map into a binary prediction. In this thesis, threshold optimization is performed on the validation probability map. A range of threshold values is evaluated, and the threshold maximizing the positive-class Intersection over Union (IoU) is selected as the optimal threshold for the corresponding experiment. The final binary prediction and the reported validation metrics are then computed using this threshold.
-
-% TODO: If a separate test set is introduced later, the threshold should be selected only on the validation set and then applied unchanged to the test set. Do not optimize the threshold directly on the test set.
 
 For full-area inference, the trained model is applied to the complete available raster using the same overlapping sliding-window strategy. The tile predictions are accumulated and averaged into a continuous probability map. This output represents the model confidence over the whole study area and can be used for both post-processing and visual inspection in GIS.
 

@@ -4,11 +4,11 @@
 
 \section{Main Objective}
 
-The main objective of this bachelor thesis is to design, implement, and experimentally evaluate a reproducible deep learning workflow for binary semantic segmentation of archaeological features in airborne LiDAR-derived raster data. The workflow is evaluated on two different archaeological and geographical domains: Maya archaeological structures in Guatemala and terrace-like archaeological features in Slovakia.
+The main objective of this bachelor thesis is to design, implement, and experimentally evaluate a reproducible deep learning workflow for binary semantic segmentation of archaeological objects and terrain features in airborne LiDAR-derived raster data. The workflow is evaluated on two different archaeological and geographical domains: Maya archaeological structures in Guatemala and terrace-like archaeological features in Slovakia.
 
 The objective is not limited to answering whether semantic segmentation can be applied to archaeological LiDAR data. Previous studies have already demonstrated that deep learning methods can be useful for similar tasks. Instead, this thesis focuses on identifying which components of the segmentation workflow influence the final result and how these components can be adjusted to improve model performance and practical usefulness.
 
-The thesis therefore studies the effect of selected methodological decisions, including input data representation, label representation, sampling strategy, loss function, model architecture, and post-processing. The purpose is to evaluate these components under a consistent experimental framework and to determine how they affect quantitative segmentation metrics and qualitative GIS-based interpretation.
+The thesis therefore studies the effect of selected methodological decisions, including input data representation, label representation, sampling strategy, loss function, model architecture, and post-processing. The purpose is to evaluate these components under a consistent experimental framework and to determine how they affect quantitative segmentation metrics and qualitative GIS-based visual interpretation.
 
 This objective is important because deep learning models can produce predictions even when the reasons for their success or failure are not fully clear. In archaeological applications, such uncertainty is problematic, since automatic predictions should support expert interpretation rather than replace it. Understanding which parts of the methodology influence the result increases confidence in the generated predictions and helps determine whether a model output can be considered useful for archaeological inspection.
 
@@ -49,7 +49,7 @@ The thesis is guided by the following research questions:
 
     \item Which loss functions are more suitable for binary semantic segmentation of sparse archaeological targets?
 
-    \item How do DeepLabV3 and DeepLabV3+ perform on compact Maya structures and elongated Slovak terrace features?
+    \item How do DeepLabV3 and DeepLab V3+ perform on compact Maya structures and elongated Slovak terrace features?
 
     \item To what extent do threshold optimization and post-processing improve the final binary segmentation maps?
 

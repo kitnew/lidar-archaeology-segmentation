@@ -860,19 +860,46 @@
     \fi
 }
 
+% Dotted list entries for figures, tables, and listings.  The stock
+% \@dottedtocline fully justifies wrapped captions, which makes long LoF/LoT
+% entries look as if they were pushed to the right.  Keep the hanging indent and
+% page-number leaders, but allow spare space at the right edge instead of
+% stretching inter-word spaces.
+\newcommand*{\tukethesis@dottedtocline}[5]{%
+  \ifnum #1>\c@tocdepth \else
+    \vskip \z@ \@plus.2\p@
+    {\leftskip #2\relax
+     \rightskip \@tocrmarg \@plus 1fil\relax
+     \parfillskip -\@tocrmarg\relax
+     \parindent #2\relax
+     \@afterindenttrue
+     \interlinepenalty\@M
+     \leavevmode
+     \@tempdima #3\relax
+     \advance\leftskip \@tempdima
+     \null\nobreak\hskip -\leftskip
+     {#4}\nobreak
+     \leaders\hbox{$\m@th
+        \mkern \@dotsep mu\hbox{.}\mkern \@dotsep
+        mu$}\hfill
+     \nobreak
+     \hb@xt@\@pnumwidth{\hfil\normalfont\normalcolor #5}%
+     \par}%
+  \fi}
+
 % list of figures without indentation
 \renewcommand*{\l@figure}[2]{%
-  \@dottedtocline{1}{0em}{2.5em}{#1}{#2}%
+  \tukethesis@dottedtocline{1}{0em}{1.8em}{#1}{#2}%
 }
 
 % list of tables without indentation
 \renewcommand*{\l@table}[2]{%
-  \@dottedtocline{1}{0em}{2.5em}{#1}{#2}%
+  \tukethesis@dottedtocline{1}{0em}{1.8em}{#1}{#2}%
 }
 
 % list of listings without indentation
 \renewcommand*{\l@lstlisting}[2]{%
-  \@dottedtocline{1}{0em}{2.5em}{#1}{#2}%
+  \tukethesis@dottedtocline{1}{0em}{1.8em}{#1}{#2}%
 }
 
 \makeatother
