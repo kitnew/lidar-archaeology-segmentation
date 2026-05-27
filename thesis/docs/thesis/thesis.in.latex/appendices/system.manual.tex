@@ -1,3 +1,151 @@
 % !TEX root = ../thesis.tex
 
-\chapter{Systémová príručka}\label{app:system.manual}
+\chapter{System Manual}\label{app:system.manual}
+
+\begin{sloppypar}
+
+This system manual describes the internal structure of the implemented information output. It follows the KKUI thesis documentation requirement that the system documentation should contain generated and commented source code or, at minimum, a commented and explained description of the principal methods and functions of the result. Because the complete source code is available in the repository, this appendix focuses on the main modules, their responsibilities, and the behaviour of the essential classes and functions.
+
+\section{Overall Architecture}
+
+The implementation is organized as a Hydra-configurable Python pipeline. Configuration files define which dataset, model, \gls{lossfunction}, and runtime paths are used. The executable scripts in \texttt{src/} instantiate these components and perform training, validation, evaluation, or inference.
+
+\begin{description}
+    \item[\texttt{src/train.py}] Main training entry point.
+    \item[\texttt{src/evaluation.py}] Validation-map reconstruction and \gls{thresholdbasedinference} evaluation.
+    \item[\texttt{src/inference.py}] Full-area \gls{tile} inference and probability-map export.
+    \item[\texttt{src/datasets/}] Dataset classes for loading prepared raster archives and extracting \gls{tile}.
+    \item[\texttt{src/models/}] Model factories for DeepLabV3 and DeepLabV3+.
+    \item[\texttt{src/engine/}] Training loop, losses, and metric aggregation.
+    \item[\texttt{src/utils/}] Helper functions for channel statistics and segmentation metrics.
+\end{description}
+
+\section{Configuration Layer}
+
+Hydra is used to keep experiment definitions outside the source code. The top-level files \texttt{configs/train.yaml}, \texttt{configs/evaluate.yaml}, and \texttt{configs/inference.yaml} define defaults and runtime parameters. Dataset definitions are stored in \texttt{configs/dataset/}; they specify the dataset class, input \texttt{.npz} files, \gls{datasetmanifest} file, subset, \gls{tile} filtering, and cross-validation location.
+
+The path configuration is stored in \texttt{configs/paths/default.yaml}. It resolves:
+
+\begin{itemize}
+    \item \texttt{DATA\_ROOT} to the processed data directory;
+    \item \texttt{OUTPUT\_DIR} to experiment outputs;
+    \item \texttt{LOG\_DIR} to logs.
+\end{itemize}
+
+This separation makes the same source code usable on a local workstation and on a cluster by changing environment variables or Hydra command-line overrides.
+
+\section{Training Entry Point}
+
+The function \texttt{main} in \texttt{src/train.py} is decorated with:
+
+\begin{verbatim}
+@hydra.main(
+    version_base=None,
+    config_path="../configs",
+    config_name="train"
+)
+\end{verbatim}
+
+Its main responsibilities are:
+
+\begin{enumerate}
+    \item load and print the resolved Hydra configuration;
+    \item select the \gls{cuda} device;
+    \item set random seeds for Python, NumPy, and PyTorch;
+    \item optionally initialize Weights and Biases logging;
+    \item instantiate the model, datasets, \gls{lossfunction}, optimizer, and trainer;
+    \item run the training loop and save checkpoints to the Hydra output directory.
+\end{enumerate}
+
+The model and datasets are created through \texttt{hydra.utils.instantiate}, so the training script does not need hard-coded knowledge of a specific dataset variant or architecture.
+
+\section{Dataset Classes}
+
+\subsection{SegmentationDataset}
+
+\texttt{SegmentationDataset} in \texttt{src/datasets/dataset.py} is the main dataset class for single-area segmentation experiments, especially the Maya dataset variants. It reads a \gls{datasetmanifest} file, filters it by subset, validity fraction, and positive-\gls{tile} selection, then loads a prepared \texttt{.npz} data archive.
+
+The class expects raster input in \texttt{(C, H, W)} format. During \texttt{\_\_getitem\_\_}, it crops one \gls{tile} using the stored \texttt{y}, \texttt{x}, and \texttt{tile\_size} values from the \gls{datasetmanifest} and returns a dictionary:
+
+\begin{verbatim}
+{
+    "data":  input tensor, shape (C, H, W),
+    "mask":  reference mask, shape (1, H, W),
+    "valid": valid-pixel mask, shape (1, H, W),
+    "coords": tile origin [y, x]
+}
+\end{verbatim}
+
+For the training subset, the class can use \texttt{soft\_mask} when it is present in the archive. Validation and full inference use binary masks or dummy zero masks, respectively.
+
+\subsection{TerassesSegmentationDataset}
+
+\texttt{TerassesSegmentationDataset} supports multi-location \gls{slovakterrace} experiments. It accepts either a single data path or a dictionary mapping location identifiers such as \texttt{ladzany}, \texttt{sasovske}, \texttt{sitno}, and \texttt{tribec} to prepared archives.
+
+The class implements the leave-one-location-out logic used in the thesis:
+
+\begin{itemize}
+    \item \texttt{subset=train}: use annotated locations except \texttt{held\_out\_location};
+    \item \texttt{subset=val}: use only \texttt{held\_out\_location};
+    \item \texttt{subset=full}: use \texttt{full\_location} for full-area inference.
+\end{itemize}
+
+It also supports optional negative-\gls{tile} subsampling through \texttt{neg\_to\_pos\_ratio}, which is useful for highly imbalanced terrace masks.
+
+\subsection{Augmentation}
+
+Training augmentation is implemented as synchronized transformations over the input \gls{tile}, mask, and valid mask. The shared augmentation includes horizontal flips, vertical flips, and rotations by multiples of 90 degrees. Applying the same geometric transform to all three tensors preserves alignment between raster data and labels.
+
+\section{Model Factories}
+
+\texttt{src/models/deeplab\_v3.py} defines \texttt{create\_model} for Torchvision DeepLabV3. It supports \gls{resnet}-50 and \gls{resnet}-101 \gls{backbone} and can optionally initialize the \gls{backbone} with ImageNet weights. The output layer is configured for one class, which corresponds to one-logit binary segmentation.
+
+\texttt{src/models/deeplab\_v3\_plus.py} defines the equivalent factory for DeepLabV3+ using \texttt{segmentation-models-pytorch}. It supports configurable encoder names, input channel count, output class count, and optional ImageNet encoder weights.
+
+\section{Loss Functions}
+
+Losses are implemented in \texttt{src/engine/losses.py}. All principal losses share the same interface:
+
+\begin{verbatim}
+forward(logits, targets, valid=None) -> scalar loss
+\end{verbatim}
+
+The helper \texttt{\_prepare\_binary\_tensors} validates tensor shapes and converts masks to the correct type. The helper \texttt{\_masked\_mean} computes a mean loss only over valid pixels when a valid mask is provided.
+
+The implemented losses are:
+
+\begin{description}
+    \item[\texttt{BCEDiceLoss}] Combines binary cross-entropy with Dice loss. It is a stable general-purpose option for binary segmentation.
+    \item[\texttt{BinaryTanimotoWithComplementLoss}] Computes Tanimoto similarity for foreground and background and minimizes one minus their average score.
+    \item[\texttt{BinaryFocalLoss}] Down-weights easy pixels and focuses learning on harder examples.
+    \item[\texttt{FocalDiceLoss}] Combines focal loss with Dice loss.
+    \item[\texttt{BinaryDECBLoss}] Binary adaptation of a class-balance-inspired loss that changes class weights according to effective sample counts within a batch.
+\end{description}
+
+\section{Trainer}
+
+\texttt{Trainer} in \texttt{src/engine/trainer.py} encapsulates the training and validation loop.
+
+\texttt{train\_epoch} switches the model to training mode, iterates over batches, computes logits, evaluates the configured loss, performs backpropagation, and updates model parameters.
+
+\texttt{validate} switches the model to evaluation mode, computes validation loss, thresholds sigmoid probabilities, and accumulates \glspl{truepositive}, \glspl{falsepositive}, \glspl{falsenegative}, and true negatives over valid pixels.
+
+\texttt{fit} controls the epoch loop. It logs training and validation losses, calculates metrics, and saves \texttt{best\_model.pth} when the selected checkpoint metric improves. The checkpoint contains the epoch number, model weights, optimizer state, positive \gls{iou}, and \gls{fscore}.
+
+\section{Evaluation and Inference}
+
+\texttt{src/evaluation.py} reconstructs a full validation \gls{probabilitymap} from \gls{tile} predictions. Overlapping predictions are accumulated and then averaged by a per-pixel count map. The final map is compared against the \gls{referencemask} only where pixels are valid and covered by validation \gls{tile}. The script then searches for an optimal threshold and reports metrics.
+
+\texttt{src/inference.py} uses the same reconstruction idea for prediction without ground-truth labels. The central function \texttt{run\_inference} creates two global tensors: one for the accumulated probabilities and one for the number of predictions per pixel. Each \gls{tile} prediction is inserted back into its original spatial position using the stored \gls{tile} coordinates. The final \gls{probabilitymap} is:
+
+\begin{verbatim}
+final_map = pred_map / clamp(map_count, min=1)
+\end{verbatim}
+
+The result is saved as a single-channel NumPy array. This output can be thresholded, converted to \gls{geotiff} by helper scripts, or inspected in \gls{gis} software together with the original \gls{lidarderiveddata} raster.
+
+\section{Extension Points}
+
+The pipeline can be extended without changing the main scripts. A new dataset variant can be added by creating another file under \texttt{configs/dataset/}. A new model can be added by implementing a factory function and registering it in \texttt{configs/model/}. A new \gls{lossfunction} must implement the same \texttt{forward(logits, targets, valid=None)} interface so that it can be used by \texttt{Trainer} without additional changes.
+
+\end{sloppypar}

@@ -1,0 +1,132 @@
+% !TEX root = ../thesis.tex
+
+\chapter{Suplementary Material}\label{app:suplementary.material}
+
+\begin{landscape}
+\begin{table}[p]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.25}
+
+\begin{tabularx}{\linewidth}{
+@{}
+p{0.9cm}
+p{2.6cm}
+p{3.0cm}
+p{4.4cm}
+p{1.5cm}
+p{3.0cm}
+Y
+@{}
+}
+\toprule
+&
+\textbf{Experiment Group} &
+\textbf{Controlled component} &
+\textbf{Compared variants} &
+\textbf{\makecell{Number of\\configurations}} &
+\textbf{Best configuration} &
+\textbf{Main observation} \\
+\midrule
+
+\multirow{5}{*}{\rotatebox{90}{Maya}}
+& Input Data Representation
+& \gls{lidarderiveddata} input
+& \gls{dem} (raw); \gls{rgb}; \gls{rgdem} (raw); \gls{rgdem} (z-score); \gls{sps} (z-score)
+& 10
+& \gls{sps} (z-score)
+& \gls{sps} provided a broader spatial context and highlighted local elevation changes, improving the distinction between man-made structures and natural terrain. \\
+
+& Label Representation
+& Target mask type
+& Binary hard mask; soft mask with radius = \{2, 4, 6\}
+& 38
+& Hard mask / soft mask radius = 2
+& Soft masks did not significantly improve the evaluation metric, with differences typically within $\pm$2\%. However, they produced lower \gls{precision} and higher \gls{recall}, while smoothing validation fluctuations. \\
+
+& Loss function
+& Optimization objective
+& \gls{bce} + Dice; Tanimoto with complement; Focal; Focal + Dice; \gls{decb}
+& 12
+& \gls{bce} + Dice / Tanimoto
+& The losses showed similar metric trends. Tanimoto produced smoother validation behaviour, higher \gls{precision}, lower \gls{recall}, and more stable convergence. \\
+
+& Sampling Strategy
+& \gls{tile} size selection
+& 128 (32); 256 (64)
+& 4
+& 128 (32)
+& The difference was minimal, but 128-sized \gls{tile} had a higher positive-to-negative pixel ratio. \\
+
+& Model Architecture
+& Segmentation network / initialization
+& DeepLab V3; DeepLab V3+; DeepLab V3+ pretrained
+& 6
+& DeepLab V3+
+& DeepLab V3+ achieved slightly better results than DeepLab V3, although the difference was only a few percentage points. \\
+
+\midrule
+
+\multirow{5}{*}{\rotatebox{90}{Slovakia}}
+& Input Data Representation
+& \gls{lidarderiveddata} input
+& \gls{dem} (z-score); \gls{dem} (min-max); \gls{iso}; \gls{aniso}
+& 5
+& \gls{aniso}
+& \gls{iso} and \gls{aniso} performed similarly, but \gls{aniso} demonstrated more stable training. \\
+
+& Label Representation
+& Target mask type
+& Binary hard mask; soft mask with radius = \{2, 4, 6\}
+& 2
+& Soft mask radius = 2
+& The control metrics were higher and more stable, but the loss also increased due to more activations near the hard mask boundaries. \\
+
+& Loss function
+& Optimization objective
+& \gls{bce} + Dice; Tanimoto with complement
+& 4
+& Tanimoto
+& Tanimoto provided higher stability, smoother control metrics, and lower error. \\
+
+& Sampling Strategy
+& \gls{tile} size selection
+& 128 (32); 256 (64); 512 (128); 1024 (256)
+& 4
+& 512 (128)
+& This setting achieved the best benchmark results and the lowest error, balancing resolution and \gls{tile} context. \\
+
+& Model Architecture
+& Segmentation network / initialization
+& DeepLab V3; DeepLab V3+; DeepLab V3+ pretrained
+& 5
+& DeepLab V3+
+& The models produced similar results, but DeepLab V3+ improved when additional preprocessing was applied. Pretrained weights worked best with an appropriate \gls{lossfunction}. \\
+
+\bottomrule
+\end{tabularx}
+
+\caption{Overview of conducted experiments on \gls{mayastructure} and \gls{slovakterrace} with outcomes.}
+\label{app:tab:experiments_summary}
+\end{table}
+\end{landscape}
+
+\begin{table}[!ht]
+    \centering
+    \begin{tabular}{|l|l|l|}
+    \hline
+        Loss Function & Tested parameter & Tested digit \\ \hline
+        BCE + Dice & Positive Weight & 1.0; 10.62 \\ \hline
+        BCE + Dice & Lambda BCE & 0.5 \\ \hline
+        Tanimoto & Smoothing & 1e-6 \\ \hline
+        Focal & Gamma & 2.0 \\ \hline
+        Focal + Dice & Gamma & 2.0 \\ \hline
+        Focal + Dice & Lambda Focal & 0.5 \\ \hline
+        DECB & Mode & Focal; BCE \\ \hline
+        DECB & Gamma (if mode = Focal) & 2.0; 3.0 \\ \hline
+        DECB & Weights Normalization & True; False \\ \hline
+    \end{tabular}
+    \caption{Hyperparameters of loss functions tested in the experiment.}
+    \label{app:tab:loss_functions_hyperparameters}
+\end{table}

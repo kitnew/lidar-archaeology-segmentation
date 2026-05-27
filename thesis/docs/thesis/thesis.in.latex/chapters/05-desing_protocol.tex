@@ -2,41 +2,41 @@
 
 \chapter{Experimental Design and Evaluation Protocol}\label{ch:design_protocol}
 
-The purpose of the experimental part of this thesis is to evaluate how selected methodological components influence the quality of binary semantic segmentation of archaeological features in LiDAR-derived raster data. The experiments are designed to compare different configurations under a consistent pipeline, so that the observed differences can be attributed to controlled variables rather than to changes in data preparation, splitting, validation, or evaluation procedure.
+The purpose of the experimental part of this thesis is to evaluate how selected methodological components influence the quality of \gls{binarysemanticsegmentation} of \gls{archaeologicalfeature} in \gls{lidarderiveddata} raster data. The experiments are designed to compare different configurations under a consistent pipeline, so that the observed differences can be attributed to controlled variables rather than to changes in data preparation, splitting, validation, or evaluation procedure.
 
-The experiment series follows the workflow described in Chapter~\ref{ch:methodology}. Each experiment uses a defined input representation, label type, model architecture, loss function, tile configuration, and validation strategy. The output of each experiment is a probability map, which is converted into a binary prediction by threshold optimization. The resulting predictions are then evaluated using pixel-wise metrics and, for selected models, by qualitative inspection in a GIS environment.
+The experiment series follows the workflow described in Chapter~\ref{ch:methodology}. Each experiment uses a defined \gls{inputrepresentation}, label type, model architecture, \gls{lossfunction}, \gls{tile} configuration, and validation strategy. The output of each experiment is a \gls{probabilitymap}, which is converted into a \gls{binaryprediction} by threshold optimization. The resulting predictions are then evaluated using \gls{pixelwisemetric} and, for selected models, by qualitative inspection in a \gls{gis} environment.
 
-The experiments are conducted separately for the Maya dataset and the Slovak terrace dataset. This separation is necessary because the two datasets differ in object morphology, spatial resolution, annotation type, and geographical context. The Maya dataset contains compact polygonal archaeological structures, while the Slovak dataset contains elongated terrace-like features represented by buffered polylines. Therefore, the goal is not only to identify the best-performing configuration, but also to understand whether the same methodological choices behave consistently across different archaeological domains.
+The experiments are conducted separately for the Maya dataset and the \gls{slovakterrace} dataset. This separation is necessary because the two datasets differ in object morphology, spatial resolution, annotation type, and geographical context. The Maya dataset contains compact polygonal archaeological structures, while the Slovak dataset contains elongated terrace-like features represented by \gls{buffer} polylines. Therefore, the goal is not only to identify the best-performing configuration, but also to understand whether the same methodological choices behave consistently across different archaeological domains.
 
 \section{Experiment Groups and Controlled Variables}
 
-To ensure consistency and comparability, the experiments are organized into several groups according to the main controlled variable. Some experiments may belong to multiple groups at the same time. For example, an experiment may simultaneously test a specific input representation, a specific loss function, and the use of soft labels. The manifest-based workflow described in Chapter~\ref{ch:methodology} makes this comparison possible because the same spatial splits and preprocessing logic can be reused across configurations.
+To ensure consistency and comparability, the experiments are organized into several groups according to the main controlled variable. Some experiments may belong to multiple groups at the same time. For example, an experiment may simultaneously test a specific \gls{inputrepresentation}, a specific \gls{lossfunction}, and the use of \gls{softlabel}. The \gls{datasetmanifest}-based workflow described in Chapter~\ref{ch:methodology} makes this comparison possible because the same spatial splits and preprocessing logic can be reused across configurations.
 
 The following experiment groups are considered:
 \begin{enumerate}
-    \item \textbf{Input data representation.} This group evaluates how different LiDAR-derived inputs affect segmentation quality. The compared representations include DEM, RGB, RGDEM, SPS, and, for the Slovak terrace dataset, also ISO and ANISO. This group is important because archaeological structures may be more or less visible depending on how the terrain surface is represented.
+    \item \textbf{Input data representation.} This group evaluates how different \gls{lidarderiveddata} inputs affect segmentation quality. The compared representations include \gls{dem}, \gls{rgb}, \gls{rgdem}, \gls{sps}, and, for the \gls{slovakterrace} dataset, also \gls{iso} and \gls{aniso}. This group is important because archaeological structures may be more or less visible depending on how the terrain surface is represented.
 
-    \item \textbf{Label representation.} This group compares hard binary masks with soft masks. The purpose is to evaluate whether confidence-shadow-like labels can reduce the negative effect of uncertain or idealized annotation boundaries and improve model stability.
+    \item \textbf{Label representation.} This group compares hard binary masks with soft masks. The purpose is to evaluate whether \gls{confidenceshadow}-like labels can reduce the negative effect of uncertain or idealized annotation boundaries and improve model stability.
 
-    \item \textbf{Loss function.} This group evaluates loss functions designed for highly imbalanced binary segmentation. Since archaeological targets occupy only a small fraction of the raster area, the loss function strongly influences whether the model learns to detect rare positive pixels or collapses toward the dominant background class.
+    \item \textbf{Loss function.} This group evaluates \gls{lossfunction} designed for highly imbalanced binary segmentation. Since archaeological targets occupy only a small fraction of the raster area, the \gls{lossfunction} strongly influences whether the model learns to detect rare positive pixels or collapses toward the dominant \gls{backgroundclass}.
 
-    \item \textbf{Patch size.} This group evaluates how the size of input tiles and the selection of training samples influence the model. This is important because tile size determines the physical context visible to the model.
+    \item \textbf{Patch size.} This group evaluates how the size of input \gls{tile} and the selection of training samples influence the model. This is important because \gls{tile} size determines the physical context visible to the model.
 
-    \item \textbf{Model architecture.} This group compares the selected DeepLab-based segmentation models. The goal is to evaluate whether the architectural differences between DeepLabV3 and DeepLab V3+ affect the segmentation of compact Maya structures and elongated Slovak terraces.
+    \item \textbf{Model architecture.} This group compares the selected DeepLab-based segmentation models. The goal is to evaluate whether the architectural differences between DeepLabV3 and DeepLab V3+ affect the segmentation of compact \gls{mayastructure} and elongated \gls{slovakterrace}.
 \end{enumerate}
 
-All experiments use the Adam optimizer with a learning rate of $10^{-5}$. The same dataset split, augmentation strategy, valid-pixel masking, and validation procedure are preserved within each experiment group.
+All experiments use the Adam optimizer with a learning rate of $10^{-5}$. The same dataset split, augmentation strategy, \gls{validpixelmask} handling, and validation procedure are preserved within each experiment group.
 
 \subsection{Compared Loss Functions}
 
-The loss function is one of the main controlled variables because of the extreme foreground--background imbalance in the data. In binary semantic segmentation, the model predicts a probability $p_i \in [0,1]$ for each valid pixel $i$, while the target label is denoted as $y_i \in \{0,1\}$ for hard labels or $y_i \in [0,1]$ for soft labels. All losses are computed only over valid pixels.
+The \gls{lossfunction} is one of the main controlled variables because of the extreme foreground--background imbalance in the data. In \gls{binarysemanticsegmentation}, the model predicts a probability $p_i \in [0,1]$ for each valid pixel $i$, while the target label is denoted as $y_i \in \{0,1\}$ for \gls{hardlabel} or $y_i \in [0,1]$ for \gls{softlabel}. All losses are computed only over valid pixels. A complete list of loss functions and their tested hyperparameter configurations is provided in Appendix~\ref{app:tab:loss_functions_hyperparameters}.
 
-The following loss functions are evaluated:
+The following \gls{lossfunction} are evaluated:
 \begin{enumerate}
-    \item \textbf{BCE+Dice Loss.} Binary Cross-Entropy (BCE) penalizes incorrect pixel-wise probabilities, while Dice loss directly optimizes the overlap between the predicted and reference masks. Their combination is commonly used in imbalanced segmentation because BCE provides stable pixel-wise supervision, while Dice reduces the dominance of the background class.
+    \item \textbf{\gls{bcediceloss}.} Binary Cross-Entropy (\gls{bce}) penalizes incorrect pixel-wise probabilities, while Dice loss directly optimizes the overlap between the predicted and \gls{referencemask}. Their combination is commonly used in imbalanced segmentation because \gls{bce} provides stable pixel-wise supervision, while Dice reduces the dominance of the \gls{backgroundclass}~\cite{yerram_extraction_2022,quan_improved_2021}.
 
     \begin{equation}
-        \mathcal{L}_{BCE}(p,y) =
+        \mathcal{L}_{\gls{bce}}(p,y) =
         - \frac{1}{N}\sum_{i=1}^{N}
         \left[
         y_i \log(p_i + \epsilon) +
@@ -53,16 +53,15 @@ The following loss functions are evaluated:
 
     The combined loss is defined as:
     \begin{equation}
-        \mathcal{L}_{BCE+Dice}
+        \mathcal{L}_{\gls{bce}+Dice}
         =
-        \lambda_{BCE}\mathcal{L}_{BCE}
+        \lambda_{\gls{bce}}\mathcal{L}_{\gls{bce}}
         +
-        \lambda_{Dice}\mathcal{L}_{Dice}.
+        (1-\lambda_{\gls{bce}})\mathcal{L}_{Dice}.
     \end{equation}
+    where \(\lambda_{\gls{bce}} = 0.5\).
 
-    % TODO: Insert the exact weights used in the implementation, e.g. lambda_BCE = 0.5 and lambda_Dice = 0.5.
-
-    \item \textbf{Tanimoto with Complement Loss.} Tanimoto loss is an overlap-based loss similar to soft IoU. It is suitable for imbalanced segmentation because it focuses on the agreement between predicted and reference regions rather than on the number of correctly classified background pixels. The complement term additionally evaluates the background class, preventing the loss from considering only the foreground region.
+    \item \textbf{Tanimoto with Complement Loss.} \gls{tanimotoloss} is an overlap-based loss similar to soft \gls{iou}. It is suitable for imbalanced segmentation because it focuses on the agreement between predicted and reference regions rather than on the number of correctly classified background pixels. The complement term additionally evaluates the \gls{backgroundclass}, preventing the loss from considering only the foreground region~\cite{diakogiannis_resunet-_2020}.
 
     \begin{equation}
         T(p,y) =
@@ -80,7 +79,7 @@ The following loss functions are evaluated:
         \right].
     \end{equation}
 
-    \item \textbf{Focal Loss.} Focal loss reduces the influence of easy examples and increases the relative importance of hard or misclassified pixels. This is useful in archaeological segmentation because the background class is dominant and contains many easy negative pixels.
+    \item \textbf{Focal Loss.} Focal loss reduces the influence of easy examples and increases the relative importance of hard or misclassified pixels. This is useful in archaeological segmentation because the \gls{backgroundclass} is dominant and contains many easy negative pixels~\cite{lin2017focal}.
 
     \begin{equation}
         \mathcal{L}_{Focal}(p,y) =
@@ -94,7 +93,7 @@ The following loss functions are evaluated:
 
     % TODO: Insert the exact alpha and gamma values used in the implementation. If alpha was not used, simplify the formula accordingly.
 
-    \item \textbf{Focal+Dice Loss.} This loss combines the hard-example focus of Focal loss with the region-overlap objective of Dice loss. It is included to test whether a combination of pixel-level difficulty weighting and mask-level overlap optimization improves segmentation of rare archaeological features.
+    \item \textbf{Focal+Dice Loss.} This loss combines the hard-example focus of Focal loss with the region-overlap objective of Dice loss. It is included to test whether a combination of \gls{pixelwisemetric} difficulty weighting and mask-level overlap optimization improves segmentation of rare \gls{archaeologicalfeature}.
 
     \begin{equation}
         \mathcal{L}_{Focal+Dice}
@@ -106,7 +105,7 @@ The following loss functions are evaluated:
 
     % TODO: Insert the exact lambda_Focal and lambda_Dice values used in the implementation.
 
-    \item \textbf{DECB Loss.} Dynamic Effective Class-Balanced loss is included to address class imbalance through dynamic class weighting. The general idea is to assign larger weight to underrepresented classes based on their effective number of samples, rather than only on their raw pixel count. This is relevant for the foreground class, which occupies only a small fraction of the raster area.
+    \item \textbf{\gls{decb} Loss.} Dynamic Effective Class-Balanced loss is included to address \gls{classimbalance} through dynamic class weighting. The general idea is to assign larger weight to underrepresented classes based on their effective number of samples, rather than only on their raw pixel count. This is relevant for the \gls{foregroundclass}, which occupies only a small fraction of the raster area~\cite{zhou_dynamic_2023}.
 
     A common form of the effective number of samples for class $c$ is:
     \begin{equation}
@@ -126,7 +125,7 @@ The following loss functions are evaluated:
 
 \section{Evaluation Metrics and Threshold Optimization}
 
-The model output is a probability map. To compute binary segmentation metrics, the probabilities are converted into a binary mask using a threshold $\tau$:
+The model output is a \gls{probabilitymap}. To compute binary segmentation metrics, the probabilities are converted into a binary mask using a threshold $\tau$:
 \begin{equation}
     \hat{y}_i^{(\tau)} =
     \begin{cases}
@@ -135,86 +134,86 @@ The model output is a probability map. To compute binary segmentation metrics, t
     \end{cases}
 \end{equation}
 
-For each threshold, the predicted mask is compared with the reference mask over valid pixels only. The following quantities are computed:
+For each threshold, the predicted mask is compared with the \gls{referencemask} over valid pixels only. The following quantities are computed:
 \begin{equation}
-    TP = |\hat{Y}_{1} \cap Y_{1}|,\quad
-    FP = |\hat{Y}_{1} \cap Y_{0}|,\quad
-    FN = |\hat{Y}_{0} \cap Y_{1}|,\quad
-    TN = |\hat{Y}_{0} \cap Y_{0}|,
+    \gls{tp} = |\hat{Y}_{1} \cap Y_{1}|,\quad
+    \gls{fp} = |\hat{Y}_{1} \cap Y_{0}|,\quad
+    \gls{fn} = |\hat{Y}_{0} \cap Y_{1}|,\quad
+    \gls{tn} = |\hat{Y}_{0} \cap Y_{0}|,
 \end{equation}
 where $Y_1$ and $Y_0$ denote the positive and negative reference pixels, while $\hat{Y}_1$ and $\hat{Y}_0$ denote the predicted positive and negative pixels.
 
-The following pixel-wise metrics are used:
+The following \gls{pixelwisemetric} are used:
 \begin{enumerate}
-    \item \textbf{Positive IoU.} Positive Intersection over Union measures the overlap between predicted and reference archaeological pixels:
+    \item \textbf{Positive \gls{iou}.} Positive \gls{intersectionoverunion} measures the overlap between predicted and reference archaeological pixels:
     \begin{equation}
-        IoU_{pos} =
-        \frac{TP}{TP + FP + FN + \epsilon}.
+        \gls{iou}_{pos} =
+        \frac{\gls{tp}}{\gls{tp} + \gls{fp} + \gls{fn} + \epsilon}.
     \end{equation}
     This is the primary metric for foreground segmentation quality.
 
-    \item \textbf{Negative IoU.} Negative Intersection over Union measures the overlap for the background class:
+    \item \textbf{Negative \gls{iou}.} Negative \gls{intersectionoverunion} measures the overlap for the \gls{backgroundclass}:
     \begin{equation}
-        IoU_{neg} =
-        \frac{TN}{TN + FP + FN + \epsilon}.
+        \gls{iou}_{neg} =
+        \frac{\gls{tn}}{\gls{tn} + \gls{fp} + \gls{fn} + \epsilon}.
     \end{equation}
-    This metric is reported as a diagnostic background score, but it must be interpreted carefully because the background class dominates the raster area.
+    This metric is reported as a diagnostic background score, but it must be interpreted carefully because the \gls{backgroundclass} dominates the raster area.
 
-    \item \textbf{Mean IoU.} Mean IoU averages the positive and negative IoU:
+    \item \textbf{Mean \gls{iou}.} Mean \gls{iou} averages the positive and negative \gls{iou}:
     \begin{equation}
-        mIoU =
-        \frac{IoU_{pos} + IoU_{neg}}{2}.
+        m\gls{iou} =
+        \frac{\gls{iou}_{pos} + \gls{iou}_{neg}}{2}.
     \end{equation}
-    It provides a balanced class-level summary, but in this thesis the positive IoU remains more informative for the archaeological target class.
+    It provides a balanced class-level summary, but in this thesis the positive \gls{iou} remains more informative for the archaeological target class.
 
-    \item \textbf{Precision.} Precision measures how many predicted positive pixels are correct:
+    \item \textbf{\gls{precision}.} \gls{precision} measures how many predicted positive pixels are correct:
     \begin{equation}
-        Precision =
-        \frac{TP}{TP + FP + \epsilon}.
+        \gls{precision} =
+        \frac{\gls{tp}}{\gls{tp} + \gls{fp} + \epsilon}.
     \end{equation}
-    High precision indicates fewer false-positive predictions.
+    High \gls{precision} indicates fewer \gls{falsepositive}.
 
-    \item \textbf{Recall.} Recall measures how many reference positive pixels were detected:
+    \item \textbf{\gls{recall}.} \gls{recall} measures how many reference positive pixels were detected:
     \begin{equation}
-        Recall =
-        \frac{TP}{TP + FN + \epsilon}.
+        \gls{recall} =
+        \frac{\gls{tp}}{\gls{tp} + \gls{fn} + \epsilon}.
     \end{equation}
-    High recall indicates that fewer archaeological pixels were missed.
+    High \gls{recall} indicates that fewer archaeological pixels were missed.
 
-    \item \textbf{F1-score.} F1-score is the harmonic mean of precision and recall:
+    \item \textbf{\gls{fscore}.} \gls{fscore} is the harmonic mean of \gls{precision} and \gls{recall}:
     \begin{equation}
-        F1 =
-        \frac{2 \cdot Precision \cdot Recall}
-        {Precision + Recall + \epsilon}.
+        \gls{f1} =
+        \frac{2 \cdot \gls{precision} \cdot \gls{recall}}
+        {\gls{precision} + \gls{recall} + \epsilon}.
     \end{equation}
-    It is useful when both false positives and false negatives are important.
+    It is useful when both \gls{falsepositive} and \gls{falsenegative} are important.
 \end{enumerate}
 
-Accuracy is not used as a primary evaluation metric because it is dominated by the background class. In highly imbalanced segmentation, a model can achieve high accuracy by predicting the majority background class while still failing to detect archaeological structures.
+Accuracy is not used as a primary evaluation metric because it is dominated by the \gls{backgroundclass}. In highly imbalanced segmentation, a model can achieve high accuracy by predicting the majority \gls{backgroundclass} while still failing to detect archaeological structures~\cite{wurm_semantic_2019,griffiths_improving_2019}.
 
-Threshold optimization is performed on the validation probability map. The tested threshold values are sampled uniformly from the interval $[0.2, 0.99]$:
+Threshold optimization is performed on the validation \gls{probabilitymap}. The tested threshold values are sampled uniformly from the interval $[0.2, 0.99]$:
 \begin{equation}
     \tau \in \mathrm{linspace}(0.2, 0.99, 100).
 \end{equation}
 
-For each threshold, all metrics listed above are computed. The final threshold is selected as the value that maximizes $IoU_{pos}$ on the validation area. This choice is motivated by the fact that the main objective of the task is accurate segmentation of the archaeological foreground class. The final reported metrics for each experiment are computed using this optimized threshold.
+For each threshold, all metrics listed above are computed. The final threshold is selected as the value that maximizes $\gls{iou}_{pos}$ on the validation area. This choice is motivated by the fact that the main objective of the task is accurate segmentation of the archaeological \gls{foregroundclass}. The final reported metrics for each experiment are computed using this optimized threshold.
 
 % TODO: If a separate test set is used, the threshold must be selected only on validation data and then applied unchanged to the test set.
 
 \section{Qualitative Assessment in GIS}
 
-Pixel-wise metrics provide a necessary quantitative comparison between experiments, but they do not fully describe the practical archaeological usefulness of a prediction. This limitation is particularly important in archaeological LiDAR interpretation, where a prediction that is slightly shifted from the reference mask may receive a low pixel-wise score even though it can still indicate a meaningful candidate feature for expert inspection. Previous work also emphasizes that archaeological evaluation often depends on geospatial interpretation and cannot always be reduced to standard computer-vision metrics alone~\cite{fiorucci_deep_2022}.
+Pixel-wise metrics provide a necessary quantitative comparison between experiments, but they do not fully describe the practical archaeological usefulness of a prediction. This limitation is particularly important in archaeological \gls{lidar} interpretation, where a prediction that is slightly shifted from the \gls{referencemask} may receive a low pixel-wise score even though it can still indicate a meaningful candidate feature for expert inspection. Previous work also emphasizes that archaeological evaluation often depends on geospatial interpretation and cannot always be reduced to standard computer-vision metrics alone~\cite{fiorucci_deep_2022}.
 
-For this reason, selected probability maps and binary predictions are exported to GeoTIFF format and inspected manually in a GIS environment. The qualitative assessment focuses on the following aspects:
+For this reason, selected \gls{probabilitymap} and \gls{binaryprediction} are exported to \gls{geotiff} format and inspected manually in a \gls{gis} environment. The qualitative assessment focuses on the following aspects:
 \begin{enumerate}
     \item whether predicted features correspond to visible micro-relief patterns;
     \item whether the model produces spatially coherent predictions or fragmented noise;
-    \item whether false positives are concentrated in specific terrain contexts;
-    \item whether the model misses visually clear archaeological features;
+    \item whether \gls{falsepositive} are concentrated in specific terrain contexts;
+    \item whether the model misses visually clear \gls{archaeologicalfeature};
     \item whether the result would be useful as a candidate layer for expert inspection.
 \end{enumerate}
 
-The purpose of this assessment is not to replace quantitative metrics, but to complement them. The final interpretation of model performance therefore considers both numerical scores and GIS-based visual inspection.
+The purpose of this assessment is not to replace quantitative metrics, but to complement them. The final interpretation of model performance therefore considers both numerical scores and \gls{gis}-based visual inspection.
 
 \section{Selection of Representative Experiments}
 
@@ -222,11 +221,11 @@ Because the full experiment series contains many configurations, only a subset o
 
 The representative experiments include:
 \begin{enumerate}
-    \item the best-performing configuration according to $IoU_{pos}$;
-    \item configurations with a strong precision--recall trade-off;
+    \item the best-performing configuration according to $\gls{iou}_{pos}$;
+    \item configurations with a strong \gls{precision}--\gls{recall} trade-off;
     \item configurations that clearly underperform;
-    \item configurations that illustrate the effect of a specific controlled variable, such as input representation, loss function, or label type;
-    \item configurations that produce archaeologically meaningful or misleading results during GIS inspection.
+    \item configurations that illustrate the effect of a specific controlled variable, such as \gls{inputrepresentation}, \gls{lossfunction}, or label type;
+    \item configurations that produce archaeologically meaningful or misleading results during \gls{gis} inspection.
 \end{enumerate}
 
-This selection makes it possible to distinguish which components improve segmentation quality and which components have limited or negative effect. The goal is not only to report the numerically best model, but also to explain why certain configurations are more suitable for archaeological LiDAR segmentation than others.
+This selection makes it possible to distinguish which components improve segmentation quality and which components have limited or negative effect. The goal is not only to report the numerically best model, but also to explain why certain configurations are more suitable for archaeological \gls{lidar} segmentation than others.

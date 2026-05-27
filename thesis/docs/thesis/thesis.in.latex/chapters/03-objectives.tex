@@ -4,31 +4,31 @@
 
 \section{Main Objective}
 
-The main objective of this bachelor thesis is to design, implement, and experimentally evaluate a reproducible deep learning workflow for binary semantic segmentation of archaeological objects and terrain features in airborne LiDAR-derived raster data. The workflow is evaluated on two different archaeological and geographical domains: Maya archaeological structures in Guatemala and terrace-like archaeological features in Slovakia.
+The main objective of this bachelor thesis is to design, implement, and experimentally evaluate a reproducible deep learning workflow for \gls{binarysemanticsegmentation} of archaeological objects and terrain features in airborne \gls{lidarderiveddata} raster data. The workflow is evaluated on two different archaeological and geographical domains: Maya archaeological structures in Guatemala and terrace-like \gls{archaeologicalfeature} in Slovakia.
 
-The objective is not limited to answering whether semantic segmentation can be applied to archaeological LiDAR data. Previous studies have already demonstrated that deep learning methods can be useful for similar tasks. Instead, this thesis focuses on identifying which components of the segmentation workflow influence the final result and how these components can be adjusted to improve model performance and practical usefulness.
+The objective is not limited to answering whether \gls{semanticsegmentation} can be applied to archaeological \gls{lidar} data. Previous studies have already demonstrated that deep learning methods can be useful for similar tasks~\cite{bundzel_semantic_2020,somrak_learning_2020,verschoof-van_der_vaart_combining_2020,guyot_objective_2021,trier_using_2019}. Instead, this thesis focuses on identifying which components of the segmentation workflow influence the final result and how these components can be adjusted to improve model performance and practical usefulness.
 
-The thesis therefore studies the effect of selected methodological decisions, including input data representation, label representation, sampling strategy, loss function, model architecture, and post-processing. The purpose is to evaluate these components under a consistent experimental framework and to determine how they affect quantitative segmentation metrics and qualitative GIS-based visual interpretation.
+The thesis therefore studies the effect of selected methodological decisions, including input data representation, label representation, sampling strategy, \gls{lossfunction}, model architecture, and \gls{postprocessing}. The purpose is to evaluate these components under a consistent experimental framework and to determine how they affect quantitative segmentation metrics and qualitative \gls{gis}-based visual interpretation.
 
-This objective is important because deep learning models can produce predictions even when the reasons for their success or failure are not fully clear. In archaeological applications, such uncertainty is problematic, since automatic predictions should support expert interpretation rather than replace it. Understanding which parts of the methodology influence the result increases confidence in the generated predictions and helps determine whether a model output can be considered useful for archaeological inspection.
+This objective is important because deep learning models can produce predictions even when the reasons for their success or failure are not fully clear. In archaeological applications, such uncertainty is problematic, since automatic predictions should support expert interpretation rather than replace it~\cite{bundzel_semantic_2020,fiorucci_deep_2022,verschoof-van_der_vaart_combining_2020,fylaktos_deep_2025}. Understanding which parts of the methodology influence the result increases confidence in the generated predictions and helps determine whether a model output can be considered useful for archaeological inspection.
 
 \section{Partial Objectives}
 
 To achieve the main objective, the thesis is divided into the following partial objectives:
 \begin{enumerate}
-    \item To analyse the current state of remote sensing, LiDAR-based archaeological prospection, and deep learning methods used for archaeological object detection and semantic segmentation.
+    \item To analyse the current state of \gls{remotesensing}, \gls{lidar}-based archaeological prospection, and deep learning methods used for archaeological object detection and \gls{semanticsegmentation}.
 
-    \item To prepare LiDAR-derived input representations suitable for CNN-based semantic segmentation, including DEM-based, RGB-like, hybrid, and derivative-based representations.
+    \item To prepare \gls{lidarderiveddata} \gls{inputrepresentation} suitable for \gls{cnn}-based \gls{semanticsegmentation}, including \gls{dem}-based, \gls{rgb}-like, hybrid, and derivative-based representations.
 
-    \item To prepare reference masks for both study domains and to compare hard binary labels with soft label variants based on confidence-shadow-like boundary representation.
+    \item To prepare \gls{referencemask} for both study domains and to compare hard binary labels with \gls{softlabel} variants based on \gls{confidenceshadow}-like boundary representation.
 
-    \item To construct a reproducible tiled dataset pipeline based on manifests, valid-pixel masks, controlled spatial splits, and consistent train-validation strategies.
+    \item To construct a reproducible \gls{tile} dataset pipeline based on \gls{datasetmanifest}, \gls{validpixelmask}, controlled spatial splits, and consistent train-validation strategies.
 
-    \item To train and compare selected semantic segmentation models on the Maya and Slovak datasets under controlled experimental settings.
+    \item To train and compare selected \gls{semanticsegmentation} models on the Maya and Slovak datasets under controlled experimental settings.
 
-    \item To evaluate the influence of input representation, label type, sampling strategy, loss function, model architecture, and post-processing on segmentation performance.
+    \item To evaluate the influence of \gls{inputrepresentation}, label type, sampling strategy, \gls{lossfunction}, model architecture, and \gls{postprocessing} on segmentation performance.
 
-    \item To assess the obtained results using both quantitative pixel-wise metrics and qualitative inspection in a GIS environment.
+    \item To assess the obtained results using both quantitative \gls{pixelwisemetric} and qualitative inspection in a \gls{gis} environment.
 
     \item To identify representative configurations that either improve segmentation quality or clearly demonstrate limitations of the proposed workflow.
 \end{enumerate}
@@ -37,37 +37,37 @@ To achieve the main objective, the thesis is divided into the following partial 
 
 The thesis is guided by the following research questions:
 \begin{enumerate}
-    \item How does the choice of LiDAR-derived input representation affect the segmentation of archaeological features?
+    \item How does the choice of \gls{lidarderiveddata} \gls{inputrepresentation} affect the segmentation of \gls{archaeologicalfeature}?
 
-    \item Do visually enhanced raster representations provide better segmentation performance than direct DEM-based representations?
+    \item Do visually enhanced raster representations provide better segmentation performance than direct \gls{dem}-based representations?
 
-    \item Does combining raster visualization channels with DEM information improve the model's ability to detect archaeological structures?
+    \item Does combining raster visualization channels with \gls{dem} information improve the model's ability to detect archaeological structures?
 
     \item How do hard binary masks and soft masks affect training stability and final segmentation quality?
 
-    \item How does the sampling strategy influence training under extreme foreground--background class imbalance?
+    \item How does the sampling strategy influence training under extreme foreground--\gls{backgroundclass} imbalance?
 
-    \item Which loss functions are more suitable for binary semantic segmentation of sparse archaeological targets?
+    \item Which \gls{lossfunction} are more suitable for \gls{binarysemanticsegmentation} of sparse archaeological targets?
 
-    \item How do DeepLabV3 and DeepLab V3+ perform on compact Maya structures and elongated Slovak terrace features?
+    \item How do DeepLabV3 and DeepLab V3+ perform on compact \gls{mayastructure} and elongated \gls{slovakterrace} features?
 
-    \item To what extent do threshold optimization and post-processing improve the final binary segmentation maps?
+    \item To what extent do threshold optimization and \gls{postprocessing} improve the final binary segmentation maps?
 
-    \item Do the configurations with the best pixel-wise metrics also produce archaeologically meaningful outputs when inspected in a GIS environment?
+    \item Do the configurations with the best \gls{pixelwisemetric} also produce archaeologically meaningful outputs when inspected in a \gls{gis} environment?
 \end{enumerate}
 
 % TODO: If no systematic comparison between human visual detectability and model detectability is performed, avoid formulating the research question as a direct correlation between human interpretation and model perception. This would require a separate expert-based evaluation protocol.
 
 \section{Scope and Limitations}
 
-This thesis is limited to binary semantic segmentation of archaeological features in LiDAR-derived raster data. The task is formulated as the separation of archaeological target pixels from background pixels. The thesis does not address multi-class classification of different archaeological object types, instance segmentation of individual objects, or the reconstruction of complete archaeological site inventories.
+This thesis is limited to \gls{binarysemanticsegmentation} of \gls{archaeologicalfeature} in \gls{lidarderiveddata} raster data. The task is formulated as the separation of archaeological target pixels from background pixels. The thesis does not address multi-class classification of different archaeological object types, instance segmentation of individual objects, or the reconstruction of complete archaeological site inventories.
 
-The work uses two available data domains: Maya archaeological structures from Guatemala and terrace-like archaeological features from Slovakia. These datasets differ in object morphology, spatial resolution, and annotation type. The comparison between them is therefore used to evaluate the robustness of the workflow across different domains, but it does not provide a universal conclusion for all archaeological LiDAR datasets.
+The work uses two available data domains: Maya archaeological structures from Guatemala and terrace-like \gls{archaeologicalfeature} from Slovakia. These datasets differ in object morphology, spatial resolution, and annotation type. The comparison between them is therefore used to evaluate the robustness of the workflow across different domains, but it does not provide a universal conclusion for all archaeological \gls{lidar} datasets.
 
-The thesis works with raster products derived from LiDAR data. It does not process the original LiDAR point clouds directly and does not develop new point-cloud filtering methods. The quality of the experiments therefore depends on the quality of the available DEMs, derived visualizations, and reference annotations.
+The thesis works with raster products derived from \gls{lidar} data. It does not process the original \gls{lidar} \gls{pointcloud} directly and does not develop new point-cloud filtering methods. The quality of the experiments therefore depends on the quality of the available \glspl{dem}, derived visualizations, and \gls{referenceannotation}.
 
-The available reference data are treated as expert annotations rather than perfect ground truth. Archaeological labels may contain uncertainty, simplified geometry, conservative interpretation, or spatial mismatch between the present terrain expression and the interpreted archaeological structure. This limitation is addressed partially through soft labels and qualitative GIS-based inspection, but it cannot be fully eliminated without additional field verification.
+The available reference data are treated as expert annotations rather than perfect \gls{groundtruth}. Archaeological labels may contain uncertainty, simplified geometry, conservative interpretation, or spatial mismatch between the present terrain expression and the interpreted archaeological structure~\cite{bundzel_semantic_2020,cowley_what_2016,hutson2012unavoidable,Quintus_Day_Smith_2017}. This limitation is addressed partially through \gls{softlabel} and qualitative \gls{gis}-based inspection, but it cannot be fully eliminated without additional field verification.
 
-The experimental comparison focuses on selected architectures, loss functions, input representations, sampling strategies, and post-processing procedures. It does not attempt to exhaustively test all possible neural network architectures or all available LiDAR visualization techniques. The selected configurations are evaluated as representative components of a reproducible segmentation workflow.
+The experimental comparison focuses on selected architectures, \gls{lossfunction}, \gls{inputrepresentation}, sampling strategies, and \gls{postprocessing} procedures. It does not attempt to exhaustively test all possible neural network architectures or all available \gls{lidar} visualization techniques. The selected configurations are evaluated as representative components of a reproducible segmentation workflow.
 
-Finally, the goal of this thesis is not to create a fully autonomous archaeological discovery system. The expected output is a decision-support layer that can help experts inspect large LiDAR-derived areas more efficiently. The final archaeological interpretation remains dependent on domain expertise and, where possible, field verification.
+Finally, the goal of this thesis is not to create a fully autonomous archaeological discovery system. The expected output is a decision-support layer that can help experts inspect large \gls{lidarderiveddata} areas more efficiently. The final archaeological interpretation remains dependent on domain expertise and, where possible, field verification.
