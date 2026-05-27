@@ -1,6 +1,6 @@
 % !TEX root = ../thesis.tex
 
-\chapter{Suplementary Material}\label{app:suplementary.material}
+\chapter{Supplementary Material}\label{app:suplementary.material}
 
 \begin{landscape}
 \begin{table}[p]
@@ -32,8 +32,8 @@ Y
 
 \multirow{5}{*}{\rotatebox{90}{Maya}}
 & Input Data Representation
-& \gls{lidarderiveddata} input
-& \gls{dem} (raw); \gls{rgb}; \gls{rgdem} (raw); \gls{rgdem} (z-score); \gls{sps} (z-score)
+& LiDAR-derived input
+& \gls{dem} (raw); RGB; RGDEM (raw); RGDEM (z-score); \gls{sps} (z-score)
 & 10
 & \gls{sps} (z-score)
 & \gls{sps} provided a broader spatial context and highlighted local elevation changes, improving the distinction between man-made structures and natural terrain. \\
@@ -43,21 +43,21 @@ Y
 & Binary hard mask; soft mask with radius = \{2, 4, 6\}
 & 38
 & Hard mask / soft mask radius = 2
-& Soft masks did not significantly improve the evaluation metric, with differences typically within $\pm$2\%. However, they produced lower \gls{precision} and higher \gls{recall}, while smoothing validation fluctuations. \\
+& Soft masks did not significantly improve the evaluation metric, with differences typically within $\pm$2\%. However, they produced lower Precision and higher Recall, while smoothing validation fluctuations. \\
 
 & Loss function
 & Optimization objective
 & \gls{bce} + Dice; Tanimoto with complement; Focal; Focal + Dice; \gls{decb}
 & 12
 & \gls{bce} + Dice / Tanimoto
-& The losses showed similar metric trends. Tanimoto produced smoother validation behaviour, higher \gls{precision}, lower \gls{recall}, and more stable convergence. \\
+& The losses showed similar metric trends. Tanimoto produced smoother validation behaviour, higher Precision, lower Recall, and more stable convergence. \\
 
 & Sampling Strategy
-& \gls{tile} size selection
+& Tile size selection
 & 128 (32); 256 (64)
 & 4
 & 128 (32)
-& The difference was minimal, but 128-sized \gls{tile} had a higher positive-to-negative pixel ratio. \\
+& The difference was minimal, but 128-sized tiles had a higher positive-to-negative pixel ratio. \\
 
 & Model Architecture
 & Segmentation network / initialization
@@ -70,7 +70,7 @@ Y
 
 \multirow{5}{*}{\rotatebox{90}{Slovakia}}
 & Input Data Representation
-& \gls{lidarderiveddata} input
+& LiDAR-derived input
 & \gls{dem} (z-score); \gls{dem} (min-max); \gls{iso}; \gls{aniso}
 & 5
 & \gls{aniso}
@@ -91,23 +91,23 @@ Y
 & Tanimoto provided higher stability, smoother control metrics, and lower error. \\
 
 & Sampling Strategy
-& \gls{tile} size selection
+& Tile size selection
 & 128 (32); 256 (64); 512 (128); 1024 (256)
 & 4
 & 512 (128)
-& This setting achieved the best benchmark results and the lowest error, balancing resolution and \gls{tile} context. \\
+& This setting achieved the best benchmark results and the lowest error, balancing resolution and tile context. \\
 
 & Model Architecture
 & Segmentation network / initialization
 & DeepLab V3; DeepLab V3+; DeepLab V3+ pretrained
 & 5
 & DeepLab V3+
-& The models produced similar results, but DeepLab V3+ improved when additional preprocessing was applied. Pretrained weights worked best with an appropriate \gls{lossfunction}. \\
+& The models produced similar results, but DeepLab V3+ improved when additional preprocessing was applied. Pretrained weights worked best with an appropriate loss function. \\
 
 \bottomrule
 \end{tabularx}
 
-\caption{Overview of conducted experiments on \gls{mayastructure} and \gls{slovakterrace} with outcomes.}
+\caption{Overview of conducted experiments on Maya and Slovakia datasets with outcomes.}
 \label{app:tab:experiments_summary}
 \end{table}
 \end{landscape}

@@ -2,9 +2,9 @@
 
 \chapter{Results and Discussion}\label{ch:results_discussion}
 
-This chapter presents the quantitative and qualitative results of the conducted experiments. The experiments were treated not as an independent sequence of model runs, but as a set of controlled experimental groups. Each group was designed to assess the impact of a single methodological component, such as input data representation, label representation, \gls{lossfunction}, sampling strategy, or model architecture. This structure allows us to distinguish general trends from the specific results of individual configurations. A detailed description of all configurations will not be provided due to their high variability; they follow directly from the methodology described above and adhere to a defined evaluation protocol.
+This chapter presents the quantitative and qualitative results of the conducted experiments. The experiments were treated not as an independent sequence of model runs, but as a set of controlled experimental groups. Each group was designed to assess the impact of a single methodological component, such as input data representation, label representation, loss function, tile size, or model architecture. This structure allows us to distinguish general trends from the specific results of individual configurations. A detailed description of all configurations will not be provided due to their high variability; they follow directly from the methodology described above and adhere to a defined evaluation protocol.
 
-Experiments were conducted separately for the datasets on \gls{mayastructure} and \gls{slovakterrace}, as these two study areas differ in object morphology, terrain context, and annotation characteristics. The Maya dataset focuses primarily on compact archaeological structures, whereas the Slovak dataset contains linear objects similar to terraces. Therefore, the results are presented separately for both areas and only then compared at the level of methodological trends. A complete description of the characteristics of the available data is provided in Chapter~\ref{ch:methodology}.
+Experiments were conducted separately for the datasets on Maya structures and Slovak terrace, as these two study areas differ in object morphology, terrain context, and annotation characteristics. The Maya dataset focuses primarily on compact archaeological structures, whereas the Slovak dataset contains linear objects similar to terraces. Therefore, the results are presented separately for both areas and only then compared at the level of methodological trends. A complete description of the characteristics of the available data is provided in Chapter~\ref{ch:methodology}.
 
 Only experiments conducted on the latest consistent version of the workflow will be considered to ensure the objectivity of the subsequent comparison and to minimize the impact of possible methodological drift from minor changes. This will ensure a meaningful comparison of the tested components regardless of the input data domain.
 
@@ -22,7 +22,7 @@ Only experiments conducted on the latest consistent version of the workflow will
 \midrule
 
 \multirow{2}{=}{Input Data Representation} &
-Maya & \gls{dem}, \gls{rgb}, \gls{rgdem}, \gls{sps} \\
+Maya & \gls{dem}, RGB, \gls{rgdem}, \gls{sps} \\
 &
 Slovakia & \gls{dem}, \gls{iso}, \gls{aniso} \\
 \midrule
@@ -39,10 +39,10 @@ Maya & \gls{bce} + Dice, Tanimoto, Focal-based losses, \gls{decb} \\
 Slovakia & \gls{bce} + Dice and Tanimoto with complement \\
 \midrule
 
-\multirow{2}{=}{Sampling Strategy} &
-Maya & 128 and 256 pixel \gls{tile} with corresponding \glspl{stride} \\
+\multirow{2}{=}{Tile size} &
+Maya & 128 and 256 pixel tile with corresponding strides \\
 &
-Slovakia & 128, 256, 512, and 1024 pixel \gls{tile} \\
+Slovakia & 128, 256, 512, and 1024 pixel tile \\
 \midrule
 
 \multirow{2}{=}{Model Architecture} &
@@ -53,7 +53,7 @@ Slovakia & DeepLab V3, DeepLab V3+, pretrained DeepLab V3+ \\
 \bottomrule
 \end{tabularx}
 
-\caption{Overview of the experimental groups evaluated on the \gls{mayastructure} and \gls{slovakterrace} datasets.}
+\caption{Overview of the experimental groups evaluated on the Maya structures and Slovak terrace datasets.}
 \label{tab:experiments_overview}
 \end{table}
 
@@ -61,33 +61,33 @@ Table ~\ref{tab:experiments_overview} provides an overview of the main experimen
 
 \section{Reference Configurations and Main Results}
 
-This section presents the reference configurations selected for detailed comparison in the results chapter. For each study domain, the best-performing configuration is first described in terms of model architecture, \gls{inputrepresentation}, label representation, \gls{lossfunction}, and \gls{tile} configuration. The reported results are then compared with a representative baseline in order to show how the final configuration differs from earlier or simpler experimental variants.
+This section presents the reference configurations selected for detailed comparison in the results chapter. For each study domain, the best-performing configuration is first described in terms of model architecture, input representation, label representation, loss function, and tile configuration. The reported results are then compared with a representative baseline in order to show how the final configuration differs from earlier or simpler experimental variants.
 
 \subsection{Best-Performing Configuration for Maya Structures}
 
 For the Maya dataset, the best-performing configuration was obtained with the following setup:
 \begin{itemize}
-    \item Model: DeepLab V3+ with an ImageNet-pretrained \gls{resnet}-101 \gls{backbone};
+    \item Model: DeepLab V3+ with an ImageNet-pretrained \gls{resnet}-101 backbone;
     \item Input representation: z-score-normalized \gls{sps} representation;
     \item Label representation: soft mask with a 2~m \gls{confidenceshadow} radius;
     \item Loss function: Tanimoto with complement loss;
-    \item \gls{tile} size: $128 \times 128$ pixels with a \gls{stride} of 32 pixels.
+    \item tile size: $128 \times 128$ pixels with a stride of 32 pixels.
 \end{itemize}
 
-This configuration is used as the reference result for the \gls{mayastructure} because it achieved the strongest overall performance among the evaluated variants. To provide a meaningful comparison, it is contrasted with the older DeepLab V3 model trained without pretrained weights. This comparison should not be interpreted as an isolated evaluation of pretraining alone, since the models also differ architecturally. However, it remains useful as a representative comparison between the strongest final configuration and the earlier baseline, especially because the non-pretrained DeepLab V3 and DeepLab V3+ variants showed only minor differences in the preliminary experiments.
+This configuration is used as the reference result for the Maya structures because it achieved the strongest overall performance among the evaluated variants. To provide a meaningful comparison, it is contrasted with the older DeepLab V3 model trained without pretrained weights. This comparison should not be interpreted as an isolated evaluation of pretraining alone, since the models also differ architecturally. However, it remains useful as a representative comparison between the strongest final configuration and the earlier baseline, especially because the non-pretrained DeepLab V3 and DeepLab V3+ variants showed only minor differences in the preliminary experiments.
 
-The pixel-wise results are summarized in Table~\ref{tab:maya_v3_v3plus_metrics}. Only the metrics that provide useful information for this highly imbalanced segmentation problem are reported. Overall accuracy and background-dominated measures were omitted, since they can overestimate performance when the \gls{foregroundclass} occupies only a small part of the raster. The results show that the DeepLab V3+ configuration improves all retained \gls{pixelwisemetric} indicators. The most important improvements are visible in foreground \gls{iou}, \gls{fscore}, and Matthews correlation coefficient, which indicates that the model provides a more balanced segmentation of the archaeological structures rather than merely preserving the dominant \gls{backgroundclass}.
+The pixel-wise results are summarized in Table~\ref{tab:maya_v3_v3plus_metrics}. Only the metrics that provide useful information for this highly imbalanced segmentation problem are reported. Overall accuracy and background-dominated measures were omitted, since they can overestimate performance when the foreground class occupies only a small part of the raster. The results show that the DeepLab V3+ configuration improves all retained pixel-wise metrics indicators. The most important improvements are visible in foreground \gls{iou}, \gls{f1}, and Matthews correlation coefficient, which indicates that the model provides a more balanced segmentation of the archaeological structures rather than merely preserving the dominant background class.
 
 \begin{table}[H]
     \centering
-    \caption{DeepLab V3 \& DeepLab V3+ \gls{pixelwisemetric} comparion on Maya dataset}
+    \caption{DeepLab V3 \& DeepLab V3+ pixel-wise metrics comparison on Maya dataset}
     \begin{tabular}{|l|ll|}
     \hline
         \textbf{Metric / Model} & \textbf{DeepLab V3} & \textbf{DeepLab V3+} \\ \hline
         \textbf{Balanced Accuracy} & 0.68021 & 0.72479 \\
         \textbf{\gls{truepositive} Rate} & 0.36169 & 0.45008 \\
         \textbf{Positive Predictive Value} & 0.43755 & 0.70669 \\
-        \textbf{\gls{fscore}} & 0.39602 & 0.54992 \\
+        \textbf{\gls{f1}} & 0.39602 & 0.54992 \\
         \textbf{\gls{iou} (Foreground)} & 0.24690 & 0.37924 \\
         \textbf{\gls{iou} (Average)} & 0.62196 & 0.68862 \\
         \textbf{Matthews Correlation Coefficient} & 0.39634 & 0.56307 \\ \hline
@@ -95,11 +95,11 @@ The pixel-wise results are summarized in Table~\ref{tab:maya_v3_v3plus_metrics}.
     \label{tab:maya_v3_v3plus_metrics}
 \end{table}
 
-Since \gls{pixelwisemetric} do not fully describe the practical usefulness of the predictions in archaeological prospection, an object-wise evaluation was also performed. The results are shown in Table~\ref{tab:maya_v3_v3plus_object_metrics}. From the \gls{objectwisemetric} perspective, DeepLab V3+ detected 2253 ground-truth objects, compared with 1746 objects detected by DeepLab V3. Given the total number of 4084 reference objects, this corresponds to a substantially higher coverage of the available archaeological structures. At the same time, the average pixel \gls{hitrate} per detected object is slightly lower for DeepLab V3+, and the number of \gls{falsepositive} predicted objects is higher. Therefore, the improvement of DeepLab V3+ should be interpreted primarily as an increase in detection completeness rather than as a reduction of all error types.
+Since pixel-wise metrics do not fully describe the practical usefulness of the predictions in archaeological prospection, an object-wise evaluation was also performed. The results are shown in Table~\ref{tab:maya_v3_v3plus_object_metrics}. From the object-wise metrics perspective, DeepLab V3+ detected 2253 ground-truth objects, compared with 1746 objects detected by DeepLab V3. Given the total number of 4084 reference objects, this corresponds to a substantially higher coverage of the available archaeological structures. At the same time, the average pixel hit rate per detected object is slightly lower for DeepLab V3+, and the number of \gls{falsepositive} predicted objects is higher. Therefore, the improvement of DeepLab V3+ should be interpreted primarily as an increase in detection completeness rather than as a reduction of all error types.
 
 \begin{table}[H]
     \centering
-    \caption{DeepLab V3 \& DeepLab V3+ \gls{objectwisemetric} comparion on Maya dataset}
+    \caption{DeepLab V3 \& DeepLab V3+ object-wise metrics comparison on Maya dataset}
     \begin{tabular}{|l|ll|}
     \hline
         \textbf{Metric / Model} & \textbf{DeepLab V3} & \textbf{DeepLab V3+} \\ \hline
@@ -112,7 +112,7 @@ Since \gls{pixelwisemetric} do not fully describe the practical usefulness of th
     \label{tab:maya_v3_v3plus_object_metrics}
 \end{table}
 
-This behaviour is consistent with the practical objective of the task. In the context of archaeological \gls{candidatedetection}, missing a potential structure may be more problematic than producing additional candidates that can later be reviewed by an expert~\cite{guyot_combined_2021,verschoof-van_der_vaart_combining_2020,somrak_learning_2020,bundzel_semantic_2020}. The qualitative comparison in Figure~\ref{fig:maya_tp_fp_fn_comparison} supports this interpretation. Both models tend to fail in similar situations, but the comparison also shows several important qualitative differences. In panel (a), most errors occur near correctly segmented structures: \gls{falsenegative} pixels are often located directly next to true-positive regions, which indicates boundary mismatch rather than a complete failure to localize the object. In panel (b), the missed structures are located in areas where the terrain expression is weaker and the object morphology is less clearly separated from the surrounding background. In this case, the DeepLab V3+ configuration detects one additional structure compared with DeepLab V3. Panel (c) illustrates \gls{falsepositive}, where the models activate on terrain forms that visually resemble archaeological structures but are not included in the \gls{referenceannotation}. Overall, the DeepLab V3+ configuration identifies a larger portion of potential structures and therefore provides a more useful basis for subsequent expert-guided interpretation.
+This behaviour is consistent with the practical objective of the task. In the context of archaeological candidate detection, missing a potential structure may be more problematic than producing additional candidates that can later be reviewed by an expert~\cite{guyot_combined_2021,verschoof-van_der_vaart_combining_2020,somrak_learning_2020,bundzel_semantic_2020}. The qualitative comparison in Figure~\ref{fig:maya_tp_fp_fn_comparison} supports this interpretation. Both models tend to fail in similar situations, but the comparison also shows several important qualitative differences. In panel (a), most errors occur near correctly segmented structures: \gls{falsenegative} pixels are often located directly next to true-positive regions, which indicates boundary mismatch rather than a complete failure to localize the object. In panel (b), the missed structures are located in areas where the terrain expression is weaker and the object morphology is less clearly separated from the surrounding background. In this case, the DeepLab V3+ configuration detects one additional structure compared with DeepLab V3. Panel (c) illustrates \gls{falsepositive}, where the models activate on terrain forms that visually resemble archaeological structures but are not included in the \gls{referenceannotation}. Overall, the DeepLab V3+ configuration identifies a larger portion of potential structures and therefore provides a more useful basis for subsequent expert-guided interpretation.
 
 \begin{figure}[htbp]
     \centering
@@ -133,29 +133,29 @@ This behaviour is consistent with the practical objective of the task. In the co
 
 \subsection{Best-Performing Configuration for Slovak Terraces}
 
-For the \gls{slovakterrace} dataset, the best-performing configuration was obtained with the following setup:
+For the Slovak terrace dataset, the best-performing configuration was obtained with the following setup:
 \begin{itemize}
-    \item Model: DeepLab V3+ with a \gls{resnet}-101 \gls{backbone};
+    \item Model: DeepLab V3+ with a \gls{resnet}-101 backbone;
     \item Input representation: \gls{aniso} visualization;
     \item Label representation: soft mask with a 2~m \gls{confidenceshadow} radius;
-    \item Loss function: \gls{bcediceloss};
-    \item \gls{tile} size: $512 \times 512$ pixels with a \gls{stride} of 128 pixels.
+    \item Loss function: BCE+Dice loss;
+    \item tile size: $512 \times 512$ pixels with a stride of 128 pixels.
 \end{itemize}
 
-This configuration is used as the reference result for the \gls{slovakterrace} dataset because it achieved the strongest overall performance among the evaluated variants. However, in contrast to the \gls{mayastructure}, the interpretation of the Slovak results is less straightforward. The terrace task involves narrow, elongated, and partially discontinuous features represented by \gls{buffer} polylines. Therefore, a prediction may correctly indicate the presence of a terrace complex while still obtaining relatively low pixel-wise overlap with the \gls{referencemask}.
+This configuration is used as the reference result for the Slovak terrace dataset because it achieved the strongest overall performance among the evaluated variants. However, in contrast to the Maya structures, the interpretation of the Slovak results is less straightforward. The terrace task involves narrow, elongated, and partially discontinuous features represented by \gls{buffer} polylines. Therefore, a prediction may correctly indicate the presence of a terrace complex while still obtaining relatively low pixel-wise overlap with the reference mask.
 
-To keep the comparison consistent with the Maya results, the selected DeepLab V3+ configuration is compared with the same architecture using an ImageNet-pretrained \gls{backbone}. The comparison shows a clear difference between the two variants. Although the pretrained model showed more stable behaviour during training, the final validation metrics favour the model trained from scratch. As shown in Table~\ref{tab:slovakia_v3_v3plus_metrics}, the non-pretrained DeepLab V3+ achieved higher balanced accuracy, \gls{truepositive} rate, \gls{fscore}, foreground \gls{iou}, average \gls{iou}, and Matthews correlation coefficient. The only retained \gls{pixelwisemetric} metric in which the pretrained model performed better is positive predictive value, indicating a more conservative prediction behaviour.
+To keep the comparison consistent with the Maya results, the selected DeepLab V3+ configuration is compared with the same architecture using an ImageNet-pretrained backbone. The comparison shows a clear difference between the two variants. Although the pretrained model showed more stable behaviour during training, the final validation metrics favour the model trained from scratch. As shown in Table~\ref{tab:slovakia_v3_v3plus_metrics}, the non-pretrained DeepLab V3+ achieved higher balanced accuracy, \gls{truepositive} rate, \gls{f1}, foreground \gls{iou}, average \gls{iou}, and Matthews correlation coefficient. The only retained pixel-wise metrics metric in which the pretrained model performed better is positive predictive value, indicating a more conservative prediction behaviour.
 
 \begin{table}[H]
     \centering
-    \caption{DeepLab V3+ \gls{pixelwisemetric} comparion on terraces dataset}
+    \caption{DeepLab V3+ pixel-wise metrics comparison on terraces dataset}
     \begin{tabular}{|l|ll|}
     \hline
         \textbf{Metric / Model} & \textbf{DeepLab V3+} & \textbf{DeepLab V3+ (ImageNet)} \\ \hline
         \textbf{Balanced Accuracy} & 0.61344 & 0.53324 \\
         \textbf{\gls{truepositive} Rate} & 0.23550 & 0.06822 \\
         \textbf{Positive Predictive Value} & 0.08336 & 0.11459 \\
-        \textbf{\gls{fscore}} & 0.12313 & 0.08553 \\
+        \textbf{\gls{f1}} & 0.12313 & 0.08553 \\
         \textbf{\gls{iou} (Foreground)} & 0.06560 & 0.04467 \\
         \textbf{\gls{iou} (Average)} & 0.52724 & 0.51992 \\
         \textbf{Matthews Correlation Coefficient} & 0.13540 & 0.08609 \\ \hline
@@ -163,11 +163,11 @@ To keep the comparison consistent with the Maya results, the selected DeepLab V3
     \label{tab:slovakia_v3_v3plus_metrics}
 \end{table}
 
-The object-wise evaluation in Table~\ref{tab:slovakia_v3plus_object_metrics} confirms the same general tendency, but also shows the limitations of the selected model. The non-pretrained DeepLab V3+ detected more ground-truth terrace objects and produced a substantially higher average \gls{hitrate} per detected object. At the same time, it generated more predicted objects and a larger number of \gls{falsepositive}. The ImageNet-pretrained model produced fewer \gls{falsepositive} objects and more true-positive predicted components, but it detected fewer ground-truth objects overall. This suggests that the pretrained model is more selective, whereas the non-pretrained model is more sensitive to terrace-like terrain patterns.
+The object-wise evaluation in Table~\ref{tab:slovakia_v3plus_object_metrics} confirms the same general tendency, but also shows the limitations of the selected model. The non-pretrained DeepLab V3+ detected more ground-truth terrace objects and produced a substantially higher average hit rate per detected object. At the same time, it generated more predicted objects and a larger number of \gls{falsepositive}. The ImageNet-pretrained model produced fewer \gls{falsepositive} objects and more true-positive predicted components, but it detected fewer ground-truth objects overall. This suggests that the pretrained model is more selective, whereas the non-pretrained model is more sensitive to terrace-like terrain patterns.
 
 \begin{table}[H]
     \centering
-    \caption{DeepLab V3+ \gls{objectwisemetric} comparion on terraces dataset}
+    \caption{DeepLab V3+ object-wise metrics comparison on terraces dataset}
     \begin{tabular}{|l|ll|}
     \hline
         \textbf{Metric / Model} & \textbf{DeepLab V3+} & \textbf{DeepLab V3+ (ImageNet)} \\ \hline
@@ -185,7 +185,7 @@ The qualitative inspection in Figure~\ref{fig:terraces_ladzany_sasovske_tp_fp_fn
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/ladzany_sasovske_tp_fp_fn.pdf}
-    \caption{Qualitative evaluation of the selected non-pretrained DeepLab V3+ configuration on \gls{slovakterrace} areas. Blue denotes \gls{falsenegative}, red denotes \gls{falsepositive}, and white denotes true-positive overlap. Panel (a) shows partial detection of terrace-like relief with many missed reference segments; panel (b) shows a larger terrace system where most annotated terrace lines remain undetected.}
+    \caption{Qualitative evaluation of the selected non-pretrained DeepLab V3+ configuration on Slovak terrace areas. Blue denotes \gls{falsenegative}, red denotes \gls{falsepositive}, and white denotes true-positive overlap. Panel (a) shows partial detection of terrace-like relief with many missed reference segments; panel (b) shows a larger terrace system where most annotated terrace lines remain undetected.}
     \label{fig:terraces_ladzany_sasovske_tp_fp_fn}
 \end{figure}
 
@@ -194,53 +194,53 @@ The detailed example in Figure~\ref{fig:terraces_ladzany_tp_fp_fn} illustrates t
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/ladzany_tp_fp_fn.pdf}
-    \caption{Detailed example of \gls{slovakterrace} prediction errors for the selected pretrained DeepLab V3+ configuration. Blue denotes \gls{falsenegative}, red denotes \gls{falsepositive}, and white denotes true-positive overlap. The example shows partial detection of several terrace segments, but also many missed annotated lines and additional predictions on nearby terrain forms.}
+    \caption{Detailed example of Slovak terrace prediction errors for the selected pretrained DeepLab V3+ configuration. Blue denotes \gls{falsenegative}, red denotes \gls{falsepositive}, and white denotes true-positive overlap. The example shows partial detection of several terrace segments, but also many missed annotated lines and additional predictions on nearby terrain forms.}
     \label{fig:terraces_ladzany_tp_fp_fn}
 \end{figure}
 
-Overall, the \gls{slovakterrace} results should therefore be interpreted more cautiously than the Maya results. The selected configuration is the most useful among the tested variants because it provides the highest coverage of potential terrace areas and the strongest foreground-oriented metrics. Nevertheless, the high number of \gls{falsepositive} and the merging of individual terraces show that the model output is not suitable as a final segmentation map. Its practical value is closer to a candidate layer for expert inspection, where the model can highlight possible terrace complexes but still requires manual verification and interpretation.
+Overall, the Slovak terrace results should therefore be interpreted more cautiously than the Maya results. The selected configuration is the most useful among the tested variants because it provides the highest coverage of potential terrace areas and the strongest foreground-oriented metrics. Nevertheless, the high number of \gls{falsepositive} and the merging of individual terraces show that the model output is not suitable as a final segmentation map. Its practical value is closer to a candidate layer for expert inspection, where the model can highlight possible terrace complexes but still requires manual verification and interpretation.
 
 \section{Ablation Study}
 
-The purpose of the \gls{ablationstudy} is to evaluate the influence of individual methodological components on the final segmentation performance. Each experiment group isolates one controlled variable, while the remaining components are kept identical within that group. Therefore, the comparisons below should be interpreted only inside the corresponding group: \gls{inputrepresentation} is compared with fixed training settings, label representation is compared within paired configurations, \gls{tile} size is compared with the same model and loss setup, and so forth. This makes it possible to attribute the observed differences to the tested component rather than to unrelated changes in the pipeline.
+The purpose of the ablation study is to evaluate the influence of individual methodological components on the final segmentation performance. Each experiment group isolates one controlled variable, while the remaining components are kept identical within that group. Therefore, the comparisons below should be interpreted only inside the corresponding group: input representation is compared with fixed training settings, label representation is compared within paired configurations, tile size is compared with the same model and loss setup, and so forth. This makes it possible to attribute the observed differences to the tested component rather than to unrelated changes in the pipeline.
 
 \subsection{Effect of Input Representation}
 
-The first ablation group evaluates the effect of \gls{lidarderiveddata} \gls{inputrepresentation}. Four representations were compared on the Maya dataset: \gls{dem}, \gls{rgb}, \gls{rgdem}, and \gls{sps}. All variants were evaluated using the same model architecture, label representation, \gls{lossfunction}, \gls{tile} configuration, training procedure, validation split, and threshold optimization strategy. Therefore, the \gls{inputrepresentation} is the only controlled component in this comparison.
+The first ablation group evaluates the effect of \gls{lidar}-derived data input representation. Four representations were compared on the Maya dataset: \gls{dem}, RGB, \gls{rgdem}, and \gls{sps}. All variants were evaluated using the same model architecture, label representation, loss function, tile configuration, training procedure, validation split, and threshold optimization strategy. Therefore, the input representation is the only controlled component in this comparison.
 
-The results are shown in Table~\ref{tab:maya_input_metrics}. Among the tested representations, \gls{sps} achieved the strongest performance across all reported metrics. The foreground \gls{iou} increased to 0.43, compared with 0.37 for \gls{rgdem}, 0.36 for \gls{rgb}, and 0.25 for \gls{dem}. The same trend is visible in \gls{precision}, \gls{recall}, and \gls{fscore}. This indicates that the combination of \gls{slope}, \gls{positiveopenness}, and \gls{skyviewfactor} provides more informative local terrain contrast than the direct \gls{dem} representation or \gls{rgb}-like visualization alone.
+The results are shown in Table~\ref{tab:maya_input_metrics}. Among the tested representations, \gls{sps} achieved the strongest performance across all reported metrics. The foreground \gls{iou} increased to 0.43, compared with 0.37 for \gls{rgdem}, 0.36 for RGB, and 0.25 for \gls{dem}. The same trend is visible in precision, recall, and \gls{f1}. This indicates that the combination of \gls{slope}, \gls{positiveopenness}, and \gls{skyviewfactor} provides more informative local terrain contrast than the direct \gls{dem} representation or RGB-like visualization alone.
 
 \begin{table}[H]
     \centering
-    \caption{Comparison of \gls{inputrepresentation} on the Maya dataset}
+    \caption{Comparison of input representation on the Maya dataset}
     \label{tab:maya_input_metrics}
     \small
     \setlength{\tabcolsep}{6pt}
     \renewcommand{\arraystretch}{1.15}
     \begin{tabular}{lcccc}
         \toprule
-        \textbf{Metric / Input} & \textbf{\gls{sps}} & \textbf{\gls{rgdem}} & \textbf{\gls{rgb}} & \textbf{\gls{dem}} \\
+        \textbf{Metric / Input} & \textbf{\gls{sps}} & \textbf{\gls{rgdem}} & \textbf{RGB} & \textbf{\gls{dem}} \\
         \midrule
         \gls{iou} (Foreground) & 0.43 & 0.37 & 0.36 & 0.25 \\
         \gls{iou} (Average)    & 0.71 & 0.68 & 0.67 & 0.62 \\
-        \gls{precision}        & 0.61 & 0.54 & 0.52 & 0.43 \\
-        \gls{recall}           & 0.60 & 0.54 & 0.54 & 0.39 \\
-        \gls{fscore}         & 0.60 & 0.54 & 0.53 & 0.40 \\
+        precision        & 0.61 & 0.54 & 0.52 & 0.43 \\
+        recall           & 0.60 & 0.54 & 0.54 & 0.39 \\
+        \gls{f1}         & 0.60 & 0.54 & 0.53 & 0.40 \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-The \gls{dem} representation produced the weakest result. This is expected, since absolute elevation values do not necessarily emphasize local micro-relief patterns associated with archaeological structures~\cite{kokalj_standardizing_2025}. In contrast, \gls{sps} explicitly encodes local terrain morphology and therefore makes subtle anthropogenic features more separable from the natural background. \gls{rgdem} and \gls{rgb} performed similarly, with \gls{rgdem} achieving slightly better foreground \gls{iou} and \gls{fscore}. However, the improvement remains smaller than the difference between \gls{sps} and the other input variants.
+The \gls{dem} representation produced the weakest result. This is expected, since absolute elevation values do not necessarily emphasize local micro-relief patterns associated with archaeological structures~\cite{kokalj_standardizing_2025}. In contrast, \gls{sps} explicitly encodes local terrain morphology and therefore makes subtle anthropogenic features more separable from the natural background. \gls{rgdem} and RGB performed similarly, with \gls{rgdem} achieving slightly better foreground \gls{iou} and \gls{f1}. However, the improvement remains smaller than the difference between \gls{sps} and the other input variants.
 
 \subsection{Effect of Label Representation}
 
-The second ablation group evaluates the effect of label representation. Hard binary masks are compared with soft masks based on the same \gls{inputrepresentation}. In this table, the relevant comparison is therefore not between all columns globally, but between each original representation and its corresponding soft-mask variant. All other components, including model architecture, \gls{inputrepresentation}, \gls{lossfunction}, \gls{tile} size, and validation protocol, are kept unchanged inside each pair.
+The second ablation group evaluates the effect of label representation. Hard binary masks are compared with soft masks based on the same input representation. In this table, the relevant comparison is therefore not between all columns globally, but between each original representation and its corresponding soft-mask variant. All other components, including model architecture, input representation, loss function, tile size, and validation protocol, are kept unchanged inside each pair.
 
-The results are summarized in Table~\ref{tab:maya_label_metrics}. The effect of \gls{softlabel} is not uniform. For \gls{sps} and \gls{rgb}, soft masks slightly improved foreground \gls{iou} and \gls{fscore}. For \gls{rgdem}, the soft-mask variant produced a minor decrease in foreground \gls{iou} and \gls{fscore}. For \gls{dem}, the difference is negligible. This indicates that soft boundary supervision does not automatically improve segmentation quality in all cases.
+The results are summarized in Table~\ref{tab:maya_label_metrics}. The effect of soft labels is not uniform. For \gls{sps} and RGB, soft masks slightly improved foreground \gls{iou} and \gls{f1}. For \gls{rgdem}, the soft-mask variant produced a minor decrease in foreground \gls{iou} and \gls{f1}. For \gls{dem}, the difference is negligible. This indicates that soft boundary supervision does not automatically improve segmentation quality in all cases.
 
 \begin{table}[H]
     \centering
-    \caption{Comparison of hard and \gls{softlabel} representations on the Maya dataset}
+    \caption{Comparison of hard- and soft-label representations on the Maya dataset}
     \label{tab:maya_label_metrics}
     \scriptsize
     \setlength{\tabcolsep}{3.5pt}
@@ -248,50 +248,50 @@ The results are summarized in Table~\ref{tab:maya_label_metrics}. The effect of 
     \resizebox{\textwidth}{!}{%
     \begin{tabular}{lcccccccc}
         \toprule
-        \textbf{Metric / Variant} & \textbf{\gls{sps}} & \textbf{\gls{sps} Soft} & \textbf{\gls{rgdem}} & \textbf{\gls{rgdem} Soft} & \textbf{\gls{rgb}} & \textbf{\gls{rgb} Soft} & \textbf{\gls{dem}} & \textbf{\gls{dem} Soft} \\
+        \textbf{Metric / Variant} & \textbf{\gls{sps}} & \textbf{\gls{sps} Soft} & \textbf{\gls{rgdem}} & \textbf{\gls{rgdem} Soft} & \textbf{RGB} & \textbf{RGB Soft} & \textbf{\gls{dem}} & \textbf{\gls{dem} Soft} \\
         \midrule
         \gls{iou} (Foreground) & 0.35 & 0.36 & 0.33 & 0.32 & 0.32 & 0.33 & 0.25 & 0.25 \\
         \gls{iou} (Average)    & 0.67 & 0.67 & 0.66 & 0.66 & 0.65 & 0.66 & 0.62 & 0.62 \\
-        \gls{precision}        & 0.55 & 0.50 & 0.51 & 0.47 & 0.55 & 0.48 & 0.43 & 0.43 \\
-        \gls{recall}           & 0.50 & 0.55 & 0.48 & 0.50 & 0.43 & 0.52 & 0.37 & 0.39 \\
-        \gls{fscore}         & 0.52 & 0.53 & 0.50 & 0.49 & 0.48 & 0.50 & 0.40 & 0.40 \\
+        precision        & 0.55 & 0.50 & 0.51 & 0.47 & 0.55 & 0.48 & 0.43 & 0.43 \\
+        recall           & 0.50 & 0.55 & 0.48 & 0.50 & 0.43 & 0.52 & 0.37 & 0.39 \\
+        \gls{f1}         & 0.52 & 0.53 & 0.50 & 0.49 & 0.48 & 0.50 & 0.40 & 0.40 \\
         \bottomrule
     \end{tabular}%
     }
 \end{table}
 
-The most consistent effect of soft masks is visible in the \gls{precision}--\gls{recall} balance. In most paired comparisons, soft masks reduce \gls{precision} and increase \gls{recall}. This suggests that softer supervision encourages the model to produce broader positive activations around annotated structures. Such behaviour may be useful when the objective is to avoid missing archaeological candidates, but it also increases the risk of \gls{falsepositive}. Therefore, \gls{softlabel} should be interpreted as a trade-off between more inclusive detection and lower prediction selectivity.
+The most consistent effect of soft masks is visible in the precision--recall balance. In most paired comparisons, soft masks reduce precision and increase recall. This suggests that softer supervision encourages the model to produce broader positive activations around annotated structures. Such behaviour may be useful when the objective is to avoid missing archaeological candidates, but it also increases the risk of \gls{falsepositive}. Therefore, soft labels should be interpreted as a trade-off between more inclusive detection and lower prediction selectivity.
 
 \subsection{Effect of Tile Size}
 
-The third ablation group evaluates the effect of \gls{tile} size. In this comparison, the model architecture, \gls{inputrepresentation}, label representation, \gls{lossfunction}, training procedure, validation split, and threshold optimization strategy are kept fixed. Only the \gls{tile} size and corresponding \gls{stride} are changed.
+The third ablation group evaluates the effect of tile size. In this comparison, the model architecture, input representation, label representation, loss function, training procedure, validation split, and threshold optimization strategy are kept fixed. Only the tile size and corresponding stride are changed.
 
-For the Maya dataset, the \gls{tile} dimensions can be interpreted directly in metres because the raster resolution is 1 m per pixel. The comparison is shown in Table~\ref{tab:maya_tile_metrics}. The smaller $128 \times 128$ m \gls{tile} with a \gls{stride} of 32 m outperformed the $256 \times 256$ m \gls{tile} with a \gls{stride} of 64 m across all reported metrics. The improvement is especially visible in foreground \gls{iou} and \gls{precision}. This suggests that, for compact \gls{mayastructure}, the smaller \gls{tile} size provides sufficient context while preserving a higher relative density of positive pixels inside the training samples.
+For the Maya dataset, the tile dimensions can be interpreted directly in metres because the raster resolution is 1 m per pixel. The comparison is shown in Table~\ref{tab:maya_tile_metrics}. The smaller $128 \times 128$ m tile with a stride of 32 m outperformed the $256 \times 256$ m tile with a stride of 64 m across all reported metrics. The improvement is especially visible in foreground \gls{iou} and precision. This suggests that, for compact Maya structures, the smaller tile size provides sufficient context while preserving a higher relative density of positive pixels inside the training samples.
 
 \begin{table}[H]
     \centering
-    \caption{Comparison of \gls{tile} sizes on the Maya dataset}
+    \caption{Comparison of tile sizes on the Maya dataset}
     \label{tab:maya_tile_metrics}
     \small
     \setlength{\tabcolsep}{6pt}
     \renewcommand{\arraystretch}{1.15}
     \begin{tabular}{lcc}
         \toprule
-        \textbf{Metric / \gls{tile} size} & \textbf{$128 \times 128$ m (\gls{stride} 32 m)} & \textbf{$256 \times 256$ m (\gls{stride} 64 m)} \\
+        \textbf{Metric / tile size} & \textbf{$128 \times 128$ m (stride 32 m)} & \textbf{$256 \times 256$ m (stride 64 m)} \\
         \midrule
         \gls{iou} (Foreground) & 0.3868 & 0.3409 \\
-        \gls{precision}        & 0.6264 & 0.5331 \\
-        \gls{recall}           & 0.5111 & 0.4992 \\
-        \gls{fscore}         & 0.5488 & 0.4994 \\
+        precision        & 0.6264 & 0.5331 \\
+        recall           & 0.5111 & 0.4992 \\
+        \gls{f1}         & 0.5488 & 0.4994 \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-For the \gls{slovakterrace} dataset, the \gls{tile} sizes in Table~\ref{tab:slovakia_tile_metrics} are reported in pixels, not metres, because the raster resolution is 0.25 m per pixel. The best result was achieved with the $512 \times 512$ \gls{tile} and a \gls{stride} of 128 pixels. This configuration reached the highest foreground \gls{iou}, \gls{precision}, average \gls{iou}, and \gls{fscore}. Smaller \gls{tile} produced higher \gls{recall} but very low \gls{precision}, indicating excessive activation on background or terrace-like noise. The $1024 \times 1024$ configuration also achieved high \gls{recall}, but its lower \gls{precision} and average \gls{iou} indicate that the larger context did not improve the spatial selectivity of predictions.
+For the Slovak terrace dataset, the tile sizes in Table~\ref{tab:slovakia_tile_metrics} are reported in pixels, not metres, because the raster resolution is 0.25 m per pixel. The best result was achieved with the $512 \times 512$ tile and a stride of 128 pixels. This configuration reached the highest foreground \gls{iou}, precision, average \gls{iou}, and \gls{f1}. Smaller tile produced higher recall but very low precision, indicating excessive activation on background or terrace-like noise. The $1024 \times 1024$ configuration also achieved high recall, but its lower precision and average \gls{iou} indicate that the larger context did not improve the spatial selectivity of predictions.
 
 \begin{table}[H]
     \centering
-    \caption{Comparison of \gls{tile} sizes on the \gls{slovakterrace} dataset}
+    \caption{Comparison of tile sizes on the Slovak terrace dataset}
     \label{tab:slovakia_tile_metrics}
     \small
     \setlength{\tabcolsep}{4pt}
@@ -299,13 +299,13 @@ For the \gls{slovakterrace} dataset, the \gls{tile} sizes in Table~\ref{tab:slov
     \resizebox{\textwidth}{!}{%
     \begin{tabular}{lcccc}
         \toprule
-        \textbf{Metric / \gls{tile} size} & \textbf{$128 \times 128$ (\gls{stride} 32)} & \textbf{$256 \times 256$ (\gls{stride} 64)} & \textbf{$512 \times 512$ (\gls{stride} 128)} & \textbf{$1024 \times 1024$ (\gls{stride} 256)} \\
+        \textbf{Metric / tile size} & \textbf{$128 \times 128$ (stride 32)} & \textbf{$256 \times 256$ (stride 64)} & \textbf{$512 \times 512$ (stride 128)} & \textbf{$1024 \times 1024$ (stride 256)} \\
         \midrule
         \gls{iou} (Foreground) & 0.017 & 0.034 & 0.044 & 0.034 \\
         \gls{iou} (Average)    & 0.48  & 0.49  & 0.51  & 0.47  \\
-        \gls{precision}        & 0.018 & 0.035 & 0.052 & 0.035 \\
-        \gls{recall}           & 0.462 & 0.453 & 0.228 & 0.498 \\
-        \gls{fscore}         & 0.034 & 0.065 & 0.085 & 0.066 \\
+        precision        & 0.018 & 0.035 & 0.052 & 0.035 \\
+        recall           & 0.462 & 0.453 & 0.228 & 0.498 \\
+        \gls{f1}         & 0.034 & 0.065 & 0.085 & 0.066 \\
         \bottomrule
     \end{tabular}%
     }
@@ -313,11 +313,11 @@ For the \gls{slovakterrace} dataset, the \gls{tile} sizes in Table~\ref{tab:slov
 
 \subsection{Effect of Loss Function}
 
-The fourth ablation group evaluates the influence of the \gls{lossfunction}. All compared variants use the same model architecture, \gls{inputrepresentation}, label representation, \gls{tile} size, training procedure, validation split, and threshold optimization strategy. Therefore, the differences in Table~\ref{tab:maya_loss_metrics} reflect the effect of the optimization objective.
+The fourth ablation group evaluates the influence of the loss function. All compared variants use the same model architecture, input representation, label representation, tile size, training procedure, validation split, and threshold optimization strategy. Therefore, the differences in Table~\ref{tab:maya_loss_metrics} reflect the effect of the optimization objective.
 
 \begin{table}[H]
     \centering
-    \caption{Comparison of \gls{lossfunction} on the Maya dataset}
+    \caption{Comparison of loss function on the Maya dataset}
     \label{tab:maya_loss_metrics}
     \small
     \setlength{\tabcolsep}{4pt}
@@ -329,23 +329,23 @@ The fourth ablation group evaluates the influence of the \gls{lossfunction}. All
         \midrule
         \gls{iou} (Foreground) & 0.26 & 0.25 & 0.23 & 0.23 & 0.08 \\
         \gls{iou} (Average)    & 0.63 & 0.62 & 0.61 & 0.61 & 0.52 \\
-        \gls{precision}        & 0.45 & 0.43 & 0.48 & 0.39 & 0.09 \\
-        \gls{recall}           & 0.39 & 0.37 & 0.31 & 0.35 & 0.77 \\
-        \gls{fscore}         & 0.42 & 0.40 & 0.38 & 0.37 & 0.16 \\
+        precision        & 0.45 & 0.43 & 0.48 & 0.39 & 0.09 \\
+        recall           & 0.39 & 0.37 & 0.31 & 0.35 & 0.77 \\
+        \gls{f1}         & 0.42 & 0.40 & 0.38 & 0.37 & 0.16 \\
         \bottomrule
     \end{tabular}%
     }
 \end{table}
 
-According to the \gls{pixelwisemetric} metrics, \gls{bce}+Dice achieved the best overall result among the tested losses, with the highest foreground \gls{iou}, average \gls{iou}, \gls{recall}, and \gls{fscore}. \gls{tanimotoloss} produced very similar results, with only a minor decrease in the reported metrics. Focal loss achieved the highest \gls{precision} among the standard losses, but its lower \gls{recall} indicates that it produced more selective predictions and missed more positive pixels. Focal+Dice showed a more balanced but weaker result. \gls{decb} loss produced very high \gls{recall}, but extremely low \gls{precision} and foreground \gls{iou}, indicating that it overemphasized the positive class and generated too many \gls{falsepositive}.
+According to the pixel-wise metrics, \gls{bce}+Dice achieved the best overall result among the tested losses, with the highest foreground \gls{iou}, average \gls{iou}, recall, and \gls{f1}. Tanimoto loss produced very similar results, with only a minor decrease in the reported metrics. Focal loss achieved the highest precision among the standard losses, but its lower recall indicates that it produced more selective predictions and missed more positive pixels. Focal+Dice showed a more balanced but weaker result. \gls{decb} loss produced very high recall, but extremely low precision and foreground \gls{iou}, indicating that it overemphasized the positive class and generated too many \gls{falsepositive}.
 
-Although \gls{bce}+Dice achieved the strongest metric values in this comparison, the training behaviour must also be considered. The observed training curves showed that \gls{bce}+Dice was more prone to unstable validation behaviour and overfitting, whereas \gls{tanimotoloss} produced smoother and more stable convergence. Therefore, \gls{bce}+Dice can be treated as the best metric-oriented loss in this group, while Tanimoto remains a strong alternative when training stability is prioritized.
+Although \gls{bce}+Dice achieved the strongest metric values in this comparison, the training behaviour must also be considered. The observed training curves showed that \gls{bce}+Dice was more prone to unstable validation behaviour and overfitting, whereas Tanimoto loss produced smoother and more stable convergence. Therefore, \gls{bce}+Dice can be treated as the best metric-oriented loss in this group, while Tanimoto remains a strong alternative when training stability is prioritized.
 
 \subsection{Effect of Model Architecture}
 
-The final ablation group evaluates the effect of model architecture. DeepLab V3 and DeepLab V3+ were compared using the same \gls{inputrepresentation}, label representation, \gls{lossfunction}, \gls{tile} configuration, training procedure, validation split, and threshold optimization strategy. Thus, the architecture is the only controlled component in this comparison.
+The final ablation group evaluates the effect of model architecture. DeepLab V3 and DeepLab V3+ were compared using the same input representation, label representation, loss function, tile configuration, training procedure, validation split, and threshold optimization strategy. Thus, the architecture is the only controlled component in this comparison.
 
-The results in Table~\ref{tab:maya_architecture_metrics} show that both architectures performed at a similar level. DeepLab V3+ achieved slightly higher foreground \gls{iou}, average \gls{iou}, \gls{precision}, and \gls{fscore}, while DeepLab V3 achieved slightly higher \gls{recall}. The difference between the two models is small, which suggests that both architectures are capable of learning the main terrain patterns associated with \gls{mayastructure} under the selected setup.
+The results in Table~\ref{tab:maya_architecture_metrics} show that both architectures performed at a similar level. DeepLab V3+ achieved slightly higher foreground \gls{iou}, average \gls{iou}, precision, and \gls{f1}, while DeepLab V3 achieved slightly higher recall. The difference between the two models is small, which suggests that both architectures are capable of learning the main terrain patterns associated with Maya structures under the selected setup.
 
 \begin{table}[H]
     \centering
@@ -360,18 +360,18 @@ The results in Table~\ref{tab:maya_architecture_metrics} show that both architec
         \midrule
         \gls{iou} (Foreground) & 0.36 & 0.37 \\
         \gls{iou} (Average)    & 0.67 & 0.68 \\
-        \gls{precision}        & 0.50 & 0.54 \\
-        \gls{recall}           & 0.55 & 0.54 \\
-        \gls{fscore}         & 0.53 & 0.54 \\
+        precision        & 0.50 & 0.54 \\
+        recall           & 0.55 & 0.54 \\
+        \gls{f1}         & 0.53 & 0.54 \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-Nevertheless, DeepLab V3+ remains preferable in this experiment because it provides a slightly more balanced \gls{precision}--\gls{recall} trade-off and higher \gls{fscore}. In addition, the observed training behaviour indicated lower overfitting and more stable error development, although convergence required more time. This supports the use of DeepLab V3+ as the reference architecture for the final configuration.
+Nevertheless, DeepLab V3+ remains preferable in this experiment because it provides a slightly more balanced precision--recall trade-off and higher \gls{f1}. In addition, the observed training behaviour indicated lower overfitting and more stable error development, although convergence required more time. This supports the use of DeepLab V3+ as the reference architecture for the final configuration.
 
 \section{Error Analysis}
 
-The error analysis was conducted to identify the main failure modes of the trained segmentation models and to relate them to the properties of archaeological \gls{lidar} data. The analysis is based on qualitative inspection of selected prediction maps in a \gls{gis} environment. The examples distinguish between \gls{falsepositive}, \gls{falsenegative}, \glspl{truepositive}, and boundary-related errors. This qualitative step is necessary because \gls{pixelwisemetric} alone do not fully explain whether a prediction is archaeologically meaningful or merely numerically correct.
+The error analysis was conducted to identify the main failure modes of the trained segmentation models and to relate them to the properties of archaeological \gls{lidar} data. The analysis is based on qualitative inspection of selected prediction maps in a \gls{gis} environment. The examples distinguish between \gls{falsepositive}, \gls{falsenegative}, \glspl{truepositive}, and boundary-related errors. This qualitative step is necessary because pixel-wise metrics alone do not fully explain whether a prediction is archaeologically meaningful or merely numerically correct.
 
 The observed errors can be divided into three main categories: \gls{falsepositive}, \gls{falsenegative}, and boundary errors. These categories are closely related to the morphology of archaeological objects, the visual similarity between anthropogenic and natural terrain forms, and the uncertainty of expert annotations.
 
@@ -386,7 +386,7 @@ False-positive predictions occur when the model identifies terrain forms as arch
 
 The predicted regions are located on local relief anomalies that visually resemble archaeological remains. These forms include curved, rectangular, or edge-like terrain patterns with strong local contrast. From the model perspective, such areas are difficult to distinguish from actual structures because they contain similar geometric and topographic cues. Therefore, \gls{falsepositive} are not random noise, but usually appear in places where the terrain morphology is similar to the learned archaeological class.
 
-Several sources of \gls{falsepositive} were identified. The first source is natural terrain morphology that resembles anthropogenic structures, especially small mounds, depressions, sharp \gls{slope} transitions, or locally regular relief forms. The second source is modern disturbance, such as tracks, edges of modified terrain, or other recent landscape changes. The third source is the visualization itself: \gls{lidarderiveddata} representations may enhance local contrast and create artefacts that appear structurally meaningful to the model~\cite{kokalj_standardizing_2025}. In addition, some predictions classified as \gls{falsepositive} may represent unannotated or ambiguous candidates rather than clear model errors, since the available labels should not be interpreted as a perfect archaeological inventory.
+Several sources of \gls{falsepositive} were identified. The first source is natural terrain morphology that resembles anthropogenic structures, especially small mounds, depressions, sharp \gls{slope} transitions, or locally regular relief forms. The second source is modern disturbance, such as tracks, edges of modified terrain, or other recent landscape changes. The third source is the visualization itself: \gls{lidar}-derived data representations may enhance local contrast and create artefacts that appear structurally meaningful to the model~\cite{kokalj_standardizing_2025}. In addition, some predictions classified as \gls{falsepositive} may represent unannotated or ambiguous candidates rather than clear model errors, since the available labels should not be interpreted as a perfect archaeological inventory.
 
 False-negative errors occur when annotated archaeological objects are missed by the model. Figure~\ref{fig:maya_fn_example} shows that this problem is especially common for small, isolated, weakly preserved, or low-contrast structures.
 
@@ -397,16 +397,16 @@ False-negative errors occur when annotated archaeological objects are missed by 
     \label{fig:maya_fn_example}
 \end{figure}
 
-In many cases, the objects are visible in the \gls{referenceannotation} but only weakly expressed in the \gls{terrainvisualization}. Such objects provide limited visual evidence for the model and can easily be suppressed as background, particularly when they are surrounded by heterogeneous natural terrain.
+In many cases, the objects are visible in the \gls{referenceannotation} but only weakly expressed in the terrain visualization. Such objects provide limited visual evidence for the model and can easily be suppressed as background, particularly when they are surrounded by heterogeneous natural terrain.
 
 The \gls{falsenegative} examples also show that the model performs better on larger or more coherent groups of structures than on individual small objects. In the lower part of Figure~\ref{fig:maya_fn_example}, several structures are partially detected, but the segmentation remains incomplete. This indicates that the model can recognize stronger archaeological morphology, but it often fails to recover the complete set of small neighbouring structures. For archaeological prospection, this is an important limitation because small structures form a substantial part of the reference dataset and may be relevant for settlement interpretation.
 
-Boundary errors represent a separate class of problems. They occur when the model detects the correct archaeological object or terrain feature, but its predicted extent does not match the \gls{referencemask}. Figure~\ref{fig:maya_boundaries_error} illustrates a strong boundary mismatch.
+Boundary errors represent a separate class of problems. They occur when the model detects the correct archaeological object or terrain feature, but its predicted extent does not match the reference mask. Figure~\ref{fig:maya_boundaries_error} illustrates a strong boundary mismatch.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/maya_boundaries_error.pdf}
-    \caption{Example of a strong boundary mismatch on the Maya dataset. Panel (a) shows the \gls{lidarderiveddata} \gls{terrainvisualization}, while panel (b) shows the evaluation overlay, where blue denotes \gls{falsenegative}, red denotes \gls{falsepositive}, and white denotes true-positive overlap. The model detects only the most visually expressed parts of the structure, while a large part of the annotated area remains \gls{falsenegative}.}
+    \caption{Example of a strong boundary mismatch on the Maya dataset. Panel (a) shows the \gls{lidar}-derived data terrain visualization, while panel (b) shows the evaluation overlay, where blue denotes \gls{falsenegative}, red denotes \gls{falsepositive}, and white denotes true-positive overlap. The model detects only the most visually expressed parts of the structure, while a large part of the annotated area remains \gls{falsenegative}.}
     \label{fig:maya_boundaries_error}
 \end{figure}
 
@@ -419,11 +419,11 @@ A contrasting example is shown in Figure~\ref{fig:maya_boundaries_success}. In t
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/maya_boundaries_success.pdf}
-    \caption{Example of a successful but not perfect boundary prediction on the Maya dataset. Panel (a) shows the \gls{lidarderiveddata} \gls{terrainvisualization}, while panel (b) shows the evaluation overlay, where blue denotes \gls{falsenegative}, red denotes \gls{falsepositive}, and white denotes true-positive overlap. The main archaeological structure is correctly localized as a coherent prediction, although minor boundary disagreement remains along the object edges.}
+    \caption{Example of a successful but not perfect boundary prediction on the Maya dataset. Panel (a) shows the \gls{lidar}-derived data terrain visualization, while panel (b) shows the evaluation overlay, where blue denotes \gls{falsenegative}, red denotes \gls{falsepositive}, and white denotes true-positive overlap. The main archaeological structure is correctly localized as a coherent prediction, although minor boundary disagreement remains along the object edges.}
     \label{fig:maya_boundaries_success}
 \end{figure}
 
-Nevertheless, small red and blue regions remain along the object boundary. This demonstrates that even successful predictions often contain minor boundary disagreement. Such errors may reduce \gls{pixelwisemetric}, although the result remains useful for expert inspection because the main archaeological object is correctly localized.
+Nevertheless, small red and blue regions remain along the object boundary. This demonstrates that even successful predictions often contain minor boundary disagreement. Such errors may reduce pixel-wise metrics, although the result remains useful for expert inspection because the main archaeological object is correctly localized.
 
 Soft masks partially address this problem by reducing the penalty for small boundary deviations. However, they do not eliminate the underlying mismatch between the raster-visible relief and the expert-defined archaeological outline. Moreover, softer supervision can encourage broader predictions and increase \gls{falsepositive}. Therefore, boundary errors should be interpreted not only as model inaccuracies, but also as evidence of uncertainty in the relation between annotation geometry and terrain expression.
 
@@ -433,9 +433,9 @@ Overall, the error analysis shows that the model is more reliable at identifying
 
 The obtained results should not be interpreted as a replacement for expert archaeological interpretation. The models developed in this thesis are more appropriate as decision-support tools that highlight candidate areas for further inspection. This interpretation is especially important in archaeological \gls{lidar} analysis, where the main practical objective is often not the automatic production of a final archaeological inventory, but the reduction of the area that must be manually inspected by an expert.
 
-From this perspective, \gls{falsepositive} and \gls{falsenegative} do not have the same practical impact. A \gls{falsepositive} prediction increases the amount of material that must be reviewed, but it can often be rejected relatively quickly during expert inspection. A \gls{falsenegative} is more problematic, because it represents a potentially missed \gls{archaeologicalfeature}~\cite{guyot_combined_2021,verschoof-van_der_vaart_combining_2020,somrak_learning_2020}. Therefore, in the context of exploratory prospection, a model with higher candidate coverage may still be useful even if it produces additional \gls{falsepositive}.
+From this perspective, \gls{falsepositive} and \gls{falsenegative} do not have the same practical impact. A \gls{falsepositive} prediction increases the amount of material that must be reviewed, but it can often be rejected relatively quickly during expert inspection. A \gls{falsenegative} is more problematic, because it represents a potentially missed archaeological features~\cite{guyot_combined_2021,verschoof-van_der_vaart_combining_2020,somrak_learning_2020}. Therefore, in the context of exploratory prospection, a model with higher candidate coverage may still be useful even if it produces additional \gls{falsepositive}.
 
-For the Maya dataset, the model output is particularly useful for candidate structure detection. The \gls{objectwisemetric} \glspl{hitrate} by size category are shown in Table~\ref{tab:maya_hit_rate_by_size}. The results demonstrate a strong dependence on object size. Large structures were detected most reliably, with 400 detected objects out of 472, corresponding to a \gls{hitrate} of 0.8475. Medium-sized structures were also detected relatively well, with 1383 detected objects out of 2182 and a \gls{hitrate} of 0.6338. In contrast, small structures were considerably more difficult to detect, with only 470 detected objects out of 1430 and a \gls{hitrate} of 0.3287. Figure~\ref{fig:maya_objects_hitrate_barchart} illustrates the dependence of the \gls{hitrate} on the object size and supports this observation.
+For the Maya dataset, the model output is particularly useful for candidate structure detection. The object-wise hit rates by size category are shown in Table~\ref{tab:maya_hit_rate_by_size}. The results demonstrate a strong dependence on object size. Large structures were detected most reliably, with 400 detected objects out of 472, corresponding to a hit rate of 0.8475. Medium-sized structures were also detected relatively well, with 1383 detected objects out of 2182 and a hit rate of 0.6338. In contrast, small structures were considerably more difficult to detect, with only 470 detected objects out of 1430 and a hit rate of 0.3287. Figure~\ref{fig:maya_objects_hitrate_barchart} illustrates the dependence of the hit rate on the object size and supports this observation.
 
 \begin{table}[H]
     \centering
@@ -446,7 +446,7 @@ For the Maya dataset, the model output is particularly useful for candidate stru
     \renewcommand{\arraystretch}{1.15}
     \begin{tabular}{lccc}
         \toprule
-        \textbf{Category} & \textbf{Total Objects} & \textbf{Hit Objects} & \textbf{\gls{hitrate}} \\
+        \textbf{Category} & \textbf{Total Objects} & \textbf{Hit Objects} & \textbf{hit rate} \\
         \midrule
         Small  & 1430 & 470  & 0.3287 \\
         Medium & 2182 & 1383 & 0.6338 \\
@@ -456,7 +456,7 @@ For the Maya dataset, the model output is particularly useful for candidate stru
     \end{tabular}
 \end{table}
 
-This trend is consistent with the qualitative error analysis. Larger structures usually have a stronger and more coherent terrain expression, which makes them more visible in the \gls{lidarderiveddata} representation and easier for the model to identify. Small structures, on the other hand, are often weakly preserved, fragmented, or visually similar to natural terrain irregularities. As a result, they are more frequently missed or only partially detected.
+This trend is consistent with the qualitative error analysis. Larger structures usually have a stronger and more coherent terrain expression, which makes them more visible in the \gls{lidar}-derived data representation and easier for the model to identify. Small structures, on the other hand, are often weakly preserved, fragmented, or visually similar to natural terrain irregularities. As a result, they are more frequently missed or only partially detected.
 
 \begin{figure}[htb]
     \centering
@@ -465,9 +465,9 @@ This trend is consistent with the qualitative error analysis. Larger structures 
     \label{fig:maya_objects_hitrate_barchart}
 \end{figure}
 
-Overall, the best Maya configuration detected 2253 out of 4084 reference objects, corresponding to an \gls{objectwisemetric} \gls{hitrate} of 0.5517. This result is not sufficient for fully automatic archaeological mapping, but it is useful for prioritizing areas of interest. In practical terms, the model can help an expert focus attention on a reduced set of candidate locations, especially for medium and large structures, where the detection rate is substantially higher than for small objects.
+Overall, the best Maya configuration detected 2253 out of 4084 reference objects, corresponding to an object-wise hit rate of 0.5517. This result is not sufficient for fully automatic archaeological mapping, but it is useful for prioritizing areas of interest. In practical terms, the model can help an expert focus attention on a reduced set of candidate locations, especially for medium and large structures, where the detection rate is substantially higher than for small objects.
 
-For the \gls{slovakterrace} dataset, the practical usefulness of the model is different. The model is less suitable for producing a precise segmentation of individual terrace lines, but it can still highlight probable terrace areas or terrace complexes. The \gls{objectwisemetric} \glspl{hitrate} are shown in Table~\ref{tab:slovakia_hit_rate_by_size}. The model detected 13 out of 21 medium-sized terrace objects and all 3 large terrace objects, resulting in an overall \gls{hitrate} of 0.666.
+For the Slovak terrace dataset, the practical usefulness of the model is different. The model is less suitable for producing a precise segmentation of individual terrace lines, but it can still highlight probable terrace areas or terrace complexes. The object-wise hit rates are shown in Table~\ref{tab:slovakia_hit_rate_by_size}. The model detected 13 out of 21 medium-sized terrace objects and all 3 large terrace objects, resulting in an overall hit rate of 0.666.
 
 \begin{table}[H]
     \centering
@@ -478,7 +478,7 @@ For the \gls{slovakterrace} dataset, the practical usefulness of the model is di
     \renewcommand{\arraystretch}{1.15}
     \begin{tabular}{lccc}
         \toprule
-        \textbf{Category} & \textbf{Total Objects} & \textbf{Hit Objects} & \textbf{\gls{hitrate}} \\
+        \textbf{Category} & \textbf{Total Objects} & \textbf{Hit Objects} & \textbf{hit rate} \\
         \midrule
         Medium & 21 & 13 & 0.619 \\
         Large  & 3  & 3  & 1 \\
@@ -487,25 +487,25 @@ For the \gls{slovakterrace} dataset, the practical usefulness of the model is di
     \end{tabular}
 \end{table}
 
-However, these results must be interpreted carefully. The Slovak reference data are based on \gls{buffer} polylines, while the model often responds to broader terrain morphology rather than to individual terrace centre lines. Therefore, a detected object may indicate the correct general location of a terrace system while still failing to match the reference geometry precisely. This explains why the \gls{objectwisemetric} \gls{hitrate} can appear practically useful even when pixel-wise segmentation metrics remain low.
+However, these results must be interpreted carefully. The Slovak reference data are based on \gls{buffer} polylines, while the model often responds to broader terrain morphology rather than to individual terrace centre lines. Therefore, a detected object may indicate the correct general location of a terrace system while still failing to match the reference geometry precisely. This explains why the object-wise hit rate can appear practically useful even when pixel-wise segmentation metrics remain low.
 
 The main practical value of the Slovak model is therefore candidate localization rather than final delineation. It can help identify zones where terrace-like morphology is present, but the continuity of individual terrace segments, their archaeological interpretation, and the rejection of \gls{falsepositive} require expert verification. This is especially important because natural \gls{slope} edges, erosion forms, and other relief anomalies can produce predictions that resemble terrace segments.
 
-In summary, the archaeological usefulness of the results depends strongly on the intended use case. For the Maya dataset, the model is useful as a candidate detector for medium and large structures, but it remains limited for small and weakly preserved features. For the \gls{slovakterrace} dataset, the model is useful for highlighting probable terrace zones, but not for automatically extracting complete and reliable terrace geometries. In both cases, the output should be treated as a supporting layer for \gls{expertguidedinspection} rather than as a final archaeological interpretation.
+In summary, the archaeological usefulness of the results depends strongly on the intended use case. For the Maya dataset, the model is useful as a candidate detector for medium and large structures, but it remains limited for small and weakly preserved features. For the Slovak terrace dataset, the model is useful for highlighting probable terrace zones, but not for automatically extracting complete and reliable terrace geometries. In both cases, the output should be treated as a supporting layer for expert-guided inspection rather than as a final archaeological interpretation.
 
 \section{Limitations}
 
 Several limitations must be considered when interpreting the results of this thesis. These limitations are related not only to the trained models themselves, but also to the available reference data, the morphology of the archaeological objects, the evaluation protocol, and the practical use of the predicted masks in a \gls{gis} environment.
 
-The first limitation concerns the uncertainty of the reference data. The available annotations should not be interpreted as perfect \gls{groundtruth}. In the Maya dataset, the labels represent expert-interpreted archaeological structures and may include simplified or idealized boundaries. In the Slovak dataset, the terrace annotations are represented as \gls{buffer} polylines rather than precise polygonal outlines of the actual relief expression. As a result, there may be a spatial mismatch between the visible terrain morphology and the \gls{referencemask} used for training and evaluation. This limitation directly affects both model learning and quantitative metrics, because the model may detect a real terrain feature but still be penalized if the prediction does not coincide with the annotation geometry.
+The first limitation concerns the uncertainty of the reference data. The available annotations should not be interpreted as perfect \gls{groundtruth}. In the Maya dataset, the labels represent expert-interpreted archaeological structures and may include simplified or idealized boundaries. In the Slovak dataset, the terrace annotations are represented as \gls{buffer} polylines rather than precise polygonal outlines of the actual relief expression. As a result, there may be a spatial mismatch between the visible terrain morphology and the reference mask used for training and evaluation. This limitation directly affects both model learning and quantitative metrics, because the model may detect a real terrain feature but still be penalized if the prediction does not coincide with the annotation geometry.
 
-The second limitation is the strong \gls{classimbalance} between \gls{archaeologicalfeature} and background. In both datasets, the target class occupies only a small fraction of the raster area. This imbalance affects training, threshold selection, and metric interpretation. A model can achieve high background performance while still failing to detect a substantial part of the archaeological class. For this reason, overall accuracy and background-dominated measures are not sufficient for evaluating the results. Even foreground-oriented metrics such as \gls{iou}, \gls{precision}, \gls{recall}, and \gls{fscore} must be interpreted together with qualitative inspection.
+The second limitation is the strong class imbalance between archaeological features and background. In both datasets, the target class occupies only a small fraction of the raster area. This imbalance affects training, threshold selection, and metric interpretation. A model can achieve high background performance while still failing to detect a substantial part of the archaeological class. For this reason, overall accuracy and background-dominated measures are not sufficient for evaluating the results. Even foreground-oriented metrics such as \gls{iou}, precision, recall, and \gls{f1} must be interpreted together with qualitative inspection.
 
-The third limitation is the limited cross-\gls{domaingeneralization} between the Maya and Slovak datasets. Although both datasets are based on airborne \gls{lidarderiveddata} terrain data, they differ substantially in spatial resolution, object morphology, annotation type, and landscape context. The Maya dataset contains mostly compact polygonal structures, while the Slovak dataset contains narrow, elongated, and partially discontinuous terrace-like features. Therefore, a configuration that performs well on the \gls{mayastructure} does not necessarily transfer directly to \gls{slovakterrace}. The results show that each domain requires its own adjustment of \gls{inputrepresentation}, \gls{tile} size, \gls{lossfunction}, and interpretation strategy.
+The third limitation is the limited cross-domain generalization between the Maya and Slovak datasets. Although both datasets are based on airborne \gls{lidar}-derived terrain data, they differ substantially in spatial resolution, object morphology, annotation type, and landscape context. The Maya dataset contains mostly compact polygonal structures, while the Slovak dataset contains narrow, elongated, and partially discontinuous terrace-like features. Therefore, a configuration that performs well on the Maya structures does not necessarily transfer directly to the Slovak terrace domain. The results show that each domain requires its own adjustment of input representation, tile size, loss function, and interpretation strategy.
 
-A related limitation is the difference in object morphology. Compact \gls{mayastructure} are more compatible with standard \gls{semanticsegmentation} assumptions, because their spatial extent is relatively coherent and object boundaries are often easier to localize. In contrast, \gls{slovakterrace} are linear features with weak relief expression, fragmented continuity, and strong dependence on surrounding \gls{slope} morphology. This makes them more difficult to segment as continuous binary masks. In many cases, the model identifies a broader terrace complex rather than individual terrace lines. Therefore, the Slovak results should be interpreted primarily as candidate localization, not as precise delineation.
+A related limitation is the difference in object morphology. Compact Maya structures are more compatible with standard \gls{semanticsegmentation} assumptions, because their spatial extent is relatively coherent and object boundaries are often easier to localize. In contrast, Slovak terrace are linear features with weak relief expression, fragmented continuity, and strong dependence on surrounding \gls{slope} morphology. This makes them more difficult to segment as continuous binary masks. In many cases, the model identifies a broader terrace complex rather than individual terrace lines. Therefore, the Slovak results should be interpreted primarily as candidate localization, not as precise delineation.
 
-Another limitation is that \gls{pixelwisemetric} metrics do not fully capture archaeological usefulness. A prediction can be slightly shifted from the \gls{referencemask} and receive a low pixel-wise score, even though it correctly indicates a relevant archaeological candidate~\cite{fiorucci_deep_2022}. Conversely, a prediction can overlap with the \gls{referencemask} but still be fragmented or difficult to interpret archaeologically. This limitation is especially important for archaeological \gls{lidar} data, where labels may be uncertain and the practical goal is often to support expert inspection rather than produce a final automatic map. For this reason, the quantitative evaluation was complemented by qualitative \gls{gis}-based assessment.
+Another limitation is that pixel-wise metrics do not fully capture archaeological usefulness. A prediction can be slightly shifted from the reference mask and receive a low pixel-wise score, even though it correctly indicates a relevant archaeological candidate~\cite{fiorucci_deep_2022}. Conversely, a prediction can overlap with the reference mask but still be fragmented or difficult to interpret archaeologically. This limitation is especially important for archaeological \gls{lidar} data, where labels may be uncertain and the practical goal is often to support expert inspection rather than produce a final automatic map. For this reason, the quantitative evaluation was complemented by qualitative \gls{gis}-based assessment.
 
 Full-area inference also remains dependent on expert interpretation. The generated \gls{probabilitymap} and binary masks can reduce the amount of terrain that must be manually inspected, but they do not remove the need for archaeological expertise. False positives caused by natural relief forms, modern disturbances, visualization artefacts, or \gls{slope} edges must still be reviewed manually. Similarly, \gls{falsenegative} may occur in weakly preserved, small, or low-contrast structures. The model output should therefore be treated as a decision-support layer rather than as an independent archaeological inventory.
 

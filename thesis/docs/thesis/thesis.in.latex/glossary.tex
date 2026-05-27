@@ -22,51 +22,6 @@
 % * https://en.wikibooks.org/wiki/LaTeX/Glossary
 %
 
-\newglossaryentry{remotesensing}{
-    name={Remote Sensing},
-    description={is the acquisition and interpretation of information about the Earth's surface without direct physical contact, typically using airborne or satellite sensors}
-}
-
-\newglossaryentry{aeriallidar}{
-    name={Aerial LiDAR},
-    description={is an airborne laser scanning technology used to measure terrain surface geometry and produce high-resolution elevation data}
-}
-
-\newglossaryentry{lidarderiveddata}{
-    name={LiDAR-Derived Data},
-    description={are raster or image-like products generated from LiDAR measurements, such as elevation models and terrain visualizations}
-}
-
-\newglossaryentry{pointcloud}{
-    name={Point Cloud},
-    description={is a collection of three-dimensional points measured by a scanning system and representing the observed surface or objects}
-}
-
-\newglossaryentry{digitalelevationmodel}{
-    name={Digital Elevation Model},
-    description={is a raster representation of elevation values used as a base terrain model for further visualization, analysis, and segmentation}
-}
-
-\newglossaryentry{digitalterrainmodel}{
-    name={Digital Terrain Model},
-    description={is an elevation model representing the bare-earth terrain surface after removing vegetation, buildings, and other above-ground objects}
-}
-
-\newglossaryentry{digitalsurfacemodel}{
-    name={Digital Surface Model},
-    description={is an elevation model representing the visible surface, including terrain, vegetation, buildings, and other above-ground objects}
-}
-
-\newglossaryentry{digitalfeaturemodel}{
-    name={Digital Feature Model},
-    description={is an elevation-related representation emphasizing above-ground or non-terrain features in comparison with the terrain surface}
-}
-
-\newglossaryentry{terrainvisualization}{
-    name={Terrain Visualization},
-    description={is a visual representation derived from elevation data to make terrain morphology and archaeological micro-relief easier to interpret}
-}
-
 \newglossaryentry{hillshade}{
     name={Hillshade},
     description={is a terrain visualization that simulates illumination from a selected direction in order to emphasize relief forms}
@@ -87,39 +42,9 @@
     description={is a terrain visualization method that estimates how much of the sky is visible from each location and helps reveal subtle relief features}
 }
 
-\newglossaryentry{combinedvat}{
-    name={Combined Visualization for Archaeological Topography},
-    description={is a combined terrain visualization approach intended to improve the readability of archaeological features in LiDAR-derived data}
-}
-
 \newglossaryentry{semanticsegmentation}{
     name={Semantic Segmentation},
     description={is a computer vision task in which each pixel of an input image or raster is assigned to a semantic class}
-}
-
-\newglossaryentry{binarysemanticsegmentation}{
-    name={Binary Semantic Segmentation},
-    description={is a semantic segmentation task with two classes, in this thesis corresponding to archaeological feature and background}
-}
-
-\newglossaryentry{archaeologicalfeature}{
-    name={Archaeological Feature},
-    description={is a terrain or landscape element interpreted as the physical trace of past human activity}
-}
-
-\newglossaryentry{anthropogenicmicrorelief}{
-    name={Anthropogenic Micro-relief},
-    description={is a subtle terrain modification caused by human activity and visible in high-resolution elevation data}
-}
-
-\newglossaryentry{mayastructure}{
-    name={Maya Structure},
-    description={is a compact archaeological object in the Guatemalan dataset, such as a building platform or mound-like remains associated with Maya settlement}
-}
-
-\newglossaryentry{slovakterrace}{
-    name={Slovak Terrace},
-    description={is a linear or elongated archaeological terrain feature in the Slovak dataset, represented mainly through terrace-like relief morphology}
 }
 
 \newglossaryentry{referenceannotation}{
@@ -132,49 +57,14 @@
     description={is the reference data against which model predictions are compared during training or evaluation}
 }
 
-\newglossaryentry{referencemask}{
-    name={Reference Mask},
-    description={is a rasterized label image in which pixels indicate the location of annotated archaeological features}
-}
-
-\newglossaryentry{hardlabel}{
-    name={Hard Label},
-    description={is a binary label representation where each pixel is assigned either to the target class or to the background class}
-}
-
-\newglossaryentry{softlabel}{
-    name={Soft Label},
-    description={is a label representation where pixels can have continuous confidence values between background and target class}
-}
-
 \newglossaryentry{confidenceshadow}{
     name={Confidence Shadow},
     description={is a soft-label representation in which confidence is highest inside the annotated object and gradually decreases toward the surrounding background}
 }
 
-\newglossaryentry{rasterization}{
-    name={Rasterization},
-    description={is the conversion of vector annotations, such as polygons or polylines, into a pixel-based raster mask}
-}
-
 \newglossaryentry{buffer}{
     name={Buffer},
     description={is a spatial expansion around vector geometry used to convert narrow annotations, such as terrace centre lines, into wider raster masks}
-}
-
-\newglossaryentry{inputrepresentation}{
-    name={Input Representation},
-    description={is the specific raster product or multi-channel combination used as model input, such as DEM, SPS, RGDEM, ISO, or ANISO}
-}
-
-\newglossaryentry{tile}{
-    name={Tile},
-    description={is a smaller image patch extracted from a large raster and used for model training, validation, or inference}
-}
-
-\newglossaryentry{stride}{
-    name={Stride},
-    description={is the step size between neighbouring tiles during tiled dataset generation or tiled inference}
 }
 
 \newglossaryentry{validpixelmask}{
@@ -185,46 +75,6 @@
 \newglossaryentry{datasetmanifest}{
     name={Dataset Manifest},
     description={is a structured file describing generated tiles, their coordinates, split assignment, validity fraction, and presence of positive pixels}
-}
-
-\newglossaryentry{trainingset}{
-    name={Training Set},
-    description={is the part of the dataset used to optimize model parameters}
-}
-
-\newglossaryentry{validationset}{
-    name={Validation Set},
-    description={is the part of the dataset used to evaluate model performance during experiment selection without directly training on it}
-}
-
-\newglossaryentry{classimbalance}{
-    name={Class Imbalance},
-    description={is a situation in which one class dominates the dataset, while the target class occupies only a small fraction of pixels}
-}
-
-\newglossaryentry{foregroundclass}{
-    name={Foreground Class},
-    description={is the positive target class corresponding to archaeological features in binary segmentation}
-}
-
-\newglossaryentry{backgroundclass}{
-    name={Background Class},
-    description={is the negative class corresponding to all valid pixels that are not labelled as archaeological features}
-}
-
-\newglossaryentry{lossfunction}{
-    name={Loss Function},
-    description={is the optimization objective used during training to measure the difference between model predictions and reference labels}
-}
-
-\newglossaryentry{bcediceloss}{
-    name={BCE+Dice Loss},
-    description={is a combined loss function using pixel-wise binary cross-entropy together with Dice-based overlap optimization}
-}
-
-\newglossaryentry{tanimotoloss}{
-    name={Tanimoto Loss},
-    description={is an overlap-based loss function used for imbalanced segmentation problems and related to the Tanimoto similarity coefficient}
 }
 
 \newglossaryentry{thresholdbasedinference}{
@@ -242,41 +92,6 @@
     description={is a thresholded model output in which each pixel is assigned either to the target class or to the background class}
 }
 
-\newglossaryentry{postprocessing}{
-    name={Post-processing},
-    description={is the set of operations applied after model inference to prepare, clean, threshold, or export prediction results}
-}
-
-\newglossaryentry{pixelwisemetric}{
-    name={Pixel-wise Metric},
-    description={is an evaluation measure computed from pixel-level agreement between prediction and reference mask}
-}
-
-\newglossaryentry{objectwisemetric}{
-    name={Object-wise Metric},
-    description={is an evaluation measure computed at the level of individual annotated or predicted objects rather than individual pixels}
-}
-
-\newglossaryentry{intersectionoverunion}{
-    name={Intersection over Union},
-    description={is an overlap metric computed as the area of intersection between prediction and reference divided by their union}
-}
-
-\newglossaryentry{precision}{
-    name={Precision},
-    description={is the proportion of predicted positive pixels or objects that are correct}
-}
-
-\newglossaryentry{recall}{
-    name={Recall},
-    description={is the proportion of reference positive pixels or objects that are successfully detected}
-}
-
-\newglossaryentry{fscore}{
-    name={F1 Score},
-    description={is the harmonic mean of precision and recall used to summarize their balance}
-}
-
 \newglossaryentry{falsepositive}{
     name={False Positive},
     description={is a model prediction incorrectly assigned to the archaeological target class}
@@ -290,49 +105,4 @@
 \newglossaryentry{truepositive}{
     name={True Positive},
     description={is a correctly detected target pixel or object}
-}
-
-\newglossaryentry{hitrate}{
-    name={Hit Rate},
-    description={is an object-level detection measure describing the proportion of reference objects successfully intersected or detected according to a defined criterion}
-}
-
-\newglossaryentry{ablationstudy}{
-    name={Ablation Study},
-    description={is an experimental analysis in which individual methodological components are varied to assess their effect on the final result}
-}
-
-\newglossaryentry{qualitativegisassessment}{
-    name={Qualitative GIS Assessment},
-    description={is the visual inspection of prediction results in a geographic information system to evaluate their archaeological usefulness beyond numerical metrics}
-}
-
-\newglossaryentry{candidatedetection}{
-    name={Candidate Detection},
-    description={is the use of model predictions to highlight areas that may contain archaeological features and require expert inspection}
-}
-
-\newglossaryentry{expertguidedinspection}{
-    name={Expert-Guided Inspection},
-    description={is an interpretation workflow in which model outputs support but do not replace archaeological expert judgement}
-}
-
-\newglossaryentry{domaingeneralization}{
-    name={Domain Generalization},
-    description={is the ability of a method trained or evaluated in one data domain to remain useful when applied to another domain with different morphology, labels, or terrain context}
-}
-
-\newglossaryentry{transferlearning}{
-    name={Transfer Learning},
-    description={is the use of knowledge or weights learned from one dataset or task to improve training or performance on another task}
-}
-
-\newglossaryentry{backbone}{
-    name={Backbone},
-    description={is the feature extraction part of a neural network architecture, often initialized from a pretrained model}
-}
-
-\newglossaryentry{reproducibleworkflow}{
-    name={Reproducible Workflow},
-    description={is a structured experimental process in which data preparation, training, inference, and evaluation steps can be repeated under controlled conditions}
 }

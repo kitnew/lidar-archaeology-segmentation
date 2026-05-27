@@ -4,7 +4,7 @@
 
 \begin{sloppypar}
 
-This user manual describes how to use the implemented information output of the thesis: a reproducible Python pipeline for \gls{binarysemanticsegmentation} of \gls{archaeologicalfeature} in \gls{lidarderiveddata} raster data. The manual follows the requirement from the official KKUI thesis instructions that the user documentation should explain the correct use of the information result of the final thesis.
+This user manual describes how to use the implemented information output of the thesis: a reproducible Python pipeline for binary semantic segmentation of archaeological features in LiDAR-derived raster data.
 
 The pipeline is intended for experiments with prepared raster datasets, training segmentation models, evaluating trained checkpoints, and generating full-area \gls{probabilitymap}. It is not an interactive desktop application. The expected user is therefore a researcher or student who can run Python scripts from a command line and who has access to the prepared data files.
 
@@ -13,24 +13,24 @@ The pipeline is intended for experiments with prepared raster datasets, training
 The source repository is available as:
 
 \begin{verbatim}
-git@github.com:kitnew/lidar-archaeology-segmentation.git
+https://github.com/kitnew/lidar-archaeology-segmentation.git
 \end{verbatim}
 
 The most important directories are:
 
 \begin{description}
-    \item[\texttt{src/}] Python source code for datasets, models, training, evaluation, inference, losses, and metrics.
-    \item[\texttt{configs/}] Hydra configuration files defining datasets, models, losses, paths, and experiment parameters.
-    \item[\texttt{data/processed/}] Expected location of prepared \texttt{.npz} raster datasets and \gls{tile} \gls{datasetmanifest}. The data files are not distributed through Git because of size and privacy constraints.
-    \item[\texttt{outputs/}] Default location for trained checkpoints, Hydra logs, and generated prediction files.
-    \item[\texttt{notebooks/} and \texttt{notebooks/scripts/}] Helper notebooks and scripts used during data preparation and visualization.
+    \item[\texttt{thesis/src/}] Python source code for datasets, models, training, evaluation, inference, losses, and metrics.
+    \item[\texttt{thesis/configs/}] Hydra configuration files defining datasets, models, losses, paths, and experiment parameters.
+    \item[\texttt{thesis/data/processed/}] Expected location of prepared \texttt{.npz} raster datasets and tile \gls{datasetmanifest}. The data files are not distributed through Git because of size and privacy constraints.
+    \item[\texttt{thesis/outputs/}] Default location for trained checkpoints, Hydra logs, and generated prediction files.
+    \item[\texttt{thesis/notebooks/} and \texttt{thesis/notebooks/scripts/}] Helper notebooks and scripts used during data preparation and visualization.
 \end{description}
 
 \section{System Requirements}
 
-The pipeline was developed for Linux and Python. \gls{gpu} execution with \gls{cuda} is expected for training and evaluation. The training script explicitly selects \texttt{cuda}, therefore a \gls{cuda}-capable environment is required for normal training runs.
+The pipeline was developed for Linux and Python. GPU execution with CUDA is expected for training and evaluation. The training script explicitly selects \texttt{cuda}, therefore a CUDA-capable environment is required for normal training runs.
 
-The main software requirements are Python 3.8 or newer, PyTorch, Torchvision, Hydra, OmegaConf, NumPy, Pandas, Pillow, Matplotlib, \gls{gdal}, tqdm, and segmentation-models-pytorch for DeepLabV3+ experiments. The repository contains \texttt{requirements.txt} and \texttt{pyproject.toml}; however, the exact PyTorch and \gls{cuda} builds should be installed according to the target machine.
+The main software requirements are Python 3.8 or newer, PyTorch, Torchvision, Hydra, OmegaConf, NumPy, Pandas, Pillow, Matplotlib, \gls{gdal}, tqdm, and segmentation-models-pytorch for DeepLabV3+ experiments. The repository contains \texttt{requirements.txt} and \texttt{pyproject.toml}; however, the exact PyTorch and CUDA builds should be installed according to the target machine.
 
 \section{Installation}
 
@@ -42,21 +42,21 @@ source .venv/bin/activate
 pip install -r requirements.txt
 \end{verbatim}
 
-If DeepLabV3+ configurations are used, install \texttt{segmentation-models-pytorch}. If the local \texttt{requirements.txt} does not include PyTorch, install the correct PyTorch, Torchvision, and \gls{cuda} build for the machine before running the pipeline.
+If DeepLabV3+ configurations are used, install \texttt{segmentation-models-pytorch}. If the local \texttt{requirements.txt} does not include PyTorch, install the correct PyTorch, Torchvision, and CUDA build for the machine before running the pipeline.
 
 \section{Input Data}
 
-The training and inference scripts expect prepared NumPy archives and \gls{tile} \gls{datasetmanifest}. A prepared dataset archive normally contains:
+The training and inference scripts expect prepared NumPy archives and tile \gls{datasetmanifest}. A prepared dataset archive normally contains:
 
 \begin{itemize}
     \item \texttt{data}: raster input tensor with shape \texttt{(C, H, W)};
     \item \texttt{valid}: valid-data mask with shape \texttt{(H, W)};
-    \item \texttt{mask}: binary \gls{referencemask} with shape \texttt{(H, W)};
-    \item \texttt{soft\_mask}: optional soft \gls{referencemask} used for training when enabled;
+    \item \texttt{mask}: binary reference mask with shape \texttt{(H, W)};
+    \item \texttt{soft\_mask}: optional soft reference mask used for training when enabled;
     \item \texttt{meta}: optional geospatial metadata.
 \end{itemize}
 
-The \gls{datasetmanifest} file, usually \texttt{.parquet}, contains the \gls{tile} coordinates, \gls{tile} size, subset assignment, validity fraction, and whether the \gls{tile} contains positive pixels. Dataset variants are selected through files in \texttt{configs/dataset/}.
+The \gls{datasetmanifest} file, usually \texttt{.parquet}, contains the tile coordinates, tile size, subset assignment, validity fraction, and whether the tile contains positive pixels. Dataset variants are selected through files in \texttt{configs/dataset/}.
 
 Before running experiments, set the data root so Hydra resolves paths correctly:
 
@@ -89,7 +89,7 @@ Hydra creates a separate output directory for each run. The best checkpoint is s
 
 \section{Evaluation}
 
-Evaluation reconstructs a validation \gls{probabilitymap} from overlapping \gls{tile}, searches for an optimal threshold, and prints segmentation metrics. Run:
+Evaluation reconstructs a validation \gls{probabilitymap} from overlapping tiles, searches for an optimal threshold, and prints segmentation metrics. Run:
 
 \begin{verbatim}
 python -u src/evaluation.py \
@@ -97,7 +97,7 @@ python -u src/evaluation.py \
   dataset=terraces_aniso_ladzany_128_32
 \end{verbatim}
 
-The evaluation output includes the optimal threshold and metrics such as positive \gls{iou}, mean \gls{iou}, \gls{precision}, \gls{recall}, \gls{fscore}, specificity, accuracy, and \texttt{MOR10R}. The metrics are computed only over valid pixels and over regions actually covered by validation \gls{tile}.
+The evaluation output includes the optimal threshold and metrics such as positive \gls{iou}, mean \gls{iou}, Precision, Recall, \gls{f1}, specificity, accuracy, and \texttt{MOR10R}. The metrics are computed only over valid pixels and over regions actually covered by validation tiles.
 
 \section{Full-Area Inference}
 
@@ -124,8 +124,8 @@ The script exports \texttt{DATA\_ROOT}, \texttt{OUTPUT\_DIR}, and \texttt{LOG\_D
 
 \section{Correct Use and Limitations}
 
-The pipeline assumes that all rasters, masks, and \gls{datasetmanifest} are spatially aligned. Incorrect alignment between the input raster and mask will produce invalid training data even if the scripts run without errors. For \gls{slovakterrace} experiments, the selected held-out location in the dataset configuration must match the intended leave-one-location-out fold.
+The pipeline assumes that all rasters, masks, and \gls{datasetmanifest} are spatially aligned. Incorrect alignment between the input raster and mask will produce invalid training data even if the scripts run without errors. For Slovak terraces experiments, the selected held-out location in the dataset configuration must match the intended leave-one-location-out fold.
 
-The generated \gls{probabilitymap} should be interpreted as model outputs, not as verified archaeological discoveries. They should be checked against the original \gls{lidarderiveddata} visualizations and, where possible, reviewed by a domain expert in a \gls{gis} environment.
+The generated \gls{probabilitymap} should be interpreted as model outputs, not as verified archaeological discoveries. They should be checked against the original LiDAR-derived visualizations and, where possible, reviewed by a domain expert in a \gls{gis} environment.
 
 \end{sloppypar}
