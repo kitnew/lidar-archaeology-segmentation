@@ -185,9 +185,11 @@ The model output is a \gls{probabilitymap}. To compute binary segmentation metri
 For each threshold, the predicted mask is compared with the reference mask over valid pixels only. The following quantities are computed:
 \begin{equation}
     \gls{tp} = |\hat{Y}_{1} \cap Y_{1}|,\quad
-    \gls{fp} = |\hat{Y}_{1} \cap Y_{0}|,\quad
+    \gls{fp} = |\hat{Y}_{1} \cap Y_{0}|
+\end{equation}
+\begin{equation}
     \gls{fn} = |\hat{Y}_{0} \cap Y_{1}|,\quad
-    \gls{tn} = |\hat{Y}_{0} \cap Y_{0}|,
+    \gls{tn} = |\hat{Y}_{0} \cap Y_{0}|
 \end{equation}
 where $Y_1$ and $Y_0$ denote the positive and negative reference pixels, while $\hat{Y}_1$ and $\hat{Y}_0$ denote the predicted positive and negative pixels.
 
@@ -214,16 +216,16 @@ The following pixel-wise metrics are used:
     \end{equation}
     It provides a balanced class-level summary, but in this thesis the positive \gls{iou} remains more informative for the archaeological target class.
 
-    \item \textbf{precision.} precision measures how many predicted positive pixels are correct:
+    \item \textbf{Precision.} Precision measures how many predicted positive pixels are correct:
     \begin{equation}
-        precision =
+        Precision =
         \frac{\gls{tp}}{\gls{tp} + \gls{fp} + \epsilon}.
     \end{equation}
     High precision indicates fewer \gls{falsepositive}.
 
-    \item \textbf{recall.} recall measures how many reference positive pixels were detected:
+    \item \textbf{Recall.} Recall measures how many reference positive pixels were detected:
     \begin{equation}
-        recall =
+        Recall =
         \frac{\gls{tp}}{\gls{tp} + \gls{fn} + \epsilon}.
     \end{equation}
     High recall indicates that fewer archaeological pixels were missed.
@@ -231,8 +233,8 @@ The following pixel-wise metrics are used:
     \item \textbf{\gls{f1}.} \gls{f1} is the harmonic mean of precision and recall:
     \begin{equation}
         \gls{f1} =
-        \frac{2 \cdot precision \cdot recall}
-        {precision + recall + \epsilon}.
+        \frac{2 \cdot Precision \cdot Recall}
+        {Precision + Recall + \epsilon}.
     \end{equation}
     It is useful when both \gls{falsepositive} and \gls{falsenegative} are important.
 \end{enumerate}
